@@ -5,6 +5,7 @@ permalink: /:categories/:year/:month/:day/:title
 exclude: [".rvmrc", ".rbenv-version", "README.md", "Rakefile", "changelog.md"]
 auto: true
 paginate: 5
+markdown: rdiscount
 pygments: true
 
 # Themes are encouraged to use these universal variables 
@@ -13,11 +14,11 @@ pygments: true
 title : CyberFlow
 tagline: Site Tagline
 author :
-  name : Name Lastname
-  email : blah@email.test
-  github : username
-  twitter : username
-  feedburner : feedname
+  name : Dmitry r CyberFlow
+  email : dmitry.r@cyberflow
+  github : cyberflow
+#  twitter : username
+#  feedburner : feedname
 
 # The production_url is only used when full-domain names are needed
 # such as sitemap.txt 

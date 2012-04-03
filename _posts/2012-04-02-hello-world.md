@@ -1,8 +1,22 @@
 ---
 layout: post
-title: "Hello World"
-description: ""
+title: "Привет Мир"
+description: "тестовая статья на русском"
 category: 
 tags: []
 ---
-{% include JB/setup %}
+### Заголовок ###
+Простой текст
+
+1. пункт1
+
+2. пункт2
+
+3. пункт3
+
+{% highlight sql %}
+BEGIN
+SELECT * from users where id = 1;
+INSERT INTO posts(title, user_id) VALUES('test', 1);
+COMMIT
+{% endhighlight %}
