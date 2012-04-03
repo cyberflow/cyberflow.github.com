@@ -6,7 +6,7 @@ category:
 tags: []
 ---
 ### Заголовок ###
-Простой текст
+Простой текст [link][1]
 
 1. пункт1
 
@@ -20,3 +20,5 @@ SELECT * from users where id = 1;
 INSERT INTO posts(title, user_id) VALUES('test', 1);
 COMMIT
 {% endhighlight %}
+
+[1]:http://www.ru
