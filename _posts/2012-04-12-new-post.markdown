@@ -1,0 +1,14 @@
+---
+layout: post
+title: "Тест Подсветки"
+description: "Тест highlighting"
+category: 
+tags: []
+---
+{% include JB/setup %}
+{{ site.time | date_to_long_string }}
+{% highlight ruby %}
+def foo
+  puts 'foo'
+end
+{% endhighlight %}
