@@ -142,3 +142,8 @@ pre,h1 {
 	vertical-align: baseline;
 	background: transparent;
 }
+
+.content article + article {
+    background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAABCAYAAACsXeyTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAFUlEQVQIHWNIS0sr/v//PwMMDzY+ADqMahlW4J91AAAAAElFTkSuQmCC') top left repeat-x;
+    padding-top: 20px;
+}

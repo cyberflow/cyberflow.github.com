@@ -3,7 +3,13 @@ layout: default
 title: Dmitry r CyberFlow Blog
 ---
 {% for post in paginator.posts %}
+  <article>
   <div class="full">
+    <p class="by-line">
+      <span class="date full-date">
+        <abbr class="published" title="{{ post.date }}">{{ post.date | date_to_string }}</abbr>
+      </span>
+    </p>
     <h1 class="entry-title">
       <a href="{{ post.url }}" title="{{ post.title }}" rel="bookmark">{{ post.title }}</a>
     </h1>
@@ -20,14 +26,9 @@ title: Dmitry r CyberFlow Blog
     <p class="comments-link">
       <a href='{{post.url}}#disqus_thread'>Comments</a>
     </p>
-    <p class="by-line">
-      <span class="date full-date">
-        <abbr class="published" title="{{ post.date }}">{{ post.date | date_to_string }}</abbr>
-      </span>
-    </p>
     <div class="clear"></div>
   </div>
-  <div class="rule"><hr/></div>
+  </article>
 {% endfor %}
 
 <div class="pagination">
