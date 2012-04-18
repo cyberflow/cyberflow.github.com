@@ -147,3 +147,38 @@ pre,h1 {
     background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAABCAYAAACsXeyTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAFUlEQVQIHWNIS0sr/v//PwMMDzY+ADqMahlW4J91AAAAAElFTkSuQmCC') top left repeat-x;
     padding-top: 20px;
 }
+
+h1.entry-title {
+    border-bottom:1px solid #fff;
+    font-size:16px;
+    text-shadow:1px 1px 3px #aaa;
+    margin:0;
+    padding:2px 10px;
+}
+
+h1.entry-title a {
+    color: #445566;
+}
+
+.post-info-top {
+    border-top:1px solid #ddd;
+    line-height:18px;
+    height:18px;
+    position:relative;
+    color:#999;
+    margin:0 0 18px;
+    padding:2px 10px;
+    overflow:hidden;
+    display:block;
+}
+
+.post-info-date{
+    display:block;
+    padding-left:20px;
+    background:url("/images/icons.gif") no-repeat scroll 0 0;
+}
+
+.post-info-date{
+    float:left;
+    background-position:0 -40px;
+}

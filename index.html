@@ -5,14 +5,14 @@ title: Dmitry r CyberFlow Blog
 {% for post in paginator.posts %}
   <article>
   <div class="full">
-    <p class="by-line">
-      <span class="date full-date">
-        <abbr class="published" title="{{ post.date }}">{{ post.date | date_to_string }}</abbr>
-      </span>
-    </p>
     <h1 class="entry-title">
       <a href="{{ post.url }}" title="{{ post.title }}" rel="bookmark">{{ post.title }}</a>
     </h1>
+    <div class="post-info-top">
+      <span class="post-info-date">
+        <abbr class="published" title="{{ post.date }}">{{ post.date | date_to_long_string }}</abbr>
+      </span>
+    </div>
     <div class="entry-content full-content">
       {{ post.content }}
       <div class="clear"></div>
