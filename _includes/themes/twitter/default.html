@@ -41,18 +41,31 @@
 
     <div class="container">
 
-      <div class="content">
+      <div id="content">
         {{ content }}
       </div>
 
+      <div id="sidebar">
+          <div id="carrington-subscribe" class="widget">
+            <h3>Categories</h3>
+	    <ul>
+                {% for category in site.categories %}
+                <li><a href="/categories/{{category | first}}">{{category | first}} ({{category | last | size }})</a></li>
+                {% endfor %}
+              </ul>
+          </div>
+      </div>
+
+</div>  <!-- /container -->
+
+    <div id="footer">
       <footer>
         <p>&copy; {{ site.author.name }} 2012 
           with help from <a href="http://jekyllbootstrap.com" target="_blank" title="The Definitive Jekyll Blogging Framework">Jekyll Bootstrap</a>
           and <a href="http://twitter.github.com/bootstrap/" target="_blank">Twitter Bootstrap</a>
         </p>
       </footer>
-
-    </div> <!-- /container -->
+    </div>
 
     {% include JB/analytics %}
   </body>
