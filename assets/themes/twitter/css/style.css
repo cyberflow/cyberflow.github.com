@@ -30,7 +30,7 @@ html, body {
     padding-top: 20px;
     float: left;
     padding-bottom: 24px;
-    width: 628px;
+    width: 635px;
     margin-right: 20px;
 }
 
@@ -59,11 +59,12 @@ footer {
     margin-top: 20px;
     overflow: hidden;
     float: left;
-    width: 290px;
+    width: 276px;
     background: #F2F2F2;
     border: 1px solid #CCC;
     -moz-border-radius:6px;-webkit-border-radius:6px;
     border-radius:6px;
+    padding: 20px 10px 10px;
 }
 
 #sidebar h3,#sidebar h2{
@@ -75,6 +76,65 @@ footer {
     padding:0 5px;
     line-height:30px;
     border-bottom:1px solid #fff;
+}
+
+#sidebar ul ul {
+    padding: 8px 5px;
+    border-top: 1px solid #DDD;
+}
+
+#sidebar ul {
+    list-style: none;
+}
+
+#sidebar li.widget {
+    margin-bottom: 10px;
+}
+
+#sidebar li {
+    line-height: 20px;
+}
+
+#sidebar ul ul ul{
+    padding:0;border-top:none;
+}
+
+#sidebar ul ul li{
+    padding-left:15px;
+    background:url("/images/icons.gif") no-repeat 0 -280px;
+}
+
+#sidebar ul ul li:hover{
+    background:url("/images/icons.gif") no-repeat -10px -260px;
+}
+
+#sidebar a {
+    color: #555;
+    text-shadow: 0 1px 0 #FAFAFA;
+}
+
+#sidebar a:hover{color:#999;}
+
+#gotocomments {
+    float: right;
+    margin-right: 10px;
+    background: url("/images/icons.gif") no-repeat scroll 0 0;
+    background-position: 0 -100px;
+    display: block;
+    padding-left: 20px;
+}
+
+.add-category {
+    float: left;
+}
+
+.post-comment {
+    overflow: hidden;
+    margin-bottom: 20px;
+}
+
+.post-comment a{
+    color: #999;
 }
 
 /* Page header tweaks */
@@ -198,6 +258,10 @@ pre,h1 {
 .content article + article {
     background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAABCAYAAACsXeyTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAFUlEQVQIHWNIS0sr/v//PwMMDzY+ADqMahlW4J91AAAAAElFTkSuQmCC') top left repeat-x;
     padding-top: 20px;
+}
+
+.entry-content {
+    padding: 0 10px;
 }
 
 h1.entry-title {

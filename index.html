@@ -4,6 +4,7 @@ title: Dmitry r CyberFlow Blog
 ---
 {% for post in paginator.posts %}
   <article>
+
   <div class="full">
     <h1 class="entry-title">
       <a href="{{ post.url }}" title="{{ post.title }}" rel="bookmark">{{ post.title }}</a>
@@ -17,17 +18,22 @@ title: Dmitry r CyberFlow Blog
       {{ post.content }}
       <div class="clear"></div>
     </div>
-    <p class="alt-font tight">
-      Posted in&nbsp;
-      {% for category in post.categories %}
-      <a href="/categories/{{ category }}" title="{{ category }}" rel="category tag">{{ category }}</a>
-      {% endfor %}
-    </p>
-    <p class="comments-link">
-      <a href='{{post.url}}#disqus_thread'>Comments</a>
-    </p>
+
+    <div class="post-comment">
+      <span class="add-category">
+	Добавлено в&nbsp;
+	{% for category in post.categories %}
+	<a href="/categories.html#{{ category }}-ref" title="{{ category }}" rel="category tag">{{ category }}</a>
+	{% endfor %}
+      </span>
+      <span id="gotocomments">
+	<a href='{{post.url}}#disqus_thread'>Коментарии</a>
+      </span>
+    </div>
+
     <div class="clear"></div>
   </div>
+
   </article>
 {% endfor %}
 
