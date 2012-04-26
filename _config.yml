@@ -28,7 +28,7 @@ author :
 # Else if you are pushing to username.github.com, replace with your username.
 # Finally if you are pushing to a GitHub project page, include the project name at the end.
 #
-production_url : http://username.github.com
+production_url : http://cyberflow.github.com
 
 # All Jekyll-Bootstrap specific configurations are namespaced into this hash
 #
@@ -75,6 +75,7 @@ JB :
   archive_path: /archive.html
   categories_path : /categories.html
   tags_path : /tags.html
+  #project_dir: /projects
 
   # Settings for comments helper
   # Set 'provider' to the comment provider you want to use.
@@ -101,11 +102,11 @@ JB :
   analytics :
     provider : google 
     google : 
-        tracking_id : 'UA-123-12'
-    getclicky :
-      site_id : 
-    mixpanel :
-        token : '_MIXPANEL_TOKEN_'
+        tracking_id : 'UA-31213444-1'
+#    getclicky :
+#      site_id : 
+#    mixpanel :
+#        token : '_MIXPANEL_TOKEN_'
 
   # Settings for sharing helper. 
   # Sharing is for things like tweet, plusone, like, reddit buttons etc.
