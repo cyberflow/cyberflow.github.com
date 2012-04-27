@@ -2,7 +2,7 @@
 layout: post
 title: "Создание chef рецептов"
 description: "Создаём рецепт для chef"
-category: notes
+category: notice
 tags: [chef]
 ---
 {% include JB/setup %}
