@@ -1,6 +1,12 @@
-<div class="page-header">
-  <h1 class="entry-title">{{ page.title }}</h1>  
-</div>
+<article>
+
+
+<h1 class="title-single">{{ page.title }}</h1>
+<div class="post-info-top">
+      <span class="post-info-date">
+        <abbr class="published" title="{{ post.date }}">{{ page.date | date_to_long_string }}</abbr>
+      </span>
+    </div>
 
 <div class="row">
   <div class="span8">
@@ -38,3 +44,5 @@
   {% endunless %}  
   </div>
 </div>
+
+</article>
