@@ -35,3 +35,7 @@ sudo apt-get install chef
 {% endhighlight %}
 
 При установке будет задан вопрос о пути к серверу chef, т.к. мы делаем установку для chef-solo, то указываем там "none".
+
+[Оригинал статьи][1]
+
+[1]:http://wiki.opscode.com/display/chef/Installing+Chef+Client+and+Chef+Solo
