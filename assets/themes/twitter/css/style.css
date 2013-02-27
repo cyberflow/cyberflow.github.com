@@ -183,12 +183,18 @@ footer {
 
 /* tag_cloud ======================= */
 
-#tagCloud {
-	font-size: 0.8em;
-	list-style-type:none;
+#sidebar .tagCloud { 
+ 	font-size: 0.8em; 
+ 	list-style-type:none; 
 }
 
-#tagCloud li {
+#sidebar .tagCloud li{ 
+	display: inline;
+	background: none;
+	padding-left: 0;
+}
+
+#sidebar .tagCloud li:hover{ 
 	display: inline;
 	background: none;
 	padding-left: 0;
