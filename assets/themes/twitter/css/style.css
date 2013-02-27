@@ -180,6 +180,19 @@ footer {
 	border:1px solid #4C964D;
 	color:#FFF;
 }
+
+/* tag_cloud ======================= */
+
+#tagCloud {
+	font-size: 0.8em;
+	list-style-type:none;
+}
+
+#tagCloud li {
+	display: inline;
+	background: none;
+	padding-left: 0;
+}
 	
 /* Highlight
  * ================================ */

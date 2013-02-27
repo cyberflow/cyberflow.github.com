@@ -3,7 +3,7 @@ layout: post
 title: "Определение ФС на LVS томе"
 description: "Как определить тип файловой системе на LVS томе снаружи"
 category: howto
-tags: [LVS,howto,fs]
+tags: [lvs, howto, fs]
 ---
 {% include JB/setup %}
 Для определения FS на LVS томе нам необходимо получить метаданные данные с тома, определяющие тип FS.
