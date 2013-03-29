@@ -43,6 +43,8 @@ $ git clone git://github.com/opscode-cookbooks/apache2.git
 $ git clone git://github.com/opscode-cookbooks/mysql.git
 $ git clone git://github.com/opscode-cookbooks/php.git
 $ git clone git://github.com/opscode-cookbooks/openssl.git
+$ git clone git://github.com/opscode-cookbooks/build-essential.git
+$ knife cookbook upload openssl wordpress php mysql apache2 build-essential xml
 {% endhighlight %}
 
 После установки можно приступать к магии. Для начала добавим в конфиг [knife][] данные аккаунта [clodo][]:
