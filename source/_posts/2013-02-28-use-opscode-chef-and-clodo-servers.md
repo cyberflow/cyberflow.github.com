@@ -4,15 +4,16 @@ title: "Настраиваем сервера на Clodo через Opscode Chef
 description: "Инструкция по использованию chef для серверов на хостинге Clodo.ru"
 category: howto
 tags: [chef, clodo.ru, knife]
-published: false
+published: true
 ---
-> Дополнить описанием сути статьи. Что, Зачем и Почему?
+
+Данная статья описывает возможность автоматической настройки виртуальных серверов (на примере хостинга [clodo][]) с помощью [chef](http://www.opscode.com).
 
 Заводим аккаунт в [opscode][]
 
 Добавляем free хостинг на 5 серверов.
 
-При создании необходимо скачать ключик валидотора и конфиг для [knife][] и поместить в ~/.chef/knife.rb.
+При создании необходимо скачать ключик валидотора и конфиг для [knife][] и поместить в `~/.chef/knife.rb`.
 {% highlight ruby %}
 current_dir = File.dirname(__FILE__)
 log_level                :info
@@ -27,12 +28,15 @@ cache_options( :path => "#{ENV['HOME']}/.chef/checksums" )
 cookbook_path            ["#{current_dir}/../cookbooks"]
 {% endhighlight %}
 
-Далее идём в chef, заводим клиента, и ключик для клиента кладём так же в ~/.chef/.
+Далее идём в [opscode][], заводим клиента, и ключик для клиента кладём так же в `~/.chef/`.
+<!-- more -->
 >  При создании пользователя помните, что его имя не должно совпадать с именем аккаунта в [opscode][]. Это приведёт к коллизии и ошибке в доступе к функциям API и панели управления chef сервером.
 
 Теперь можно установить [knife][] и плагин к нему от [clodo][]:
 {% highlight bash %}
-всякие gem install бла-бла-бла. Надо воспроизвести на другом компе или виртуалке.
+$ curl -L https://www.opscode.com/chef/install.sh | sudo bash
+$ sudo aptitude install libxml2-dev libxslt1-dev
+$ sudo gem install knife-clodo
 {% endhighlight %}
 
 Определимся с целью. Для тестов допустим, что нам нужно устанавливать ВПС с [wordpress][] на борту. Для это в [opscode][] уже есть соответствующий [рецепт](https://github.com/opscode-cookbooks/wordpress). Но для его использования нам надо залить его(и ещё пару рецептов которые нужны по зависимостям) на наш chef-server. Делается это следующим образом:
@@ -59,7 +63,10 @@ EOF
 
 Волшебство
 {% highlight bash %}
-knife clodo server create -r "recipe[apt]" -c ~/.chef/knife-clodo-test.rb --server-disk=5 --server-memory=256 --server-memory-max=512 -I 541 --node-name test1 --server-name opscode-test --template-file ~/.chef/chef-full.erb --no-ssl-verify-peer --clodo-api-auth-url api.kh.clodo.ru
+knife clodo server create -r "recipe[apt]" -c ~/.chef/knife-clodo-test.rb \
+--server-disk=5 --server-memory=256 --server-memory-max=512 -I 541 \
+--node-name test1 --server-name opscode-test --template-file ~/.chef/chef-full.erb \
+--no-ssl-verify-peer --clodo-api-auth-url api.mn.clodo.ru
 {% endhighlight %}
 
 [opscode]:	http://www.opscode.com/	      	     	    "Opscode" 
