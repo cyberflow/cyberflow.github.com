@@ -43,14 +43,18 @@ excerpt_link: "Read on &rarr;"  # "Continue reading" link text at the bottom of 
 
 titlecase: true       # Converts page and post titles to titlecase
 
+# tags
+tag_dir: tag
+tag_title_prefix: "Tag: "
+
 # list each of the sidebar modules you want to include, in the order you want them to appear.
 # To add custom asides, create files in /source/_includes/custom/asides/ and add them to the list like 'custom/asides/custom_aside_name.html'
-default_asides: [asides/recent_posts.html, asides/github.html, asides/delicious.html, asides/pinboard.html, asides/googleplus.html]
+default_asides: [asides/recent_posts.html, asides/github.html, asides/delicious.html, asides/pinboard.html, asides/googleplus.html, custom/asides/tag_cloud.html, custom/asides/category_cloud.html]
 
 # Each layout uses the default asides, but they can have their own asides instead. Simply uncomment the lines below
 # and add an array with the asides you want to use.
 # blog_index_asides:
-# post_asides:
+post_asides: [custom/asides/tag_cloud.html, custom/asides/category_cloud.html]
 # page_asides:
 
 # ----------------------- #
@@ -85,8 +89,8 @@ delicious_user:
 delicious_count: 3
 
 # Disqus Comments
-disqus_short_name:
-disqus_show_comment_count: true
+disqus_short_name: 
+disqus_show_comment_count: false
 
 # Google Analytics
 google_analytics_tracking_id: 'UA-31213444-1'
@@ -100,3 +104,6 @@ facebook:
   num_post: 5	
   width: 789
   colorscheme: light
+
+# post revision
+github_repo: blog_source

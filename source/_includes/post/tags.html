@@ -1,0 +1,14 @@
+{% capture tag %}{% if post %}{{ post.tags | tag_links | size }}{% else %}{{ page.tags | tag_links | size }}{% endif %}{% endcapture %}
+{% unless tag == '0' %}
+<span>
+  Tagged with:&nbsp;
+  <span class="tags">
+    {% if post %}
+    {{ post.tags | tag_links }}
+    {% else %}
+    {{ page.tags | tag_links }}
+    {% endif %}
+  </span>
+</span>
+<br />
+{% endunless %}

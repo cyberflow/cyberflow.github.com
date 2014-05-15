@@ -4,5 +4,7 @@
 {% if category != '0' %}
 <footer>
   <span class="categories">posted in {{ post.categories | category_links }}</span>
+  <br/>
+  <span class="tags">tagged with {{ post.tags | tag_links }}</span>
 </footer>
 {% endif %}

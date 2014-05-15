@@ -1,0 +1,12 @@
+[submodule "octopress-tag-cloud"]
+	path = octopress-tag-cloud
+	url = https://github.com/robbyedwards/octopress-tag-cloud.git
+[submodule "plugins/octopress-tag-cloud"]
+	path = plugins/octopress-tag-cloud
+	url = https://github.com/robbyedwards/octopress-tag-cloud.git
+[submodule "plugins/octopress-tag-pages"]
+	path = plugins/octopress-tag-pages
+	url = https://github.com/robbyedwards/octopress-tag-pages.git
+[submodule "plugins/octopress-category-list"]
+	path = plugins/octopress-category-list
+	url = https://github.com/alswl/octopress-category-list.git
