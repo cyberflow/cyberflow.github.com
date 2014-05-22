@@ -89,8 +89,8 @@ delicious_user:
 delicious_count: 3
 
 # Disqus Comments
-disqus_short_name: 
-disqus_show_comment_count: false
+disqus_short_name: cyberflowblog
+disqus_show_comment_count: true
 
 # Google Analytics
 google_analytics_tracking_id: 'UA-31213444-1'
@@ -99,11 +99,11 @@ google_analytics_tracking_id: 'UA-31213444-1'
 facebook_like: true
 
 # Facebook comments
-facebook:
-  appid: 385575881513639
-  num_post: 5	
-  width: 789
-  colorscheme: light
+# facebook:
+#   appid: 385575881513639
+#   num_post: 5	
+#   width: 789
+#   colorscheme: light
 
 # post revision
 github_repo: blog_source
