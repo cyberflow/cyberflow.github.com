@@ -4,7 +4,7 @@ title: "Grafana/nginx auth proxy httpaswd"
 date: 2016-03-17 17:25
 comments: true
 tags: [monitoring, linux, grafana, nginx, auth]
-categories: [notes, howto, linux, monitoing]
+categories: [notes, howto, linux, monitoring]
 published: true
 ---
 
