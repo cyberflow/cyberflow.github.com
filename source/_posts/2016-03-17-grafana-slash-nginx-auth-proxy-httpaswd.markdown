@@ -5,7 +5,7 @@ date: 2016-03-17 17:25
 comments: true
 tags: [monitoring, linux, grafana, nginx, auth]
 categories: [notes, howto, linux, monitoing]
-published: false
+published: true
 ---
 
 Краткое описание настройки [Grafana](http://grafana.org) (> 2.0) и nginx с использованием auth basic авторизации через файлы htpasswd.
