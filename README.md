@@ -1,21 +1,11 @@
 ## My Stack Problems
 
-> This project forked and has been modified from [A simple grey theme for Jekyll](https://github.com/liamsymonds/simplygrey-jekyll), and the search posts using [Super Search](https://github.com/chinchang/super-search)
+> This project forked and has been modified from [Stack Problems](https://github.com/agusmakmun/agusmakmun.github.io), and the search posts using [Super Search](https://github.com/chinchang/super-search)
 
 ### Demo
-* [https://agusmakmun.github.io](https://agusmakmun.github.io)
+* [https://cyberflow.net](https://cyberflow.net)
 
 #### Feature
 
-* Sitemap and XML Feed
-* Paginations in homepage
-* Posts under category
-* Realtime Search Posts _(title & description)_ under query.
-* Related Posts
-* Highlight pre
-* Next & Previous Post
-* Disqus comment
+* Gravatar
 
-#### Screenshot
-
-![Screenshot Post Page](https://raw.githubusercontent.com/agusmakmun/agusmakmun.github.io/master/static/img/screenshot-post-page.png  "Screenshot Post Page")
