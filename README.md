@@ -8,4 +8,5 @@
 #### Feature
 
 * Gravatar
+* Disqus from config. And ability to disable comments for post
 

@@ -20,6 +20,8 @@ markdown: kramdown
 kramdown:
   input: GFM
 
+disqus_short_name: cyberflowblog
+
 gems:
   - jekyll-gravatar
 
