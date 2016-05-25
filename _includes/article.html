@@ -1,0 +1,18 @@
+
+<header>
+  <h1 class="entry-title"><a href="{{ root_url }}{{ post.url }}">{% if site.titlecase %}{{ post.title | titlecase }}{% else %}{{ post.title }}{% endif %}</a></h1>
+  {% unless page.meta == false %}
+    <p class="meta">
+      {{ post.date | date_to_string }}
+      {% if site.disqus_short_name and post.comments != false %}
+       | <a href="{% if index %}{{ root_url }}{{ post.url }}{% endif %}#disqus_thread">Comments</a>
+      {% endif %}
+    </p>
+  {% endunless %}
+</header>
+<div class="content">{{ post.excerpt }}</div>
+{% if post.content | post_contains_excerpt_tag %}
+  <footer>
+    <a rel="full-article" href="{{ root_url }}{{ post.url }}">{{ site.excerpt_link }}</a>
+  </footer>
+{% endif %}
