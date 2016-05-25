@@ -20,3 +20,7 @@ markdown: kramdown
 
 gems:
   - jekyll-gravatar
+
+exclude:
+  - Gemfile
+  - Gemfile.lock
