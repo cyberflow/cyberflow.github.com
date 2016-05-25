@@ -2,10 +2,10 @@ title: Cyberflow
 description: My Personal Blog
 author: Cyberflow
 github: https://github.com/cyberflow
-about: I am system administrator.
+about: I am linux system administrator.
 email: dmitry.r@cyberflow.net
 urls:
-    - text: Category
+    - text: Categories
       url: /category/
     - text: Github
       url: https://github.com/cyberflow
@@ -17,6 +17,8 @@ paginate: 5
 per_page: 5
 paginate_path: "/page:num/"
 markdown: kramdown
+kramdown:
+  input: GFM
 
 gems:
   - jekyll-gravatar
