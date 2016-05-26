@@ -34,4 +34,7 @@ exclude:
 excerpt_separator: <!--more-->
 excerpt_link: "Read on &rarr;"
 
-category_dir: "category"
+category_dir: 'category'
+
+# Google Analytics
+google_analytics_tracking_id: 'UA-31213444-1'
