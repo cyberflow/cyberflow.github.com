@@ -10,4 +10,5 @@
 * Gravatar
 * Disqus from config. And ability to disable comments for post
 * Show excerpt content on home page
-
+* Categories generator
+* Google analytics
