@@ -24,6 +24,8 @@ disqus_short_name: cyberflowblog
 
 gems:
   - jekyll-gravatar
+  - jekyll-read-more
+  - jekyll-categories
 
 exclude:
   - Gemfile
@@ -31,3 +33,5 @@ exclude:
 
 excerpt_separator: <!--more-->
 excerpt_link: "Read on &rarr;"
+
+category_dir: "category"

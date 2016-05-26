@@ -5,7 +5,7 @@
     <p class="meta">
       {{ post.date | date_to_string }}
       {% if site.disqus_short_name and post.comments != false %}
-       | <a href="{% if index %}{{ root_url }}{{ post.url }}{% endif %}#disqus_thread">Comments</a>
+       | <a href="{{ root_url }}{{ post.url }}#disqus_thread">Comments</a>
       {% endif %}
     </p>
   {% endunless %}
