@@ -11,7 +11,7 @@
   {% endunless %}
 </header>
 <div class="content">{{ post.excerpt }}</div>
-{% if post.content | post_contains_excerpt_tag %}
+{% if post.content contains site.excerpt_separator %}
   <footer>
     <a rel="full-article" href="{{ root_url }}{{ post.url }}">{{ site.excerpt_link }}</a>
   </footer>

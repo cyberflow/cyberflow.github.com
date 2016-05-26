@@ -24,7 +24,6 @@ disqus_short_name: cyberflowblog
 
 gems:
   - jekyll-gravatar
-  - jekyll-read-more
   - jekyll-categories
 
 exclude:
