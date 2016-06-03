@@ -4,7 +4,7 @@ title: "Оптимизация standalone сервера elasticsearch"
 date: 2016-05-12 12:12
 comments: true
 tags: [monitoring, linux, elasticsearch]
-categories: [monitoring, linux]
+categories: [elasticsearch, monitoring, linux]
 published: true
 ---
 

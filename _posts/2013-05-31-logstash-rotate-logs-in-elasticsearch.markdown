@@ -3,8 +3,8 @@ layout: post
 title: "logstash, ротация логов в elasticsearch"
 date: 2013-05-31 19:24
 comments: true
-categories: [notice, linux]
-tags: [logstash, logs, elasticsearch]
+categories: [notice, linux, elasticsearch]
+tags: [elasticsearch, logs, logstash]
 published: true
 ---
 
