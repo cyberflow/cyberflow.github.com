@@ -7,3 +7,7 @@ group :jekyll_plugins do
   gem 'jekyll-gravatar'
   gem 'jekyll-categories'
 end
+
+group :tests do
+  gem 'html-proofer'
+end

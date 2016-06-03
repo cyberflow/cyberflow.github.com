@@ -13,7 +13,7 @@ published: true
 В логах nginx'a видно, что запросы на поиск отправляются на бэкэнд erchef'а (ядро chef-server написанное на эрланге) и в ответ получаем `500`:
 
 ```
-192.168.1.111 - - [27/May/2014:11:45:28 +0000] "GET /search/databag1?q=id:node1&sort=X_CHEF_id_CHEF_X%20asc&start=0&rows=1000 HTTP/1.1" 500 "0.051" 36 "-" "Chef Client/11.6.0 (ruby-1.9.3-p429; ohai-6.18.0; x86_64-linux; +http://opscode.com)" "127.0.0.1:8000" "500" "0.046" "11.6.0" "algorithm=sha1;version=1.0;" "auth1" "2014-05-27T11:45:28Z" "2jmj7l5rSw0yVb/vlWAYkK/YBwk=" 1011 
+192.168.1.111 - - [27/May/2014:11:45:28 +0000] "GET /search/databag1?q=id:node1&sort=X_CHEF_id_CHEF_X%20asc&start=0&rows=1000 HTTP/1.1" 500 "0.051" 36 "-" "Chef Client/11.6.0 (ruby-1.9.3-p429; ohai-6.18.0; x86_64-linux; +http://opscode.com)" "127.0.0.1:8000" "500" "0.046" "11.6.0" "algorithm=sha1;version=1.0;" "auth1" "2014-05-27T11:45:28Z" "2jmj7l5rSw0yVb/vlWAYkK/YBwk=" 1011
 ```
 
 Смотрим далее в логи `erchef`:

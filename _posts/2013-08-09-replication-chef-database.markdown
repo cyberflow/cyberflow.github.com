@@ -35,7 +35,7 @@ root@chef-master:~# wget https://opscode-omnibus-packages.s3.amazonaws.com/ubunt
 root@chef-master:~# dpkg -i chef-server_11.0.4-1.ubuntu.11.04_amd64.deb
 {% endhighlight %}
 
-Перед запуском `chef-server-ctl reconfigure` нужно немного поправить chef-solo рецепт для postgresql из omnibus пакета. Надо заменить исходный рецепт `/opt/chef-server/embedded/cookbooks/chef-server/recipes/postgresql.rb` на не исходный - [postgresql.rb](/files/postgresql.rb)
+Перед запуском `chef-server-ctl reconfigure` нужно немного поправить chef-solo рецепт для postgresql из omnibus пакета. Надо заменить исходный рецепт `/opt/chef-server/embedded/cookbooks/chef-server/recipes/postgresql.rb` на не исходный - [postgresql.rb](/static/files/postgresql.rb)
 
 Запускаем `sudo chef-server-ctl reconfigure`
 
@@ -79,7 +79,7 @@ job_name = replication_src
 db = host=master-db dbname=opscode_chef user=postgres
 queue_name = replica
 logfile = /var/log/skytools/replica_src.log
-pidfile = /var/run/skytools/replica_src.pid 
+pidfile = /var/run/skytools/replica_src.pid
 {% endhighlight %}
 
 Добавляем мастер:
@@ -98,12 +98,12 @@ job_name = replication_dst
 db = host=master-db dbname=opscode_chef user=postgres
 queue_name = replica
 logfile = /var/log/skytools/replica_dst.log
-pidfile = /var/run/skytools/replica_dst.pid 
+pidfile = /var/run/skytools/replica_dst.pid
 {% endhighlight %}
 
 Добавление слейва:
 {% highlight console %}
-root@chef-master:~# londiste3 /etc/skytools/replication_slave.ini create-leaf slave-server 'dbname=opscode_chef host=chef-slave user=postgres' --provider='host=localhost dbname=opscode_chef user=postgres' 
+root@chef-master:~# londiste3 /etc/skytools/replication_slave.ini create-leaf slave-server 'dbname=opscode_chef host=chef-slave user=postgres' --provider='host=localhost dbname=opscode_chef user=postgres'
 {% endhighlight nets%}
 
 Добавляем конфиг для pgq демона:

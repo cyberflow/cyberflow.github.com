@@ -70,6 +70,6 @@ knife clodo server create -r "recipe[apt]" -c ~/.chef/knife-clodo-test.rb \
 {% endhighlight %}
 
 [opscode]:	http://www.opscode.com/	      	     	    "Opscode"
-[knife]:	http://wiki.opscode.com/display/chef/Knife/ "Knife"
-[clodo]:	http://clodo.ru/			    "Clodo.ru"
-[wordpress]:    http://wordpress.org/ 			    "WordPress"
+[knife]:	https://docs.chef.io/knife.html             "Knife"
+[clodo]:	http://clodo.ru/			                "Clodo.ru"
+[wordpress]:    http://wordpress.org/ 			        "WordPress"

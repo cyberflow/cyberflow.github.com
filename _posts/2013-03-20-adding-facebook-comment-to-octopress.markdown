@@ -7,7 +7,7 @@ categories: [jekyll]
 tags: [jekyll, facebook, comments]
 ---
 
-В этой небольшой статья я опишу как добавить комментарии facebook к блогу на [octopress](http://octopres.org). В octopress есть поддержка комментариев с использованием [disqus](http://disqus.com/), но мне ближе facebook.
+В этой небольшой статья я опишу как добавить комментарии facebook к блогу на [octopress](http://octopress.org). В octopress есть поддержка комментариев с использованием [disqus](http://disqus.com/), но мне ближе facebook.
 
 Для начала необходимо [зарегистрировать приложение на facebook](https://developers.facebook.com/apps) для своего блога. Когда регистрация пройдена facebook  должен выдать app id. Теперь можно приступить к настройке. Добавим facebook app id и параметры отображения комментариев в файл конфигурации `_config.yml`
 
@@ -64,5 +64,3 @@ js.src = "//connect.facebook.net/en_US/all.js#appId=222612811167194&xfbml=1";
 {% endhighlight %}
 
 Это должно разрешить модерацию всем админ пользователям вашего преложения в facebook.
-
-В статье использовались материалы с сайта [blog.grambo.me.uk](http://blog.grambo.me.uk/blog/2012/02/20/adding-facebook-comments-to-octopress/)
