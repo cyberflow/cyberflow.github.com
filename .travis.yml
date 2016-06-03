@@ -9,6 +9,7 @@ env:
   - NOKOGIRI_USE_SYSTEM_LIBRARIES=true
 gemfile:
   - Gemfile
+exclude: [vendor]
 script:
   - bundle exec jekyll build
   - bundle exec htmlproofer ./_site/
