@@ -16,6 +16,7 @@ baseurl: ""
 paginate: 5
 per_page: 5
 paginate_path: "/page:num/"
+permalink: /:year/:month/:title.html
 markdown: kramdown
 kramdown:
   input: GFM
