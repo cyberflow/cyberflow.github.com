@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link rel="shortcut icon" href="/static/img/favicon.ico" />
+        <title>Cyberflow</title>
+        <meta name="author" content="Cyberflow" />
+        <meta name="description" content="My Personal Blog" />
+        <meta name="keywords" content="Cyberflow, monitoring, perl, ruby, debian, linux, chef, notice, jekyll, clusters, ha, databases, elasticsearch" />
+        <link rel="alternate" type="application/rss+xml" title="RSS" href="/feed.xml">
+
+        <!-- syntax highlighting CSS -->
+        <link rel="stylesheet" href="/static/css/syntax.css">
+
+        <!-- Bootstrap core CSS -->
+        <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+
+        <!-- Fonts -->
+        <link href="//fonts.googleapis.com/css?family=Roboto+Condensed:400,300italic,300,400italic,700&amp;subset=latin,latin-ext" rel="stylesheet" type="text/css">
+
+        <!-- Custom CSS -->
+        <link rel="stylesheet" href="/static/css/super-search.css">
+        <link rel="stylesheet" href="/static/css/main.css">
+
+        <!-- Google Analytics -->
+        
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-31213444-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+    </head>
+
+    <body>
+        <div class="container">
+            <div class="col-sm-3">
+                <a href="/"><img id="about" src="https://www.gravatar.com/avatar/7ca36522be02d33e7d2f4ea209012ac3?s=68" alt="cyberflow_gravatar" height="75px" width="75px" /></a>
+                <h1 class="author-name">Cyberflow</h1>
+                
+                <div id="about">
+                    I am linux system administrator.
+                </div>
+                
+
+                <hr />
+                <div class="search" id="js-search">
+                  <input type="text" placeholder="(sitemap)~$ type to search" class="search__input form-control" id="js-search__input">
+                  <ul class="search__results" id="js-search__results"></ul>
+                </div>
+                <hr />
+
+                <strong>Navigation</strong><br />
+                    &raquo; <a href="/">Home</a> <br />
+                
+                    &raquo; <a class="about" href="/category/">Categories</a><br />
+                
+                    &raquo; <a class="about" href="https://github.com/cyberflow">Github</a><br />
+                
+                    &raquo; <a class="about" href="/feed.xml">XML Feed</a><br />
+                
+            </div>
+
+            <div class="col-sm-8 col-offset-1">
+                <div id="home">
+    <h1>Cyberflow</h1>
+    <hr />
+    <ol class="posts">
+    
+      
+      
+<header>
+  <h1 class="entry-title"><a href="/elasticsearch/2016/06/03/elasticsearch-cluster-for-old-indice.html">Миграция старых indices elasticsearch на другую ноду</a></h1>
+  
+    <p class="meta">
+      03 Jun 2016
+      
+       | <a href="/elasticsearch/2016/06/03/elasticsearch-cluster-for-old-indice.html#disqus_thread">Comments</a>
+      
+    </p>
+  
+</header>
+<div class="content"><p>Я использую <code class="highlighter-rouge">elasticsearch</code> для централизованного хранения логов с серверов. Логов хранится много и каждый новый индекс ест ресурсы на сервере (статью об оптимизации используемых ресурсов для одной ноды можно посмотреть <a href="/linux/monitoring/2016/05/12/optimization-standalone-elasticsearch-in-elk-stack.html">здесь</a>). Однако это решение не спасает при хранении логов за очень большие периоды, в связи с чем я решил рассмотреть вариант хранения старых логов на отдельном сервере.</p>
+
+<p>Т.к. речь идет именно о логах, то шансы изменения данных из прошлого стремятся к нулю. Это позволяет нам не думать о необходимости записи в старые индексы и просто хранить их на сервере (например более дешевом с медленными дисками).
+Генеральная идея состоит в том, чтобы добавить дополнительную ноду данных в кластер и распределять индексы (indices) в зависимости от времени их создания.</p>
+
+</div>
+
+  <footer>
+    <a rel="full-article" href="/elasticsearch/2016/06/03/elasticsearch-cluster-for-old-indice.html">Read on &rarr;</a>
+  </footer>
+
+
+    
+      
+      
+<header>
+  <h1 class="entry-title"><a href="/monitoring/linux/2016/05/12/optimization-standalone-elasticsearch-in-elk-stack.html">Оптимизация standalone сервера elasticsearch</a></h1>
+  
+    <p class="meta">
+      12 May 2016
+      
+       | <a href="/monitoring/linux/2016/05/12/optimization-standalone-elasticsearch-in-elk-stack.html#disqus_thread">Comments</a>
+      
+    </p>
+  
+</header>
+<div class="content"><p>При использовании <a href="https://elastic.io">elasticsearch</a> для сбора и анализа логов возникает вопрос оптимизации для одного сервера. Т.к. <code class="highlighter-rouge">elasticsearch</code> расчитан для использования в кластере, то большинство настроек “по умолчанию” выставлены так, что один сервер работает не эффективно. В этой заметке я разберу несколько примеров оптимизации <code class="highlighter-rouge">elasticsearch</code> для работы на одном сервере.</p>
+
+</div>
+
+  <footer>
+    <a rel="full-article" href="/monitoring/linux/2016/05/12/optimization-standalone-elasticsearch-in-elk-stack.html">Read on &rarr;</a>
+  </footer>
+
+
+    
+      
+      
+<header>
+  <h1 class="entry-title"><a href="/linux/monitoring/2016/03/17/grafana-slash-nginx-auth-proxy-httpaswd.html">Grafana/nginx auth proxy httpaswd</a></h1>
+  
+    <p class="meta">
+      17 Mar 2016
+      
+       | <a href="/linux/monitoring/2016/03/17/grafana-slash-nginx-auth-proxy-httpaswd.html#disqus_thread">Comments</a>
+      
+    </p>
+  
+</header>
+<div class="content"><p>Краткое описание настройки <a href="http://grafana.org">Grafana</a> (&gt; 2.0) и nginx с использованием auth basic авторизации через файлы htpasswd.</p>
+
+<p>Необходимые настройки конфига Grafana:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>[server]
+protocol = http
+http_port = 3000
+domain = localhost
+http_addr = 127.0.0.1
+...
+[auth.basic]
+enabled=false
+[users]
+allow_sign_up = false
+auto_assign_org = true
+auto_assign_org_role = Editor
+[auth.proxy]
+enabled = true
+header_name = X-WEBAUTH-USER
+auto_sign_up = true
+</code></pre>
+</div>
+
+</div>
+
+  <footer>
+    <a rel="full-article" href="/linux/monitoring/2016/03/17/grafana-slash-nginx-auth-proxy-httpaswd.html">Read on &rarr;</a>
+  </footer>
+
+
+    
+      
+      
+<header>
+  <h1 class="entry-title"><a href="/notice/linux/2015/09/09/use-ssh-x-session-from-user-to-root.html">Пробрасывание X сессии от пользователя к root</a></h1>
+  
+    <p class="meta">
+      09 Sep 2015
+      
+       | <a href="/notice/linux/2015/09/09/use-ssh-x-session-from-user-to-root.html#disqus_thread">Comments</a>
+      
+    </p>
+  
+</header>
+<div class="content"><p>Сталкнулся с необходимостью запуска графической утилиты на удаленном сервере под пользователем root, но доступ для root по ssh закрыт.</p>
+
+<p>В итоге нашел такой workaround:</p>
+
+<p>Заходим на сервер под пользователем прокинув X сессию через ssh:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="gp">~$ </span>ssh -X user@hostname
+</code></pre>
+</div>
+
+<p>Находим X сессию, потом свитчемся в root:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="gp">~$ </span>xauth list
+hostname/unix:10  MIT-MAGIC-COOKIE-1  f714ef310193878cae851635b871d840
+<span class="gp">~$ </span>sudo -s
+</code></pre>
+</div>
+
+<p>Добавляем имеющуюся сессию пользователю root</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="gp">~# </span>xauth add hostname/unix:10  MIT-MAGIC-COOKIE-1 f714ef310193878cae851635b871d840
+</code></pre>
+</div>
+<p>Все! Можно запускать X приложение под root-ом.</p>
+</div>
+
+
+    
+      
+      
+<header>
+  <h1 class="entry-title"><a href="/monitoring/linux/2014/07/02/monitoring-dmesg.html">Мониторинг dmesg</a></h1>
+  
+    <p class="meta">
+      02 Jul 2014
+      
+       | <a href="/monitoring/linux/2014/07/02/monitoring-dmesg.html#disqus_thread">Comments</a>
+      
+    </p>
+  
+</header>
+<div class="content"><h3 id="section">Задача</h3>
+<p>Необходимо организовать централизованный сбор логов, в частности сообщений ядра <code class="highlighter-rouge">dmesg</code> и реакции на них со стороны событийного мониторинга (например <em>nagios</em>).</p>
+
+<h3 id="section-1">Передача сообщений ядра на сервер логов</h3>
+<p>Для передачи сообщения ядра можно использовать модуль <code class="highlighter-rouge">netconsole</code>. Он позволяет передавать сообщения журнала ядра (dmesg) на удаленный компьютер по сети, без участия пространства пользователя (например, syslogd).
+Для сбора данных можно использовать, например <a href="http://logstash.net/">logstash</a>.</p>
+
+<p>Netconsole может быть встроен в ядро, так и загружен как модуль. Я использую загрузка модуля после загрузки системы, чтобы гарантировать, что сеть уже работает  настроена.</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code># dmesg -n 7
+# modprobe netconsole netconsole="6665@10.13.77.99/eth1,6666@10.13.77.1/d4:ae:52:cf:33:96"
+</code></pre>
+</div>
+<p>Первая команда устанавливает уровень логирования для <code class="highlighter-rouge">dmesg</code>.
+Вторая загружает модуль <code class="highlighter-rouge">netconsole</code> с параметрами, где:</p>
+
+</div>
+
+  <footer>
+    <a rel="full-article" href="/monitoring/linux/2014/07/02/monitoring-dmesg.html">Read on &rarr;</a>
+  </footer>
+
+
+    
+    </ol>
+
+    <!-- Pagination links -->
+    
+    <ul class="pagination">
+      
+        <li class="disabled"><span aria-hidden="true">&laquo;</span></li>
+      
+
+      <li><a href="/">First</a></li>
+
+      
+        
+          <li class="active">
+             <a>1<span class="sr-only">(current)</span></a>
+          </li>
+        
+      
+        
+          <li>
+            <a href="/page2/">2</a>
+          </li>
+        
+      
+        
+          <li>
+            <a href="/page3/">3</a>
+          </li>
+        
+      
+        
+          <li>
+            <a href="/page4/">4</a>
+          </li>
+        
+      
+        
+          <li>
+            <a href="/page5/">5</a>
+          </li>
+        
+      
+
+      <li><a href="/page5/">Last</a></li>
+
+      
+        <li>
+          <a href="/page2/">&raquo;</a>
+        </li>
+      
+    </ul>
+    
+</div><!-- end #home -->
+
+
+                <footer>
+                    &copy; Cyberflow
+                    
+                    - <a href="https://github.com/cyberflow">https://github.com/cyberflow</a> - Powered by Jekyll.
+                    
+                </footer>
+            </div><!-- end /.col-sm-8 -->
+        </div><!-- end /.container -->
+
+        <!-- Bootstrap core JavaScript
+        ================================================== -->
+        <!-- Placed at the end of the document so the pages load faster -->
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+        <script src="/static/js/bootstrap.min.js"></script>
+        <script src="/static/js/super-search.js"></script>
+    </body>
+</html>

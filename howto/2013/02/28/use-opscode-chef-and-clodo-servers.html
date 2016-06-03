@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link rel="shortcut icon" href="/static/img/favicon.ico" />
+        <title>Настраиваем сервера на Clodo через Opscode Chef - Cyberflow</title>
+        <meta name="author" content="Cyberflow" />
+        <meta name="description" content="Настраиваем сервера на Clodo через Opscode Chef" />
+        <meta name="keywords" content="Настраиваем сервера на Clodo через Opscode Chef, Cyberflow, howto" />
+        <link rel="alternate" type="application/rss+xml" title="RSS" href="/feed.xml">
+
+        <!-- syntax highlighting CSS -->
+        <link rel="stylesheet" href="/static/css/syntax.css">
+
+        <!-- Bootstrap core CSS -->
+        <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+
+        <!-- Fonts -->
+        <link href="//fonts.googleapis.com/css?family=Roboto+Condensed:400,300italic,300,400italic,700&amp;subset=latin,latin-ext" rel="stylesheet" type="text/css">
+
+        <!-- Custom CSS -->
+        <link rel="stylesheet" href="/static/css/super-search.css">
+        <link rel="stylesheet" href="/static/css/main.css">
+
+        <!-- Google Analytics -->
+        
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-31213444-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+    </head>
+
+    <body>
+        <div class="container">
+            <div class="col-sm-3">
+                <a href="/"><img id="about" src="https://www.gravatar.com/avatar/7ca36522be02d33e7d2f4ea209012ac3?s=68" alt="cyberflow_gravatar" height="75px" width="75px" /></a>
+                <h1 class="author-name">Cyberflow</h1>
+                
+                <div id="about">
+                    I am linux system administrator.
+                </div>
+                
+
+                <hr />
+                <div class="search" id="js-search">
+                  <input type="text" placeholder="(sitemap)~$ type to search" class="search__input form-control" id="js-search__input">
+                  <ul class="search__results" id="js-search__results"></ul>
+                </div>
+                <hr />
+
+                <strong>Navigation</strong><br />
+                    &raquo; <a href="/">Home</a> <br />
+                
+                    &raquo; <a class="about" href="/category/">Categories</a><br />
+                
+                    &raquo; <a class="about" href="https://github.com/cyberflow">Github</a><br />
+                
+                    &raquo; <a class="about" href="/feed.xml">XML Feed</a><br />
+                
+            </div>
+
+            <div class="col-sm-8 col-offset-1">
+                <h1>Настраиваем сервера на Clodo через Opscode Chef</h1>
+<span class="time">28 Feb 2013</span>
+
+<span class="categories">
+    &raquo; <a href="/category/howto">howto</a>
+</span>
+
+
+<div class="content">
+    <div class="post"><p>Данная статья описывает возможность автоматической настройки виртуальных серверов (на примере хостинга <a href="http://clodo.ru/" title="Clodo.ru">clodo</a>) с помощью <a href="http://www.opscode.com">chef</a>.</p>
+
+<p>Заводим аккаунт в <a href="http://www.opscode.com/" title="Opscode">opscode</a></p>
+
+<p>Добавляем free хостинг на 5 серверов.</p>
+
+<p>При создании необходимо скачать ключик валидотора и конфиг для <a href="http://wiki.opscode.com/display/chef/Knife/" title="Knife">knife</a> и поместить в <code class="highlighter-rouge">~/.chef/knife.rb</code>.</p>
+
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="n">current_dir</span> <span class="o">=</span> <span class="no">File</span><span class="p">.</span><span class="nf">dirname</span><span class="p">(</span><span class="kp">__FILE__</span><span class="p">)</span>
+<span class="n">log_level</span>                <span class="ss">:info</span>
+<span class="n">log_location</span>             <span class="no">STDOUT</span>
+<span class="n">node_name</span>                <span class="s2">"cyberflow"</span>
+<span class="n">client_key</span>               <span class="s2">"</span><span class="si">#{</span><span class="n">current_dir</span><span class="si">}</span><span class="s2">/cyberflow.pem"</span>
+<span class="n">validation_client_name</span>   <span class="s2">"clodo-test-validator"</span>
+<span class="n">validation_key</span>           <span class="s2">"</span><span class="si">#{</span><span class="n">current_dir</span><span class="si">}</span><span class="s2">/clodo-test-validator.pem"</span>
+<span class="n">chef_server_url</span>          <span class="s2">"https://api.opscode.com/organizations/clodo-test"</span>
+<span class="n">cache_type</span>               <span class="s1">'BasicFile'</span>
+<span class="n">cache_options</span><span class="p">(</span> <span class="ss">:path</span> <span class="o">=&gt;</span> <span class="s2">"</span><span class="si">#{</span><span class="no">ENV</span><span class="p">[</span><span class="s1">'HOME'</span><span class="p">]</span><span class="si">}</span><span class="s2">/.chef/checksums"</span> <span class="p">)</span>
+<span class="n">cookbook_path</span>            <span class="p">[</span><span class="s2">"</span><span class="si">#{</span><span class="n">current_dir</span><span class="si">}</span><span class="s2">/../cookbooks"</span><span class="p">]</span></code></pre></figure>
+
+<p>Далее идём в <a href="http://www.opscode.com/" title="Opscode">opscode</a>, заводим клиента, и ключик для клиента кладём так же в <code class="highlighter-rouge">~/.chef/</code>.
+<!-- more -->
+&gt;  При создании пользователя помните, что его имя не должно совпадать с именем аккаунта в <a href="http://www.opscode.com/" title="Opscode">opscode</a>. Это приведёт к коллизии и ошибке в доступе к функциям API и панели управления chef сервером.</p>
+
+<p>Теперь можно установить <a href="http://wiki.opscode.com/display/chef/Knife/" title="Knife">knife</a> и плагин к нему от <a href="http://clodo.ru/" title="Clodo.ru">clodo</a>:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="gp">$ </span>curl -L https://www.opscode.com/chef/install.sh | sudo bash
+<span class="gp">$ </span>sudo aptitude install libxml2-dev libxslt1-dev
+<span class="gp">$ </span>sudo gem install knife-clodo</code></pre></figure>
+
+<p>Определимся с целью. Для тестов допустим, что нам нужно устанавливать ВПС с <a href="http://wordpress.org/" title="WordPress">wordpress</a> на борту. Для это в <a href="http://www.opscode.com/" title="Opscode">opscode</a> уже есть соответствующий <a href="https://github.com/opscode-cookbooks/wordpress">рецепт</a>. Но для его использования нам надо залить его(и ещё пару рецептов которые нужны по зависимостям) на наш chef-server. Делается это следующим образом:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="gp">$ </span>mkdir ~/cookbook <span class="o">&amp;&amp;</span> <span class="nb">cd</span> ~/cookbook
+<span class="gp">$ </span>git clone git://github.com/opscode-cookbooks/wordpress.git
+<span class="gp">$ </span>git clone git://github.com/opscode-cookbooks/apache2.git
+<span class="gp">$ </span>git clone git://github.com/opscode-cookbooks/mysql.git
+<span class="gp">$ </span>git clone git://github.com/opscode-cookbooks/php.git
+<span class="gp">$ </span>git clone git://github.com/opscode-cookbooks/openssl.git
+<span class="gp">$ </span>git clone git://github.com/opscode-cookbooks/build-essential.git
+<span class="gp">$ </span>knife cookbook upload openssl wordpress php mysql apache2 build-essential xml</code></pre></figure>
+
+<p>После установки можно приступать к магии. Для начала добавим в конфиг <a href="http://wiki.opscode.com/display/chef/Knife/" title="Knife">knife</a> данные аккаунта <a href="http://clodo.ru/" title="Clodo.ru">clodo</a>:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="gp">$ </span>cat &gt;&gt; ~/.chef/knife.rb <span class="sh">&lt;&lt; EOF
+knife[:clodo_username] =         'clodo@user.name' 
+knife[:clodo_api_key]   =        '12345678890qwertyasdfgh'
+knife[:clodo_api_auth_url]      = 'api.clodo.ru'
+</span><span class="err">EOF</span></code></pre></figure>
+
+<p>Волшебство</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">knife clodo server create -r <span class="s2">"recipe[apt]"</span> -c ~/.chef/knife-clodo-test.rb <span class="se">\</span>
+--server-disk<span class="o">=</span>5 --server-memory<span class="o">=</span>256 --server-memory-max<span class="o">=</span>512 -I 541 <span class="se">\</span>
+--node-name test1 --server-name opscode-test --template-file ~/.chef/chef-full.erb <span class="se">\</span>
+--no-ssl-verify-peer --clodo-api-auth-url api.mn.clodo.ru</code></pre></figure>
+
+</div>
+</div>
+
+
+
+    
+    
+        
+            
+        
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+        
+            
+        
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+        
+            
+        
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+        
+            
+        
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+
+
+
+<div class="PageNavigation">
+  
+  
+    <a class="next" href="/jekyll/2013/03/20/adding-facebook-comment-to-octopress.html">Добавление Facebook комментариев к Octopress &raquo;</a>
+  
+</div>
+
+
+
+
+<div class="disqus-comments">
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* <![CDATA[ */
+
+        var disqus_shortname = "cyberflowblog";
+        var disqus_identifier = "https://cyberflow.net_Настраиваем сервера на Clodo через Opscode Chef";
+        var disqus_title = "Настраиваем сервера на Clodo через Opscode Chef";
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    /* ]]> */
+    </script>
+</div>
+
+
+
+                <footer>
+                    &copy; Cyberflow
+                    
+                    - <a href="https://github.com/cyberflow">https://github.com/cyberflow</a> - Powered by Jekyll.
+                    
+                </footer>
+            </div><!-- end /.col-sm-8 -->
+        </div><!-- end /.container -->
+
+        <!-- Bootstrap core JavaScript
+        ================================================== -->
+        <!-- Placed at the end of the document so the pages load faster -->
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+        <script src="/static/js/bootstrap.min.js"></script>
+        <script src="/static/js/super-search.js"></script>
+    </body>
+</html>

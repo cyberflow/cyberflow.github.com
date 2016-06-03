@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link rel="shortcut icon" href="/static/img/favicon.ico" />
+        <title>Install debian to HP ProLiant with bnx2 - Cyberflow</title>
+        <meta name="author" content="Cyberflow" />
+        <meta name="description" content="Install debian to HP ProLiant with bnx2" />
+        <meta name="keywords" content="Install debian to HP ProLiant with bnx2, Cyberflow, howto" />
+        <link rel="alternate" type="application/rss+xml" title="RSS" href="/feed.xml">
+
+        <!-- syntax highlighting CSS -->
+        <link rel="stylesheet" href="/static/css/syntax.css">
+
+        <!-- Bootstrap core CSS -->
+        <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+
+        <!-- Fonts -->
+        <link href="//fonts.googleapis.com/css?family=Roboto+Condensed:400,300italic,300,400italic,700&amp;subset=latin,latin-ext" rel="stylesheet" type="text/css">
+
+        <!-- Custom CSS -->
+        <link rel="stylesheet" href="/static/css/super-search.css">
+        <link rel="stylesheet" href="/static/css/main.css">
+
+        <!-- Google Analytics -->
+        
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-31213444-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+    </head>
+
+    <body>
+        <div class="container">
+            <div class="col-sm-3">
+                <a href="/"><img id="about" src="https://www.gravatar.com/avatar/7ca36522be02d33e7d2f4ea209012ac3?s=68" alt="cyberflow_gravatar" height="75px" width="75px" /></a>
+                <h1 class="author-name">Cyberflow</h1>
+                
+                <div id="about">
+                    I am linux system administrator.
+                </div>
+                
+
+                <hr />
+                <div class="search" id="js-search">
+                  <input type="text" placeholder="(sitemap)~$ type to search" class="search__input form-control" id="js-search__input">
+                  <ul class="search__results" id="js-search__results"></ul>
+                </div>
+                <hr />
+
+                <strong>Navigation</strong><br />
+                    &raquo; <a href="/">Home</a> <br />
+                
+                    &raquo; <a class="about" href="/category/">Categories</a><br />
+                
+                    &raquo; <a class="about" href="https://github.com/cyberflow">Github</a><br />
+                
+                    &raquo; <a class="about" href="/feed.xml">XML Feed</a><br />
+                
+            </div>
+
+            <div class="col-sm-8 col-offset-1">
+                <h1>Install debian to HP ProLiant with bnx2</h1>
+<span class="time">27 Aug 2012</span>
+
+<span class="categories">
+    &raquo; <a href="/category/howto">howto</a>
+</span>
+
+
+<div class="content">
+    <div class="post"><h3 id="section">Введение</h3>
+<p>При установки Debian 6 на HP ProLiant DL360 сталкнулся с тем, что в образе netinstall нет fireware для сетевой карточки Broadcom Corporation NetXtreme II. Собственно инсталлятор в курсе этого и предлагает поискать соответствующий fireware на внешнем носителе. В этой заметке я опишу как быстро создать *.img файл с нужными fireware, который в последствии можно смонтировать через ipmi-kvm и скормить инсталлятору.</p>
+
+<h3 id="fireware">Поиск fireware</h3>
+<p>Собственно для debian 6 есть <a href="http://packages.debian.org/squeeze/firmware-bnx2">пакет</a> со всем необходимым, и всё бы ничего, но вот без настроенной сетевой карты поставить этот пакет в систему не простая задача. Но т.к. в пакете есть всё необходимое, то качаем <a href="http://ftp.de.debian.org/debian/pool/non-free/f/firmware-nonfree/firmware-nonfree_0.28+squeeze1.tar.gz">сырцы</a> пакета, распаковываем и приступаем к созданию образа.</p>
+
+<h3 id="img-">Создание IMG файла</h3>
+<p>Создайм бланковый файл, который будет у нас образом флоппи-диска, и создаём в нём файловую систему:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="gp">$ </span>dd <span class="nv">bs</span><span class="o">=</span>512 <span class="nv">count</span><span class="o">=</span>2880 <span class="k">if</span><span class="o">=</span>/dev/zero <span class="nv">of</span><span class="o">=</span>imagefile.img
+<span class="gp">$ </span>mkfs.msdos imagefile.img</code></pre></figure>
+
+<p>Далее монтируем наш флоппи-образ:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="gp">$ </span>sudo mkdir /media/floppy1/
+<span class="gp">$ </span>sudo mount -o loop imagefile.img /media/floppy1/</code></pre></figure>
+
+<p>Теперь кладём файлы, который просит инстолятор в /media/floppy1/, отмонтируем образ и скармливаем файл с образом инсталятору.</p>
+
+</div>
+</div>
+
+
+
+    
+    
+        
+            
+        
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+        
+            
+        
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+        
+            
+        
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+        
+            
+        
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+
+
+
+<div class="PageNavigation">
+  
+  
+    <a class="next" href="/linux/2012/10/12/identify-fs-on-lvs-volume.html">Определение ФС на LVS томе &raquo;</a>
+  
+</div>
+
+
+
+
+<div class="disqus-comments">
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* <![CDATA[ */
+
+        var disqus_shortname = "cyberflowblog";
+        var disqus_identifier = "https://cyberflow.net_Install debian to HP ProLiant with bnx2";
+        var disqus_title = "Install debian to HP ProLiant with bnx2";
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    /* ]]> */
+    </script>
+</div>
+
+
+
+                <footer>
+                    &copy; Cyberflow
+                    
+                    - <a href="https://github.com/cyberflow">https://github.com/cyberflow</a> - Powered by Jekyll.
+                    
+                </footer>
+            </div><!-- end /.col-sm-8 -->
+        </div><!-- end /.container -->
+
+        <!-- Bootstrap core JavaScript
+        ================================================== -->
+        <!-- Placed at the end of the document so the pages load faster -->
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+        <script src="/static/js/bootstrap.min.js"></script>
+        <script src="/static/js/super-search.js"></script>
+    </body>
+</html>

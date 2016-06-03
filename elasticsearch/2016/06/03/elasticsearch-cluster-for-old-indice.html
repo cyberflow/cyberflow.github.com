@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link rel="shortcut icon" href="/static/img/favicon.ico" />
+        <title>Миграция старых indices elasticsearch на другую ноду - Cyberflow</title>
+        <meta name="author" content="Cyberflow" />
+        <meta name="description" content="Миграция старых indices elasticsearch на другую ноду" />
+        <meta name="keywords" content="Миграция старых indices elasticsearch на другую ноду, Cyberflow, elasticsearch" />
+        <link rel="alternate" type="application/rss+xml" title="RSS" href="/feed.xml">
+
+        <!-- syntax highlighting CSS -->
+        <link rel="stylesheet" href="/static/css/syntax.css">
+
+        <!-- Bootstrap core CSS -->
+        <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+
+        <!-- Fonts -->
+        <link href="//fonts.googleapis.com/css?family=Roboto+Condensed:400,300italic,300,400italic,700&amp;subset=latin,latin-ext" rel="stylesheet" type="text/css">
+
+        <!-- Custom CSS -->
+        <link rel="stylesheet" href="/static/css/super-search.css">
+        <link rel="stylesheet" href="/static/css/main.css">
+
+        <!-- Google Analytics -->
+        
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-31213444-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+    </head>
+
+    <body>
+        <div class="container">
+            <div class="col-sm-3">
+                <a href="/"><img id="about" src="https://www.gravatar.com/avatar/7ca36522be02d33e7d2f4ea209012ac3?s=68" alt="cyberflow_gravatar" height="75px" width="75px" /></a>
+                <h1 class="author-name">Cyberflow</h1>
+                
+                <div id="about">
+                    I am linux system administrator.
+                </div>
+                
+
+                <hr />
+                <div class="search" id="js-search">
+                  <input type="text" placeholder="(sitemap)~$ type to search" class="search__input form-control" id="js-search__input">
+                  <ul class="search__results" id="js-search__results"></ul>
+                </div>
+                <hr />
+
+                <strong>Navigation</strong><br />
+                    &raquo; <a href="/">Home</a> <br />
+                
+                    &raquo; <a class="about" href="/category/">Categories</a><br />
+                
+                    &raquo; <a class="about" href="https://github.com/cyberflow">Github</a><br />
+                
+                    &raquo; <a class="about" href="/feed.xml">XML Feed</a><br />
+                
+            </div>
+
+            <div class="col-sm-8 col-offset-1">
+                <h1>Миграция старых indices elasticsearch на другую ноду</h1>
+<span class="time">03 Jun 2016</span>
+
+<span class="categories">
+    &raquo; <a href="/category/elasticsearch">elasticsearch</a>
+</span>
+
+
+<div class="content">
+    <div class="post"><p>Я использую <code class="highlighter-rouge">elasticsearch</code> для централизованного хранения логов с серверов. Логов хранится много и каждый новый индекс ест ресурсы на сервере (статью об оптимизации используемых ресурсов для одной ноды можно посмотреть <a href="/linux/monitoring/2016/05/12/optimization-standalone-elasticsearch-in-elk-stack.html">здесь</a>). Однако это решение не спасает при хранении логов за очень большие периоды, в связи с чем я решил рассмотреть вариант хранения старых логов на отдельном сервере.</p>
+
+<p>Т.к. речь идет именно о логах, то шансы изменения данных из прошлого стремятся к нулю. Это позволяет нам не думать о необходимости записи в старые индексы и просто хранить их на сервере (например более дешевом с медленными дисками).
+Генеральная идея состоит в том, чтобы добавить дополнительную ноду данных в кластер и распределять индексы (indices) в зависимости от времени их создания.</p>
+
+<!--more-->
+
+<h2 id="section">Настройка кластера</h2>
+
+<h3 id="section-1">Настройка мастер ноды</h3>
+<p>Пропуская процесс установки <code class="highlighter-rouge">elasticsearch</code> укажу лишь необходимые настройки:</p>
+
+<blockquote class="filename">
+  <p>elasticsearch.yml</p>
+</blockquote>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="s">node.master</span><span class="pi">:</span> <span class="s">true</span>
+<span class="s">node.data</span><span class="pi">:</span> <span class="s">true</span>
+<span class="s">node.node_type</span><span class="pi">:</span> <span class="s">hot</span>
+<span class="nn">...</span>
+<span class="s">discovery.zen.ping.multicast.enabled</span><span class="pi">:</span> <span class="s">false</span>
+<span class="s">discovery.zen.ping.unicast.hosts</span><span class="pi">:</span> <span class="pi">[</span><span class="s2">"</span><span class="s">10.0.0.2"</span><span class="pi">]</span>
+</code></pre>
+</div>
+
+<p>Нода будет иметь тэг <code class="highlighter-rouge">hot</code> и хранит индексы для быстрого доступа.</p>
+
+<h3 id="section-2">Настройка ноды дынных</h3>
+
+<blockquote class="filename">
+  <p>elasticsearch.yml</p>
+</blockquote>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="s">node.master</span><span class="pi">:</span> <span class="s">false</span>
+<span class="s">node.data</span><span class="pi">:</span> <span class="s">true</span>
+<span class="s">node.node_type</span><span class="pi">:</span> <span class="s">warm</span>
+<span class="nn">...</span>
+<span class="s">discovery.zen.ping.multicast.enabled</span><span class="pi">:</span> <span class="s">false</span>
+<span class="s">discovery.zen.ping.unicast.hosts</span><span class="pi">:</span> <span class="pi">[</span><span class="s2">"</span><span class="s">10.0.0.1"</span><span class="pi">]</span>
+</code></pre>
+</div>
+
+<p>Нода будет иметь тэг <code class="highlighter-rouge">warm</code> и мы будем перемещать на нее устаревшие indices.</p>
+
+<h3 id="section-3">Перемещение</h3>
+<p>После подготовки нод надо перезапустить <code class="highlighter-rouge">elasticsearch</code>.</p>
+
+<p>Убедиться, что ноды теперь в кластере можно командой:</p>
+
+<pre><code class="language-console">$ curl http://localhost:9200/_nodes/process?pretty
+</code></pre>
+
+<p>Следующая команда поставит аттрибут аллокации для всех индексов старше 7 дней:</p>
+
+<pre><code class="language-console">$ curator --logfile /var/log/curator.log --loglevel INFO --logformat default --master-only --host localhost --port 9200 allocation --rule node_type=warm indices --time-unit days --older-than 7 --timestring '%Y.%m.%d'
+</code></pre>
+
+<p>Теперь можно добавить команду curator-а, описанную выше, в cron сервера и перемещение будет происходить автоматически.</p>
+</div>
+</div>
+
+
+
+    
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+        
+            
+        
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+        
+            
+        
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+        
+            
+        
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+
+
+
+<div class="PageNavigation">
+  
+    <a class="prev" href="/monitoring/linux/2016/05/12/optimization-standalone-elasticsearch-in-elk-stack.html">&laquo; Оптимизация standalone сервера elasticsearch</a>
+  
+  
+</div>
+
+
+
+
+<div class="disqus-comments">
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* <![CDATA[ */
+
+        var disqus_shortname = "cyberflowblog";
+        var disqus_identifier = "https://cyberflow.net_Миграция старых indices elasticsearch на другую ноду";
+        var disqus_title = "Миграция старых indices elasticsearch на другую ноду";
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    /* ]]> */
+    </script>
+</div>
+
+
+
+                <footer>
+                    &copy; Cyberflow
+                    
+                    - <a href="https://github.com/cyberflow">https://github.com/cyberflow</a> - Powered by Jekyll.
+                    
+                </footer>
+            </div><!-- end /.col-sm-8 -->
+        </div><!-- end /.container -->
+
+        <!-- Bootstrap core JavaScript
+        ================================================== -->
+        <!-- Placed at the end of the document so the pages load faster -->
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+        <script src="/static/js/bootstrap.min.js"></script>
+        <script src="/static/js/super-search.js"></script>
+    </body>
+</html>
