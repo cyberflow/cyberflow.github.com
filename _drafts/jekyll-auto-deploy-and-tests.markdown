@@ -28,3 +28,25 @@ gem 'html-proofer'
 ``` html
 <a href="http://notareallink" data-proofer-ignore>Not checked.</a>
 ```
+
+Добавляем конфиг для travis-ci:
+
+>.travis.yml
+{:.filename}
+
+``` yml
+language: ruby
+rvm:
+  - 2.1
+branches:
+  only:
+  - source
+env:
+  global:
+  - NOKOGIRI_USE_SYSTEM_LIBRARIES=true
+gemfile:
+  - Gemfile
+script:
+  - bundle exec jekyll build
+  - bundle exec htmlproofer ./_site/
+```
