@@ -50,3 +50,5 @@ script:
   - bundle exec jekyll build
   - bundle exec htmlproofer ./_site/
 ```
+
+`exclude: [vendor]` - крайне важная строчка, т.к. travis ставит gem в корень проекта в директорию vendor. Если не добавить ее в исключения jekyll будет пытаться обработать фалы gem-ов.
