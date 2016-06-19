@@ -32,6 +32,7 @@ exclude:
   - Gemfile
   - Gemfile.lock
   - vendor
+  - .travis
 
 excerpt_separator: <!--more-->
 excerpt_link: "Read on &rarr;"
