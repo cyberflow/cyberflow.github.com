@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link rel="shortcut icon" href="/static/img/favicon.ico" />
+        <title>Тестирование сайта на jekyll и авто-deploy на github pages - Cyberflow</title>
+        <meta name="author" content="Cyberflow" />
+        <meta name="description" content="Тестирование сайта на jekyll и авто-deploy на github pages" />
+        <meta name="keywords" content="Тестирование сайта на jekyll и авто-deploy на github pages, Cyberflow, jekyll" />
+        <link rel="alternate" type="application/rss+xml" title="RSS" href="/feed.xml">
+
+        <!-- syntax highlighting CSS -->
+        <link rel="stylesheet" href="/static/css/syntax.css">
+
+        <!-- Bootstrap core CSS -->
+        <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+
+        <!-- Fonts -->
+        <link href="//fonts.googleapis.com/css?family=Roboto+Condensed:400,300italic,300,400italic,700&amp;subset=latin,latin-ext" rel="stylesheet" type="text/css">
+
+        <!-- Custom CSS -->
+        <link rel="stylesheet" href="/static/css/super-search.css">
+        <link rel="stylesheet" href="/static/css/main.css">
+
+        <!-- Google Analytics -->
+        
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-31213444-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+    </head>
+
+    <body>
+        <div class="container">
+            <div class="col-sm-3">
+                <a href="/"><img id="about" src="https://www.gravatar.com/avatar/7ca36522be02d33e7d2f4ea209012ac3?s=68" alt="cyberflow_gravatar" height="75px" width="75px" /></a>
+                <h1 class="author-name">Cyberflow</h1>
+                
+                <div id="about">
+                    I am linux system administrator.
+                </div>
+                
+
+                <hr />
+                <div class="search" id="js-search">
+                  <input type="text" placeholder="(sitemap)~$ type to search" class="search__input form-control" id="js-search__input">
+                  <ul class="search__results" id="js-search__results"></ul>
+                </div>
+                <hr />
+
+                <strong>Navigation</strong><br />
+                    &raquo; <a href="/">Home</a> <br />
+                
+                    &raquo; <a class="about" href="/category/">Categories</a><br />
+                
+                    &raquo; <a class="about" href="https://github.com/cyberflow">Github</a><br />
+                
+                    &raquo; <a class="about" href="/feed.xml">XML Feed</a><br />
+                
+            </div>
+
+            <div class="col-sm-8 col-offset-1">
+                <h1>Тестирование сайта на jekyll и авто-deploy на github pages</h1>
+<span class="time">19 Jun 2016</span>
+
+<span class="categories">
+    &raquo; <a href="/category/jekyll">jekyll</a>
+</span>
+
+
+<div class="content">
+    <div class="post"><p>Как и все в IT сайт нуждается в тестировании. Качество и количество тестов зависит от функциональности и значения сайта. Для своего блога я то же решил использовать тесты. Ну а так как все системные администраторы жутко ленивы, то и настроить автоматическую выкладку новых статей на <a href="https://pages.github.com">github pages</a> (в моем случае через <a href="http://travis-ci.org">travis-ci</a>)</p>
+
+<h3 id="html-proofer">html-proofer</h3>
+<p>Первым инструментом тестирования я выбрал <a href="https://github.com/gjtorikian/html-proofer">html-proofer</a>. Он позволяет проверять ссылки сайта, правильность оформления изображений а так же работоспособность внутренних и внешних скриптов.
+Для работы нужно установить gem или добавить строчку в Gemfile:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>gem 'html-proofer'
+</code></pre>
+</div>
+
+<!--more-->
+
+<p>Для быстрой ручной проверки можно выполнить следующие команды:</p>
+
+<pre><code class="language-console"># bundle exec jekyll build
+# bundle exec htmlproofer ./_site
+</code></pre>
+
+<p>Чтобы не проверять генерируемые jekyll кросслинки (например список категорий), можно добавить в шаблоны тэг <code class="highlighter-rouge">data-proofer-ignore</code>. ТАким образом можно уменьшить количество проверяемых ссылок:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">"http://notareallink"</span> <span class="na">data-proofer-ignore</span><span class="nt">&gt;</span>Not checked.<span class="nt">&lt;/a&gt;</span>
+</code></pre>
+</div>
+
+<p>Добавляем конфиг для travis-ci:</p>
+
+<blockquote class="filename">
+  <p>.travis.yml</p>
+</blockquote>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="s">language</span><span class="pi">:</span> <span class="s">ruby</span>
+<span class="s">rvm</span><span class="pi">:</span>
+  <span class="pi">-</span> <span class="s">2.1</span>
+<span class="s">branches</span><span class="pi">:</span>
+  <span class="s">only</span><span class="pi">:</span>
+  <span class="pi">-</span> <span class="s">source</span>
+<span class="s">env</span><span class="pi">:</span>
+  <span class="s">global</span><span class="pi">:</span>
+  <span class="pi">-</span> <span class="s">NOKOGIRI_USE_SYSTEM_LIBRARIES=true</span>
+<span class="s">gemfile</span><span class="pi">:</span>
+  <span class="pi">-</span> <span class="s">Gemfile</span>
+<span class="s">script</span><span class="pi">:</span>
+  <span class="pi">-</span> <span class="s">bundle exec jekyll build</span>
+  <span class="pi">-</span> <span class="s">bundle exec htmlproofer ./_site/</span>
+</code></pre>
+</div>
+
+<p>Так же надо добавить строчку в конфиг jekyll:</p>
+
+<blockquote class="filename">
+  <p>_config.yml</p>
+</blockquote>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="s">exclude</span><span class="pi">:</span> <span class="pi">[</span><span class="nv">vendor</span><span class="pi">]</span>
+</code></pre>
+</div>
+
+<p><code class="highlighter-rouge">exclude: [vendor]</code> - крайне важная строчка, т.к. travis ставит gem в корень проекта в директорию vendor. Если не добавить ее в исключения, jekyll будет пытаться обработать фалы gem-ов.</p>
+
+<p>Тесты можно обернуть в <code class="highlighter-rouge">rake</code> таски для удобства.</p>
+
+<h3 id="github-pages">Автодеплой на github pages</h3>
+<p>После удачного тестирования можно и залить изменения на сайт. Я использую две ветки в репозитории: <code class="highlighter-rouge">source</code> - для хранения исходников постов и потрошков <code class="highlighter-rouge">jekyll</code> и, соответственно, <code class="highlighter-rouge">master</code> - для самого блога. В итоге задача сводится к генерации сайта средствами <code class="highlighter-rouge">jekyll</code> на стороне CI и push в определенную ветку репозитория.
+Для этого можно использовать <code class="highlighter-rouge">rake</code> таски ruby. Вот пример:</p>
+
+<blockquote class="filename">
+  <p>Rakefile</p>
+</blockquote>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="c1">#############################################################################</span>
+<span class="c1">#</span>
+<span class="c1"># Modified version of jekyllrb Rakefile</span>
+<span class="c1"># https://github.com/jekyll/jekyll/blob/master/Rakefile</span>
+<span class="c1">#</span>
+<span class="c1">#############################################################################</span>
+
+<span class="nb">require</span> <span class="s1">'rake'</span>
+<span class="nb">require</span> <span class="s1">'yaml'</span>
+
+<span class="no">CONFIG</span> <span class="o">=</span> <span class="no">YAML</span><span class="p">.</span><span class="nf">load</span><span class="p">(</span><span class="no">File</span><span class="p">.</span><span class="nf">read</span><span class="p">(</span><span class="s1">'_config.yml'</span><span class="p">))</span>
+<span class="no">USERNAME</span> <span class="o">=</span> <span class="no">CONFIG</span><span class="p">[</span><span class="s1">'username'</span><span class="p">]</span> <span class="o">||</span> <span class="no">ENV</span><span class="p">[</span><span class="s1">'GIT_NAME'</span><span class="p">]</span>
+<span class="no">REPO</span> <span class="o">=</span> <span class="no">CONFIG</span><span class="p">[</span><span class="s1">'repo'</span><span class="p">]</span> <span class="o">||</span> <span class="s2">"cyberflow.github.com"</span>
+<span class="no">DEST</span> <span class="o">=</span> <span class="no">CONFIG</span><span class="p">[</span><span class="s1">'destination'</span><span class="p">]</span> <span class="o">||</span> <span class="s1">'_deploy'</span>
+
+<span class="no">SOURCE_BRANCH</span> <span class="o">=</span> <span class="s1">'source'</span>
+<span class="no">DESTINATION_BRANCH</span> <span class="o">=</span> <span class="s1">'master'</span>
+
+<span class="k">def</span> <span class="nf">check_destination</span>
+  <span class="k">unless</span> <span class="no">Dir</span><span class="p">.</span><span class="nf">exist?</span> <span class="no">DEST</span>
+    <span class="n">sh</span> <span class="s2">"git clone https://</span><span class="si">#{</span><span class="no">ENV</span><span class="p">[</span><span class="s1">'GIT_NAME'</span><span class="p">]</span><span class="si">}</span><span class="s2">:</span><span class="si">#{</span><span class="no">ENV</span><span class="p">[</span><span class="s1">'GH_TOKEN'</span><span class="p">]</span><span class="si">}</span><span class="s2">@github.com/</span><span class="si">#{</span><span class="no">USERNAME</span><span class="si">}</span><span class="s2">/</span><span class="si">#{</span><span class="no">REPO</span><span class="si">}</span><span class="s2">.git </span><span class="si">#{</span><span class="no">DEST</span><span class="si">}</span><span class="s2">"</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="n">namespace</span> <span class="ss">:site</span> <span class="k">do</span>
+  <span class="n">desc</span> <span class="s1">'Generate the site and push changes to remote origin'</span>
+  <span class="n">task</span> <span class="ss">:deploy</span> <span class="k">do</span>
+    <span class="c1"># Detect pull request</span>
+    <span class="k">if</span> <span class="no">ENV</span><span class="p">[</span><span class="s1">'TRAVIS_PULL_REQUEST'</span><span class="p">].</span><span class="nf">to_s</span><span class="p">.</span><span class="nf">to_i</span> <span class="o">&gt;</span> <span class="mi">0</span>
+      <span class="nb">puts</span> <span class="s1">'Pull request detected. Not proceeding with deploy.'</span>
+      <span class="nb">exit</span>
+    <span class="k">end</span>
+
+    <span class="c1"># Configure git if this is run in Travis CI</span>
+    <span class="k">if</span> <span class="no">ENV</span><span class="p">[</span><span class="s1">'TRAVIS'</span><span class="p">]</span>
+      <span class="nb">puts</span> <span class="s1">'Configure git'</span>
+      <span class="n">sh</span> <span class="s2">"git config --global user.name '</span><span class="si">#{</span><span class="no">USERNAME</span><span class="si">}</span><span class="s2">'"</span>
+      <span class="n">sh</span> <span class="s2">"git config --global user.email '</span><span class="si">#{</span><span class="no">CONFIG</span><span class="p">[</span><span class="s1">'email'</span><span class="p">]</span><span class="si">}</span><span class="s2">'"</span>
+      <span class="n">sh</span> <span class="s1">'git config --global push.default simple'</span>
+    <span class="k">end</span>
+
+    <span class="c1"># Make sure destination folder exists as git repo</span>
+    <span class="n">check_destination</span>
+
+    <span class="c1"># sh "git checkout #{SOURCE_BRANCH}"</span>
+    <span class="no">Dir</span><span class="p">.</span><span class="nf">chdir</span><span class="p">(</span><span class="no">DEST</span><span class="p">)</span> <span class="k">do</span>
+      <span class="n">sh</span> <span class="s2">"git checkout </span><span class="si">#{</span><span class="no">DESTINATION_BRANCH</span><span class="si">}</span><span class="s2">"</span>
+      <span class="n">sh</span> <span class="s1">'rm -rf *'</span>
+    <span class="k">end</span>
+
+    <span class="c1"># Generate the site</span>
+    <span class="n">sh</span> <span class="s2">"bundle exec jekyll build -d </span><span class="si">#{</span><span class="no">DEST</span><span class="si">}</span><span class="s2">"</span>
+
+    <span class="c1"># Commit and push to github</span>
+    <span class="n">sha</span> <span class="o">=</span> <span class="sb">`git log`</span><span class="p">.</span><span class="nf">match</span><span class="p">(</span><span class="sr">/[a-z0-9]{40}/</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="no">Dir</span><span class="p">.</span><span class="nf">chdir</span><span class="p">(</span><span class="no">DEST</span><span class="p">)</span> <span class="k">do</span>
+      <span class="n">sh</span> <span class="s2">"git status -s"</span>
+      <span class="n">sh</span> <span class="s2">"git add --all ."</span>
+      <span class="n">sh</span> <span class="s2">"git commit -m 'Updating to </span><span class="si">#{</span><span class="no">USERNAME</span><span class="si">}</span><span class="s2">/</span><span class="si">#{</span><span class="no">REPO</span><span class="si">}</span><span class="s2">@</span><span class="si">#{</span><span class="n">sha</span><span class="si">}</span><span class="s2">.'"</span>
+      <span class="n">sh</span> <span class="s2">"git push --quiet origin </span><span class="si">#{</span><span class="no">DESTINATION_BRANCH</span><span class="si">}</span><span class="s2"> --force"</span>
+      <span class="nb">puts</span> <span class="s2">"Pushed updated branch </span><span class="si">#{</span><span class="no">DESTINATION_BRANCH</span><span class="si">}</span><span class="s2"> to GitHub Pages"</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre>
+</div>
+
+<p>и теперь можно добавить деплой после удачного тестирования:</p>
+
+<blockquote class="filename">
+  <p>.travis.yml</p>
+</blockquote>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>...
+before_install:
+  - openssl aes-256-cbc -K $encrypted_d1eeda8dc2f5_key -iv $encrypted_d1eeda8dc2f5_iv -in travis_rsa.enc -out .travis/travis_rsa -d
+script:
+  - bundle exec jekyll build
+  - bundle exec htmlproofer ./_site/
+after_success:
+  - eval "$(ssh-agent -s)" #start the ssh agent
+  - chmod 600 .travis/travis_rsa # this key should have push access
+  - ssh-add .travis/travis_rsa
+  - bundle exec rake site:deploy
+</code></pre>
+</div>
+
+<p>Ниже пояснения к блокам <code class="highlighter-rouge">before_install</code> и <code class="highlighter-rouge">after_success</code>. Необходимо добавить ключ для travis, чтобы иметь возможность деплоить в репозиторий.</p>
+
+<h3 id="travis">Добавление ключа для деплоя из travis</h3>
+<p>Для того, чтобы travis смог деплоить наш сайт необходимо проделать еще один шаг. Надо добавить ключ в репозиторий.
+Для начала сгенерим новый ключ (я не советую использовать уже созданные ключи). Посмотреть как это нужно делать можно <a href="https://help.github.com/articles/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent/">тут</a></p>
+
+<pre><code class="language-console"># ssh-keygen -t rsa -b 4096 -C "travis"
+</code></pre>
+
+<p>После этого добавьте сгенеренный ключ в ваш репозиторий в настройках репозитория на github.
+Теперь надо закриптовать ключ для travis:</p>
+
+<pre><code class="language-console">$ travis encrypt-file deploy_key
+encrypting deploy_key for domenic/travis-encrypt-file-example
+storing result as deploy_key.enc
+storing secure env variables for decryption
+
+Please add the following to your build script (before_install stage in your .travis.yml, for instance):
+
+    openssl aes-256-cbc -K $encrypted_0a6446eb3ae3_key -iv $encrypted_0a6446eb3ae3_key -in super_secret.txt.enc -out super_secret.txt -d
+
+Pro Tip: You can add it automatically by running with --add.
+
+Make sure to add deploy_key.enc to the git repository.
+Make sure not to add deploy_key to the git repository.
+Commit all changes to your .travis.yml.
+</code></pre>
+</div>
+</div>
+
+
+
+    
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+        
+            
+        
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+        
+            
+        
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+        
+            
+        
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+        
+            
+        
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+        
+            
+        
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+                
+                <div class="panel-body">
+                <h4>Related Posts</h4>
+                <ul>
+                
+                <li class="relatedPost">
+                    <a href="https://cyberflow.net/2013/03/adding-facebook-comment-to-octopress.html" data-proofer-ignore>Добавление Facebook комментариев к Octopress</a>
+                    
+                        (Categories: <a href="/category/jekyll">jekyll</a>)
+                    
+                </li>
+                
+                
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+                
+                <li class="relatedPost">
+                    <a href="https://cyberflow.net/2013/02/github-jekyll-custom-plugins.html" data-proofer-ignore>Github pages, jekyll и custom plugins</a>
+                    
+                        (Categories: <a href="/category/jekyll">jekyll</a>)
+                    
+                </li>
+                
+                
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+
+
+    </ul>
+    </div>
+
+
+<div class="PageNavigation">
+  
+    <a class="prev" href="/2016/06/elasticsearch-cluster-for-old-indice.html">&laquo; Миграция старых indices elasticsearch на другую ноду</a>
+  
+  
+</div>
+
+
+
+
+<div class="disqus-comments">
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* <![CDATA[ */
+
+        var disqus_shortname = "cyberflowblog";
+        var disqus_identifier = "https://cyberflow.net_Тестирование сайта на jekyll и авто-deploy на github pages";
+        var disqus_title = "Тестирование сайта на jekyll и авто-deploy на github pages";
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    /* ]]> */
+    </script>
+</div>
+
+
+
+                <footer>
+                    &copy; Cyberflow
+                    
+                    - <a href="https://github.com/cyberflow">https://github.com/cyberflow</a> - Powered by Jekyll.
+                    
+                </footer>
+            </div><!-- end /.col-sm-8 -->
+        </div><!-- end /.container -->
+
+        <!-- Bootstrap core JavaScript
+        ================================================== -->
+        <!-- Placed at the end of the document so the pages load faster -->
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+        <script src="/static/js/bootstrap.min.js"></script>
+        <script src="/static/js/super-search.js"></script>
+    </body>
+</html>

@@ -80,6 +80,40 @@
       
       
 <header>
+  <h1 class="entry-title"><a href="/2012/05/fix-invalid-date-format-in-specification-ruby.html">Fix invalid date format in specification Ruby</a></h1>
+  
+    <p class="meta">
+      05 May 2012
+      
+       | <a href="/2012/05/fix-invalid-date-format-in-specification-ruby.html#disqus_thread">Comments</a>
+      
+    </p>
+  
+</header>
+<div class="content"><p>После обновления Ubuntu с 11.04 до версии 11.10 столкнулся с постоянной ошибкой при работе с ruby вида:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">Invalid gemspec <span class="k">in</span> <span class="o">[</span>/var/lib/gems/1.8/specifications/directory_watcher-1.4.1.gemspec]: invalid date format <span class="k">in </span>specification: <span class="s2">"2011-08-30 00:00:00.000000000Z"</span></code></pre></figure>
+
+<p>Версия ruby 1.8.7</p>
+
+<p>Для лечения этой проблемы необходимо поправить строчку в проблемной спеке, заменив строчку:</p>
+
+<p><em>s.date = %q{2011-05-21 00:00:00.000000000Z}</em></p>
+
+<p>на</p>
+
+<p><em>s.date = %q{2011-05-21}</em></p>
+
+<p>Для конкретно моего случая надо править <em>/var/lib/gems/1.8/specifications/directory_watcher-1.4.1.gemspec</em></p>
+
+<p>WIN!</p>
+</div>
+
+
+    
+      
+      
+<header>
   <h1 class="entry-title"><a href="/2012/04/nagios-plugin-check_smsc.html">Nagios plugin check_smsc</a></h1>
   
     <p class="meta">

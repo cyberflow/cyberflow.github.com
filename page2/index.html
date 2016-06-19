@@ -80,6 +80,43 @@
       
       
 <header>
+  <h1 class="entry-title"><a href="/2014/07/monitoring-dmesg.html">Мониторинг dmesg</a></h1>
+  
+    <p class="meta">
+      02 Jul 2014
+      
+       | <a href="/2014/07/monitoring-dmesg.html#disqus_thread">Comments</a>
+      
+    </p>
+  
+</header>
+<div class="content"><h3 id="section">Задача</h3>
+<p>Необходимо организовать централизованный сбор логов, в частности сообщений ядра <code class="highlighter-rouge">dmesg</code> и реакции на них со стороны событийного мониторинга (например <em>nagios</em>).</p>
+
+<h3 id="section-1">Передача сообщений ядра на сервер логов</h3>
+<p>Для передачи сообщения ядра можно использовать модуль <code class="highlighter-rouge">netconsole</code>. Он позволяет передавать сообщения журнала ядра (dmesg) на удаленный компьютер по сети, без участия пространства пользователя (например, syslogd).
+Для сбора данных можно использовать, например <a href="http://logstash.net/">logstash</a>.</p>
+
+<p>Netconsole может быть встроен в ядро, так и загружен как модуль. Я использую загрузка модуля после загрузки системы, чтобы гарантировать, что сеть уже работает  настроена.</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code># dmesg -n 7
+# modprobe netconsole netconsole="6665@10.13.77.99/eth1,6666@10.13.77.1/d4:ae:52:cf:33:96"
+</code></pre>
+</div>
+<p>Первая команда устанавливает уровень логирования для <code class="highlighter-rouge">dmesg</code>.
+Вторая загружает модуль <code class="highlighter-rouge">netconsole</code> с параметрами, где:</p>
+
+</div>
+
+  <footer>
+    <a rel="full-article" href="/2014/07/monitoring-dmesg.html">Read on &rarr;</a>
+  </footer>
+
+
+    
+      
+      
+<header>
   <h1 class="entry-title"><a href="/2014/05/erchef-no-connect-error.html">Erchef no_connect Error</a></h1>
   
     <p class="meta">
@@ -237,34 +274,6 @@ mysql&gt; slave start;
   <footer>
     <a rel="full-article" href="/2013/08/replication-chef-database.html">Read on &rarr;</a>
   </footer>
-
-
-    
-      
-      
-<header>
-  <h1 class="entry-title"><a href="/2013/05/logstash-rotate-logs-in-elasticsearch.html">logstash, ротация логов в elasticsearch</a></h1>
-  
-    <p class="meta">
-      31 May 2013
-      
-       | <a href="/2013/05/logstash-rotate-logs-in-elasticsearch.html#disqus_thread">Comments</a>
-      
-    </p>
-  
-</header>
-<div class="content"><p>Небольшая заметка как организовать ротацию логов, собирающихся при помощи <a href="http://logstash.net/">logstash</a> в <a href="http://www.elasticsearch.org/">elasticsearch</a>.</p>
-
-<p>В крон добавляем:</p>
-
-<figure class="highlight"><pre><code class="language-bash" data-lang="bash">cat <span class="sh">&lt;&lt;'EOF' &gt; /etc/cron.daily/logstash
-#!/bin/bash
-logdate=$(date -d'-15 days' +"%Y.%m.%d")
-curl -XDELETE "http://localhost:9200/logstash-${logdate}"
-</span><span class="err">EOF</span></code></pre></figure>
-
-<p>Этот скрипт будет запускаться ежедневно и удалять все логи из elasticsearch 15-дневной давности.</p>
-</div>
 
 
     

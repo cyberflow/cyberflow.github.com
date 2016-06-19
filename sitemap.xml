@@ -5,9 +5,208 @@
     <description>My Personal Blog</description>
     <link>https://cyberflow.net/</link>
     <atom:link href="https://cyberflow.net/sitemap.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Sun, 19 Jun 2016 11:05:44 +0000</pubDate>
-    <lastBuildDate>Sun, 19 Jun 2016 11:05:44 +0000</lastBuildDate>
+    <pubDate>Sun, 19 Jun 2016 23:24:18 +0300</pubDate>
+    <lastBuildDate>Sun, 19 Jun 2016 23:24:18 +0300</lastBuildDate>
     <generator>Jekyll v3.0.3</generator>
+    
+      <item>
+        <title>Тестирование сайта на jekyll и авто-deploy на github pages</title>
+        <description>&lt;p&gt;Как и все в IT сайт нуждается в тестировании. Качество и количество тестов зависит от функциональности и значения сайта. Для своего блога я то же решил использовать тесты. Ну а так как все системные администраторы жутко ленивы, то и настроить автоматическую выкладку новых статей на &lt;a href=&quot;https://pages.github.com&quot;&gt;github pages&lt;/a&gt; (в моем случае через &lt;a href=&quot;http://travis-ci.org&quot;&gt;travis-ci&lt;/a&gt;)&lt;/p&gt;
+
+&lt;h3 id=&quot;html-proofer&quot;&gt;html-proofer&lt;/h3&gt;
+&lt;p&gt;Первым инструментом тестирования я выбрал &lt;a href=&quot;https://github.com/gjtorikian/html-proofer&quot;&gt;html-proofer&lt;/a&gt;. Он позволяет проверять ссылки сайта, правильность оформления изображений а так же работоспособность внутренних и внешних скриптов.
+Для работы нужно установить gem или добавить строчку в Gemfile:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;gem &#39;html-proofer&#39;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;!--more--&gt;
+
+&lt;p&gt;Для быстрой ручной проверки можно выполнить следующие команды:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-console&quot;&gt;# bundle exec jekyll build
+# bundle exec htmlproofer ./_site
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Чтобы не проверять генерируемые jekyll кросслинки (например список категорий), можно добавить в шаблоны тэг &lt;code class=&quot;highlighter-rouge&quot;&gt;data-proofer-ignore&lt;/code&gt;. ТАким образом можно уменьшить количество проверяемых ссылок:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nt&quot;&gt;&amp;lt;a&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;href=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;http://notareallink&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;data-proofer-ignore&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;Not checked.&lt;span class=&quot;nt&quot;&gt;&amp;lt;/a&amp;gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;Добавляем конфиг для travis-ci:&lt;/p&gt;
+
+&lt;blockquote class=&quot;filename&quot;&gt;
+  &lt;p&gt;.travis.yml&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;s&quot;&gt;language&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;ruby&lt;/span&gt;
+&lt;span class=&quot;s&quot;&gt;rvm&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;2.1&lt;/span&gt;
+&lt;span class=&quot;s&quot;&gt;branches&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;s&quot;&gt;only&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;source&lt;/span&gt;
+&lt;span class=&quot;s&quot;&gt;env&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;s&quot;&gt;global&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;NOKOGIRI_USE_SYSTEM_LIBRARIES=true&lt;/span&gt;
+&lt;span class=&quot;s&quot;&gt;gemfile&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;Gemfile&lt;/span&gt;
+&lt;span class=&quot;s&quot;&gt;script&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;bundle exec jekyll build&lt;/span&gt;
+  &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;bundle exec htmlproofer ./_site/&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;Так же надо добавить строчку в конфиг jekyll:&lt;/p&gt;
+
+&lt;blockquote class=&quot;filename&quot;&gt;
+  &lt;p&gt;_config.yml&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;s&quot;&gt;exclude&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;pi&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;vendor&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;]&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;exclude: [vendor]&lt;/code&gt; - крайне важная строчка, т.к. travis ставит gem в корень проекта в директорию vendor. Если не добавить ее в исключения, jekyll будет пытаться обработать фалы gem-ов.&lt;/p&gt;
+
+&lt;p&gt;Тесты можно обернуть в &lt;code class=&quot;highlighter-rouge&quot;&gt;rake&lt;/code&gt; таски для удобства.&lt;/p&gt;
+
+&lt;h3 id=&quot;github-pages&quot;&gt;Автодеплой на github pages&lt;/h3&gt;
+&lt;p&gt;После удачного тестирования можно и залить изменения на сайт. Я использую две ветки в репозитории: &lt;code class=&quot;highlighter-rouge&quot;&gt;source&lt;/code&gt; - для хранения исходников постов и потрошков &lt;code class=&quot;highlighter-rouge&quot;&gt;jekyll&lt;/code&gt; и, соответственно, &lt;code class=&quot;highlighter-rouge&quot;&gt;master&lt;/code&gt; - для самого блога. В итоге задача сводится к генерации сайта средствами &lt;code class=&quot;highlighter-rouge&quot;&gt;jekyll&lt;/code&gt; на стороне CI и push в определенную ветку репозитория.
+Для этого можно использовать &lt;code class=&quot;highlighter-rouge&quot;&gt;rake&lt;/code&gt; таски ruby. Вот пример:&lt;/p&gt;
+
+&lt;blockquote class=&quot;filename&quot;&gt;
+  &lt;p&gt;Rakefile&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;#############################################################################&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;# Modified version of jekyllrb Rakefile&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;# https://github.com/jekyll/jekyll/blob/master/Rakefile&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#############################################################################&lt;/span&gt;
+
+&lt;span class=&quot;nb&quot;&gt;require&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&#39;rake&#39;&lt;/span&gt;
+&lt;span class=&quot;nb&quot;&gt;require&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&#39;yaml&#39;&lt;/span&gt;
+
+&lt;span class=&quot;no&quot;&gt;CONFIG&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;YAML&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;load&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;File&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;read&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#39;_config.yml&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+&lt;span class=&quot;no&quot;&gt;USERNAME&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;CONFIG&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#39;username&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;||&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;ENV&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#39;GIT_NAME&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+&lt;span class=&quot;no&quot;&gt;REPO&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;CONFIG&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#39;repo&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;||&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;cyberflow.github.com&quot;&lt;/span&gt;
+&lt;span class=&quot;no&quot;&gt;DEST&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;CONFIG&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#39;destination&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;||&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&#39;_deploy&#39;&lt;/span&gt;
+
+&lt;span class=&quot;no&quot;&gt;SOURCE_BRANCH&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&#39;source&#39;&lt;/span&gt;
+&lt;span class=&quot;no&quot;&gt;DESTINATION_BRANCH&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&#39;master&#39;&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;check_destination&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;unless&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;Dir&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;exist?&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;DEST&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;sh&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;git clone https://&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;#{&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;ENV&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#39;GIT_NAME&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;#{&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;ENV&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#39;GH_TOKEN&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;@github.com/&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;#{&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;USERNAME&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;#{&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;REPO&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;.git &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;#{&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;DEST&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;namespace&lt;/span&gt; &lt;span class=&quot;ss&quot;&gt;:site&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;do&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;desc&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&#39;Generate the site and push changes to remote origin&#39;&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;task&lt;/span&gt; &lt;span class=&quot;ss&quot;&gt;:deploy&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;do&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;# Detect pull request&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;ENV&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#39;TRAVIS_PULL_REQUEST&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;].&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;to_s&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;to_i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;
+      &lt;span class=&quot;nb&quot;&gt;puts&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&#39;Pull request detected. Not proceeding with deploy.&#39;&lt;/span&gt;
+      &lt;span class=&quot;nb&quot;&gt;exit&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+
+    &lt;span class=&quot;c1&quot;&gt;# Configure git if this is run in Travis CI&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;ENV&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#39;TRAVIS&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+      &lt;span class=&quot;nb&quot;&gt;puts&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&#39;Configure git&#39;&lt;/span&gt;
+      &lt;span class=&quot;n&quot;&gt;sh&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;git config --global user.name &#39;&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;#{&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;USERNAME&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&#39;&quot;&lt;/span&gt;
+      &lt;span class=&quot;n&quot;&gt;sh&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;git config --global user.email &#39;&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;#{&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;CONFIG&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#39;email&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&#39;&quot;&lt;/span&gt;
+      &lt;span class=&quot;n&quot;&gt;sh&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&#39;git config --global push.default simple&#39;&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+
+    &lt;span class=&quot;c1&quot;&gt;# Make sure destination folder exists as git repo&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;check_destination&lt;/span&gt;
+
+    &lt;span class=&quot;c1&quot;&gt;# sh &quot;git checkout #{SOURCE_BRANCH}&quot;&lt;/span&gt;
+    &lt;span class=&quot;no&quot;&gt;Dir&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;chdir&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;DEST&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;do&lt;/span&gt;
+      &lt;span class=&quot;n&quot;&gt;sh&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;git checkout &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;#{&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;DESTINATION_BRANCH&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;
+      &lt;span class=&quot;n&quot;&gt;sh&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&#39;rm -rf *&#39;&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+
+    &lt;span class=&quot;c1&quot;&gt;# Generate the site&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;sh&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;bundle exec jekyll build -d &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;#{&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;DEST&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;
+
+    &lt;span class=&quot;c1&quot;&gt;# Commit and push to github&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;sha&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;sb&quot;&gt;`git log`&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;match&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;sr&quot;&gt;/[a-z0-9]{40}/&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+    &lt;span class=&quot;no&quot;&gt;Dir&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;chdir&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;DEST&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;do&lt;/span&gt;
+      &lt;span class=&quot;n&quot;&gt;sh&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;git status -s&quot;&lt;/span&gt;
+      &lt;span class=&quot;n&quot;&gt;sh&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;git add --all .&quot;&lt;/span&gt;
+      &lt;span class=&quot;n&quot;&gt;sh&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;git commit -m &#39;Updating to &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;#{&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;USERNAME&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;#{&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;REPO&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;@&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;#{&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sha&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;.&#39;&quot;&lt;/span&gt;
+      &lt;span class=&quot;n&quot;&gt;sh&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;git push --quiet origin &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;#{&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;DESTINATION_BRANCH&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt; --force&quot;&lt;/span&gt;
+      &lt;span class=&quot;nb&quot;&gt;puts&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;Pushed updated branch &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;#{&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;DESTINATION_BRANCH&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt; to GitHub Pages&quot;&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;и теперь можно добавить деплой после удачного тестирования:&lt;/p&gt;
+
+&lt;blockquote class=&quot;filename&quot;&gt;
+  &lt;p&gt;.travis.yml&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;...
+before_install:
+  - openssl aes-256-cbc -K $encrypted_d1eeda8dc2f5_key -iv $encrypted_d1eeda8dc2f5_iv -in travis_rsa.enc -out .travis/travis_rsa -d
+script:
+  - bundle exec jekyll build
+  - bundle exec htmlproofer ./_site/
+after_success:
+  - eval &quot;$(ssh-agent -s)&quot; #start the ssh agent
+  - chmod 600 .travis/travis_rsa # this key should have push access
+  - ssh-add .travis/travis_rsa
+  - bundle exec rake site:deploy
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;Ниже пояснения к блокам &lt;code class=&quot;highlighter-rouge&quot;&gt;before_install&lt;/code&gt; и &lt;code class=&quot;highlighter-rouge&quot;&gt;after_success&lt;/code&gt;. Необходимо добавить ключ для travis, чтобы иметь возможность деплоить в репозиторий.&lt;/p&gt;
+
+&lt;h3 id=&quot;travis&quot;&gt;Добавление ключа для деплоя из travis&lt;/h3&gt;
+&lt;p&gt;Для того, чтобы travis смог деплоить наш сайт необходимо проделать еще один шаг. Надо добавить ключ в репозиторий.
+Для начала сгенерим новый ключ (я не советую использовать уже созданные ключи). Посмотреть как это нужно делать можно &lt;a href=&quot;https://help.github.com/articles/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent/&quot;&gt;тут&lt;/a&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-console&quot;&gt;# ssh-keygen -t rsa -b 4096 -C &quot;travis&quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;После этого добавьте сгенеренный ключ в ваш репозиторий в настройках репозитория на github.
+Теперь надо закриптовать ключ для travis:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-console&quot;&gt;$ travis encrypt-file deploy_key
+encrypting deploy_key for domenic/travis-encrypt-file-example
+storing result as deploy_key.enc
+storing secure env variables for decryption
+
+Please add the following to your build script (before_install stage in your .travis.yml, for instance):
+
+    openssl aes-256-cbc -K $encrypted_0a6446eb3ae3_key -iv $encrypted_0a6446eb3ae3_key -in super_secret.txt.enc -out super_secret.txt -d
+
+Pro Tip: You can add it automatically by running with --add.
+
+Make sure to add deploy_key.enc to the git repository.
+Make sure not to add deploy_key to the git repository.
+Commit all changes to your .travis.yml.
+&lt;/code&gt;&lt;/pre&gt;
+</description>
+        <pubDate>Sun, 19 Jun 2016 12:46:00 +0300</pubDate>
+        <link>https://cyberflow.net/2016/06/jekyll-auto-deploy-and-tests.html</link>
+        <guid isPermaLink="true">https://cyberflow.net/2016/06/jekyll-auto-deploy-and-tests.html</guid>
+        
+        <category>jekyll</category>
+        
+        <category>testing</category>
+        
+        
+        <category>jekyll</category>
+        
+      </item>
     
       <item>
         <title>Миграция старых indices elasticsearch на другую ноду</title>
@@ -70,7 +269,7 @@
 
 &lt;p&gt;Теперь можно добавить команду curator-а, описанную выше, в cron сервера и перемещение будет происходить автоматически.&lt;/p&gt;
 </description>
-        <pubDate>Fri, 03 Jun 2016 12:41:00 +0000</pubDate>
+        <pubDate>Fri, 03 Jun 2016 12:41:00 +0300</pubDate>
         <link>https://cyberflow.net/2016/06/elasticsearch-cluster-for-old-indice.html</link>
         <guid isPermaLink="true">https://cyberflow.net/2016/06/elasticsearch-cluster-for-old-indice.html</guid>
         
@@ -124,7 +323,7 @@ logstash-2016.05.09 2 p STARTED    1520377    966mb 127.0.0.1 logstash1
 &lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 </description>
-        <pubDate>Thu, 12 May 2016 12:12:00 +0000</pubDate>
+        <pubDate>Thu, 12 May 2016 12:12:00 +0300</pubDate>
         <link>https://cyberflow.net/2016/05/optimization-standalone-elasticsearch-in-elk-stack.html</link>
         <guid isPermaLink="true">https://cyberflow.net/2016/05/optimization-standalone-elasticsearch-in-elk-stack.html</guid>
         
@@ -188,7 +387,7 @@ auto_sign_up = true
 
 &lt;p&gt;После сделать рестарт сервера Grafana и nginx.&lt;/p&gt;
 </description>
-        <pubDate>Thu, 17 Mar 2016 17:25:00 +0000</pubDate>
+        <pubDate>Thu, 17 Mar 2016 17:25:00 +0200</pubDate>
         <link>https://cyberflow.net/2016/03/grafana-slash-nginx-auth-proxy-httpaswd.html</link>
         <guid isPermaLink="true">https://cyberflow.net/2016/03/grafana-slash-nginx-auth-proxy-httpaswd.html</guid>
         
@@ -236,7 +435,7 @@ hostname/unix:10  MIT-MAGIC-COOKIE-1  f714ef310193878cae851635b871d840
 &lt;/div&gt;
 &lt;p&gt;Все! Можно запускать X приложение под root-ом.&lt;/p&gt;
 </description>
-        <pubDate>Wed, 09 Sep 2015 15:24:00 +0000</pubDate>
+        <pubDate>Wed, 09 Sep 2015 15:24:00 +0300</pubDate>
         <link>https://cyberflow.net/2015/09/use-ssh-x-session-from-user-to-root.html</link>
         <guid isPermaLink="true">https://cyberflow.net/2015/09/use-ssh-x-session-from-user-to-root.html</guid>
         
@@ -403,7 +602,7 @@ hostname/unix:10  MIT-MAGIC-COOKIE-1  f714ef310193878cae851635b871d840
 &lt;/div&gt;
 &lt;p&gt;Дальнейшее расширение очевидно. Если нужно добавить оповещение о сообщениях другого типа, то нужно просто отлавливать их в &lt;em&gt;logstash&lt;/em&gt; и навешивать тэг &lt;code class=&quot;highlighter-rouge&quot;&gt;notify&lt;/code&gt;.&lt;/p&gt;
 </description>
-        <pubDate>Wed, 02 Jul 2014 09:58:00 +0000</pubDate>
+        <pubDate>Wed, 02 Jul 2014 09:58:00 +0300</pubDate>
         <link>https://cyberflow.net/2014/07/monitoring-dmesg.html</link>
         <guid isPermaLink="true">https://cyberflow.net/2014/07/monitoring-dmesg.html</guid>
         
@@ -491,7 +690,7 @@ hostname/unix:10  MIT-MAGIC-COOKIE-1  f714ef310193878cae851635b871d840
 &lt;/div&gt;
 &lt;p&gt;Правим значения для &lt;code class=&quot;highlighter-rouge&quot;&gt;max_count&lt;/code&gt; и &lt;code class=&quot;highlighter-rouge&quot;&gt;init_count&lt;/code&gt; с 20 на большие. В моём случае пока хватает 60 и 40.&lt;/p&gt;
 </description>
-        <pubDate>Wed, 28 May 2014 09:42:00 +0000</pubDate>
+        <pubDate>Wed, 28 May 2014 09:42:00 +0300</pubDate>
         <link>https://cyberflow.net/2014/05/erchef-no-connect-error.html</link>
         <guid isPermaLink="true">https://cyberflow.net/2014/05/erchef-no-connect-error.html</guid>
         
@@ -567,7 +766,7 @@ Host db*.dc2
 
 &lt;p&gt;Больше о конфиге ssh можно узнать из документации: &lt;a href=&quot;http://man.cx/ssh_config&quot;&gt;ssh_config&lt;/a&gt;&lt;/p&gt;
 </description>
-        <pubDate>Thu, 22 May 2014 20:57:00 +0000</pubDate>
+        <pubDate>Thu, 22 May 2014 20:57:00 +0300</pubDate>
         <link>https://cyberflow.net/2014/05/ssh-config-tricks.html</link>
         <guid isPermaLink="true">https://cyberflow.net/2014/05/ssh-config-tricks.html</guid>
         
@@ -614,7 +813,7 @@ mysql&amp;gt; slave start;
 &lt;/div&gt;
 
 </description>
-        <pubDate>Wed, 14 May 2014 18:03:00 +0000</pubDate>
+        <pubDate>Wed, 14 May 2014 18:03:00 +0300</pubDate>
         <link>https://cyberflow.net/2014/05/install-slave-percona-server.html</link>
         <guid isPermaLink="true">https://cyberflow.net/2014/05/install-slave-percona-server.html</guid>
         
@@ -780,7 +979,7 @@ master-server (root)
 &lt;/div&gt;
 
 </description>
-        <pubDate>Fri, 09 Aug 2013 11:16:00 +0000</pubDate>
+        <pubDate>Fri, 09 Aug 2013 11:16:00 +0300</pubDate>
         <link>https://cyberflow.net/2013/08/replication-chef-database.html</link>
         <guid isPermaLink="true">https://cyberflow.net/2013/08/replication-chef-database.html</guid>
         
@@ -817,7 +1016,7 @@ curl -XDELETE &quot;http://localhost:9200/logstash-${logdate}&quot;
 
 &lt;p&gt;Этот скрипт будет запускаться ежедневно и удалять все логи из elasticsearch 15-дневной давности.&lt;/p&gt;
 </description>
-        <pubDate>Fri, 31 May 2013 19:24:00 +0000</pubDate>
+        <pubDate>Fri, 31 May 2013 19:24:00 +0300</pubDate>
         <link>https://cyberflow.net/2013/05/logstash-rotate-logs-in-elasticsearch.html</link>
         <guid isPermaLink="true">https://cyberflow.net/2013/05/logstash-rotate-logs-in-elasticsearch.html</guid>
         
@@ -1065,7 +1264,7 @@ function get_lag( $wpdb ) {
 
 &lt;p&gt;Собственно теперь мы отслеживаем лаги репликации и отдаём пользователям наисвежайшие данные из баз.&lt;/p&gt;
 </description>
-        <pubDate>Fri, 22 Mar 2013 18:02:00 +0000</pubDate>
+        <pubDate>Fri, 22 Mar 2013 18:02:00 +0200</pubDate>
         <link>https://cyberflow.net/2013/03/hyperdb-to-wordpress.html</link>
         <guid isPermaLink="true">https://cyberflow.net/2013/03/hyperdb-to-wordpress.html</guid>
         
@@ -1147,7 +1346,7 @@ function get_lag( $wpdb ) {
 
 &lt;p&gt;Это должно разрешить модерацию всем админ пользователям вашего преложения в facebook.&lt;/p&gt;
 </description>
-        <pubDate>Wed, 20 Mar 2013 12:11:00 +0000</pubDate>
+        <pubDate>Wed, 20 Mar 2013 12:11:00 +0200</pubDate>
         <link>https://cyberflow.net/2013/03/adding-facebook-comment-to-octopress.html</link>
         <guid isPermaLink="true">https://cyberflow.net/2013/03/adding-facebook-comment-to-octopress.html</guid>
         
@@ -1221,7 +1420,7 @@ knife[:clodo_api_auth_url]      = &#39;api.clodo.ru&#39;
 --no-ssl-verify-peer --clodo-api-auth-url api.mn.clodo.ru&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
 </description>
-        <pubDate>Thu, 28 Feb 2013 00:00:00 +0000</pubDate>
+        <pubDate>Thu, 28 Feb 2013 00:00:00 +0200</pubDate>
         <link>https://cyberflow.net/2013/02/use-opscode-chef-and-clodo-servers.html</link>
         <guid isPermaLink="true">https://cyberflow.net/2013/02/use-opscode-chef-and-clodo-servers.html</guid>
         
@@ -1271,7 +1470,7 @@ knife[:clodo_api_auth_url]      = &#39;api.clodo.ru&#39;
 &lt;a href=&quot;http://arademaker.github.com/blog/2011/12/01/github-pages-jekyll-plugins.html&quot;&gt;http://arademaker.github.com&lt;/a&gt;&lt;/p&gt;
 
 </description>
-        <pubDate>Thu, 28 Feb 2013 00:00:00 +0000</pubDate>
+        <pubDate>Thu, 28 Feb 2013 00:00:00 +0200</pubDate>
         <link>https://cyberflow.net/2013/02/github-jekyll-custom-plugins.html</link>
         <guid isPermaLink="true">https://cyberflow.net/2013/02/github-jekyll-custom-plugins.html</guid>
         
@@ -1313,7 +1512,7 @@ knife[:clodo_api_auth_url]      = &#39;api.clodo.ru&#39;
 &lt;p&gt;&lt;a href=&quot;http://oodavid.tumblr.com/post/15090798307/how-to-install-node-js-on-linux&quot;&gt;How to install node js on linux&lt;/a&gt;&lt;/p&gt;
 
 </description>
-        <pubDate>Mon, 25 Feb 2013 00:00:00 +0000</pubDate>
+        <pubDate>Mon, 25 Feb 2013 00:00:00 +0200</pubDate>
         <link>https://cyberflow.net/2013/02/how-to-install-nodejs-on-linux-deb-base.html</link>
         <guid isPermaLink="true">https://cyberflow.net/2013/02/how-to-install-nodejs-on-linux-deb-base.html</guid>
         
@@ -1336,7 +1535,7 @@ knife[:clodo_api_auth_url]      = &#39;api.clodo.ru&#39;
 
 &lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;ruby script/rails runner &lt;span class=&quot;s1&quot;&gt;&#39;user = User.find(:first, :conditions =&amp;gt; {:admin =&amp;gt; true}) ; user.password, user.password_confirmation = &quot;password&quot;; user.save!&#39;&lt;/span&gt; -e production&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 </description>
-        <pubDate>Thu, 13 Dec 2012 00:00:00 +0000</pubDate>
+        <pubDate>Thu, 13 Dec 2012 00:00:00 +0200</pubDate>
         <link>https://cyberflow.net/2012/12/redmine-2-admin-password-reset.html</link>
         <guid isPermaLink="true">https://cyberflow.net/2012/12/redmine-2-admin-password-reset.html</guid>
         
@@ -1375,7 +1574,7 @@ gpg --export packages@opscode.com | sudo tee /etc/apt/trusted.gpg.d/opscode-keyr
 
 &lt;p&gt;При установке будет задан вопрос о пути к серверу chef, т.к. мы делаем установку для chef-solo, то указываем там “none”.&lt;/p&gt;
 </description>
-        <pubDate>Thu, 18 Oct 2012 00:00:00 +0000</pubDate>
+        <pubDate>Thu, 18 Oct 2012 00:00:00 +0300</pubDate>
         <link>https://cyberflow.net/2012/10/install-chef-solo-to-debian-6-squeeze.html</link>
         <guid isPermaLink="true">https://cyberflow.net/2012/10/install-chef-solo-to-debian-6-squeeze.html</guid>
         
@@ -1435,7 +1634,7 @@ Internal Bitmap : 8 sectors from superblock
 
 &lt;p&gt;Том, который использовался для примера содержит FS ext4&lt;/p&gt;
 </description>
-        <pubDate>Fri, 12 Oct 2012 00:00:00 +0000</pubDate>
+        <pubDate>Fri, 12 Oct 2012 00:00:00 +0300</pubDate>
         <link>https://cyberflow.net/2012/10/identify-fs-on-lvs-volume.html</link>
         <guid isPermaLink="true">https://cyberflow.net/2012/10/identify-fs-on-lvs-volume.html</guid>
         
@@ -1472,7 +1671,7 @@ Internal Bitmap : 8 sectors from superblock
 &lt;p&gt;Теперь кладём файлы, который просит инстолятор в /media/floppy1/, отмонтируем образ и скармливаем файл с образом инсталятору.&lt;/p&gt;
 
 </description>
-        <pubDate>Mon, 27 Aug 2012 00:00:00 +0000</pubDate>
+        <pubDate>Mon, 27 Aug 2012 00:00:00 +0300</pubDate>
         <link>https://cyberflow.net/2012/08/install-debian-to-hp-proliant-with-bnx2.html</link>
         <guid isPermaLink="true">https://cyberflow.net/2012/08/install-debian-to-hp-proliant-with-bnx2.html</guid>
         
@@ -1509,7 +1708,7 @@ Internal Bitmap : 8 sectors from superblock
 
 &lt;p&gt;WIN!&lt;/p&gt;
 </description>
-        <pubDate>Sat, 05 May 2012 00:00:00 +0000</pubDate>
+        <pubDate>Sat, 05 May 2012 00:00:00 +0300</pubDate>
         <link>https://cyberflow.net/2012/05/fix-invalid-date-format-in-specification-ruby.html</link>
         <guid isPermaLink="true">https://cyberflow.net/2012/05/fix-invalid-date-format-in-specification-ruby.html</guid>
         
@@ -1557,7 +1756,7 @@ Internal Bitmap : 8 sectors from superblock
 &lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nb&quot;&gt;echo&lt;/span&gt; -n &lt;span class=&quot;s2&quot;&gt;&quot;password&quot;&lt;/span&gt; | md5sum -&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
 </description>
-        <pubDate>Thu, 26 Apr 2012 00:00:00 +0000</pubDate>
+        <pubDate>Thu, 26 Apr 2012 00:00:00 +0300</pubDate>
         <link>https://cyberflow.net/2012/04/nagios-plugin-check_smsc.html</link>
         <guid isPermaLink="true">https://cyberflow.net/2012/04/nagios-plugin-check_smsc.html</guid>
         
@@ -1697,7 +1896,7 @@ quit
 &lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;Icinga-web по умолчанию доступна по адресу http://serverhostname/icinga-web/.Также по умолчанию авторизация происходит с помощью логина &lt;code class=&quot;highlighter-rouge&quot;&gt;root&lt;/code&gt; и пароля &lt;code class=&quot;highlighter-rouge&quot;&gt;password&lt;/code&gt;.&lt;/p&gt;
 </description>
-        <pubDate>Thu, 03 Nov 2011 09:28:00 +0000</pubDate>
+        <pubDate>Thu, 03 Nov 2011 09:28:00 +0200</pubDate>
         <link>https://cyberflow.net/2011/11/idoutils-icinga-web-1-dot-5-2.html</link>
         <guid isPermaLink="true">https://cyberflow.net/2011/11/idoutils-icinga-web-1-dot-5-2.html</guid>
         

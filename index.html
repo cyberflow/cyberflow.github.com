@@ -80,6 +80,37 @@
       
       
 <header>
+  <h1 class="entry-title"><a href="/2016/06/jekyll-auto-deploy-and-tests.html">Тестирование сайта на jekyll и авто-deploy на github pages</a></h1>
+  
+    <p class="meta">
+      19 Jun 2016
+      
+       | <a href="/2016/06/jekyll-auto-deploy-and-tests.html#disqus_thread">Comments</a>
+      
+    </p>
+  
+</header>
+<div class="content"><p>Как и все в IT сайт нуждается в тестировании. Качество и количество тестов зависит от функциональности и значения сайта. Для своего блога я то же решил использовать тесты. Ну а так как все системные администраторы жутко ленивы, то и настроить автоматическую выкладку новых статей на <a href="https://pages.github.com">github pages</a> (в моем случае через <a href="http://travis-ci.org">travis-ci</a>)</p>
+
+<h3 id="html-proofer">html-proofer</h3>
+<p>Первым инструментом тестирования я выбрал <a href="https://github.com/gjtorikian/html-proofer">html-proofer</a>. Он позволяет проверять ссылки сайта, правильность оформления изображений а так же работоспособность внутренних и внешних скриптов.
+Для работы нужно установить gem или добавить строчку в Gemfile:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>gem 'html-proofer'
+</code></pre>
+</div>
+
+</div>
+
+  <footer>
+    <a rel="full-article" href="/2016/06/jekyll-auto-deploy-and-tests.html">Read on &rarr;</a>
+  </footer>
+
+
+    
+      
+      
+<header>
   <h1 class="entry-title"><a href="/2016/06/elasticsearch-cluster-for-old-indice.html">Миграция старых indices elasticsearch на другую ноду</a></h1>
   
     <p class="meta">
@@ -208,43 +239,6 @@ hostname/unix:10  MIT-MAGIC-COOKIE-1  f714ef310193878cae851635b871d840
 </div>
 <p>Все! Можно запускать X приложение под root-ом.</p>
 </div>
-
-
-    
-      
-      
-<header>
-  <h1 class="entry-title"><a href="/2014/07/monitoring-dmesg.html">Мониторинг dmesg</a></h1>
-  
-    <p class="meta">
-      02 Jul 2014
-      
-       | <a href="/2014/07/monitoring-dmesg.html#disqus_thread">Comments</a>
-      
-    </p>
-  
-</header>
-<div class="content"><h3 id="section">Задача</h3>
-<p>Необходимо организовать централизованный сбор логов, в частности сообщений ядра <code class="highlighter-rouge">dmesg</code> и реакции на них со стороны событийного мониторинга (например <em>nagios</em>).</p>
-
-<h3 id="section-1">Передача сообщений ядра на сервер логов</h3>
-<p>Для передачи сообщения ядра можно использовать модуль <code class="highlighter-rouge">netconsole</code>. Он позволяет передавать сообщения журнала ядра (dmesg) на удаленный компьютер по сети, без участия пространства пользователя (например, syslogd).
-Для сбора данных можно использовать, например <a href="http://logstash.net/">logstash</a>.</p>
-
-<p>Netconsole может быть встроен в ядро, так и загружен как модуль. Я использую загрузка модуля после загрузки системы, чтобы гарантировать, что сеть уже работает  настроена.</p>
-
-<div class="highlighter-rouge"><pre class="highlight"><code># dmesg -n 7
-# modprobe netconsole netconsole="6665@10.13.77.99/eth1,6666@10.13.77.1/d4:ae:52:cf:33:96"
-</code></pre>
-</div>
-<p>Первая команда устанавливает уровень логирования для <code class="highlighter-rouge">dmesg</code>.
-Вторая загружает модуль <code class="highlighter-rouge">netconsole</code> с параметрами, где:</p>
-
-</div>
-
-  <footer>
-    <a rel="full-article" href="/2014/07/monitoring-dmesg.html">Read on &rarr;</a>
-  </footer>
 
 
     
