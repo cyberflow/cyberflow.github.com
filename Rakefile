@@ -80,7 +80,8 @@ namespace :site do
       sh "git status -s"
       sh "git add --all ."
       sh "git commit -m 'Updating to #{USERNAME}/#{REPO}@#{sha}.'"
-      sh "git push --quiet origin #{DESTINATION_BRANCH} --force"
+      sh "git remote add deploy git@github.com:#{USERNAME}/#{REPO}.git"
+      sh "git push --quiet deploy #{DESTINATION_BRANCH} --force"
       puts "Pushed updated branch #{DESTINATION_BRANCH} to GitHub Pages"
     end
   end

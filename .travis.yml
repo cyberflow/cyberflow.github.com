@@ -10,7 +10,12 @@ env:
 gemfile:
   - Gemfile
 exclude: [vendor]
+before_install:
+  - openssl aes-256-cbc -K $encrypted_d1eeda8dc2f5_key -iv $encrypted_d1eeda8dc2f5_iv -in travis_rsa.enc -out .travis/travis_rsa -d
 script:
   - bundle exec rake site:test
 after_success:
+  - eval "$(ssh-agent -s)" #start the ssh agent
+  - chmod 600 .travis/travis_rsa # this key should have push access
+  - ssh-add .travis/travis_rsa
   - bundle exec rake site:deploy

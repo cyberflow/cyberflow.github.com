@@ -148,9 +148,44 @@ end
 
 ```
 ...
+before_install:
+  - openssl aes-256-cbc -K $encrypted_d1eeda8dc2f5_key -iv $encrypted_d1eeda8dc2f5_iv -in travis_rsa.enc -out .travis/travis_rsa -d
 script:
   - bundle exec jekyll build
   - bundle exec htmlproofer ./_site/
 after_success:
+  - eval "$(ssh-agent -s)" #start the ssh agent
+  - chmod 600 .travis/travis_rsa # this key should have push access
+  - ssh-add .travis/travis_rsa
   - bundle exec rake site:deploy
+```
+
+Ниже пояснения к блокам `before_install` и `after_success`. Необходимо добавить ключ для travis, чтобы иметь возможность деплоить в репозиторий.
+
+### Добавление ключа для деплоя из travis
+Для того, чтобы travis смог деплоить наш сайт необходимо проделать еще один шаг. Надо добавить ключ в репозиторий.
+Для начала сгенерим новый ключ (я не советую использовать уже созданные ключи). Посмотреть как это нужно делать можно [тут](https://help.github.com/articles/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent/)
+
+``` console
+# ssh-keygen -t rsa -b 4096 -C "travis"
+```
+
+После этого добавьте сгенеренный ключ в ваш репозиторий в настройках репозитория на github.
+Теперь надо закриптовать ключ для travis:
+
+``` console
+$ travis encrypt-file deploy_key
+encrypting deploy_key for domenic/travis-encrypt-file-example
+storing result as deploy_key.enc
+storing secure env variables for decryption
+
+Please add the following to your build script (before_install stage in your .travis.yml, for instance):
+
+    openssl aes-256-cbc -K $encrypted_0a6446eb3ae3_key -iv $encrypted_0a6446eb3ae3_key -in super_secret.txt.enc -out super_secret.txt -d
+
+Pro Tip: You can add it automatically by running with --add.
+
+Make sure to add deploy_key.enc to the git repository.
+Make sure not to add deploy_key to the git repository.
+Commit all changes to your .travis.yml.
 ```
