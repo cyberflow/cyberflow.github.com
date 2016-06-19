@@ -6,10 +6,10 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
         <link rel="shortcut icon" href="/static/img/favicon.ico" />
-        <title>Category: jekyll - Cyberflow</title>
+        <title>Fix invalid date format in specification Ruby - Cyberflow</title>
         <meta name="author" content="Cyberflow" />
-        <meta name="description" content="Category: jekyll" />
-        <meta name="keywords" content="Category: jekyll, Cyberflow, " />
+        <meta name="description" content="Fix invalid date format in specification Ruby" />
+        <meta name="keywords" content="Fix invalid date format in specification Ruby, Cyberflow, ruby" />
         <link rel="alternate" type="application/rss+xml" title="RSS" href="/feed.xml">
 
         <!-- syntax highlighting CSS -->
@@ -72,135 +72,293 @@
             </div>
 
             <div class="col-sm-8 col-offset-1">
-                <header id="post-header">
-    <h1 id="post-subtitle">Category: jekyll</h1>
-</header>
+                <h1>Fix invalid date format in specification Ruby</h1>
+<span class="time">05 May 2012</span>
 
-<div id="post-content">
-    <hr />
-    
-        
-        
-            
-                <a href="/category/monitoring" class="btn btn-sm btn-default">monitoring</a>
-            
-        
-    
-        
-        
-            
-                <a href="/category/perl" class="btn btn-sm btn-default">perl</a>
-            
-        
-    
-        
-        
-            
-                <a href="/category/ruby" class="btn btn-sm btn-default">ruby</a>
-            
-        
-    
-        
-        
-            
-                <a href="/category/debian" class="btn btn-sm btn-default">debian</a>
-            
-        
-    
-        
-        
-            
-                <a href="/category/linux" class="btn btn-sm btn-default">linux</a>
-            
-        
-    
-        
-        
-            
-                <a href="/category/chef" class="btn btn-sm btn-default">chef</a>
-            
-        
-    
-        
-        
-            
-                <a href="/category/notice" class="btn btn-sm btn-default">notice</a>
-            
-        
-    
-        
-        
-            
-                <a href="/category/jekyll" class="btn btn-sm btn-default">jekyll</a>
-            
-        
-    
-        
-        
-            
-                <a href="/category/clusters" class="btn btn-sm btn-default">clusters</a>
-            
-        
-    
-        
-        
-            
-                <a href="/category/ha" class="btn btn-sm btn-default">ha</a>
-            
-        
-    
-        
-        
-            
-                <a href="/category/elasticsearch" class="btn btn-sm btn-default">elasticsearch</a>
-            
-        
-    
-        
-        
-            
-                <a href="/category/databases" class="btn btn-sm btn-default">databases</a>
-            
-        
-    
-    <hr />
+<span class="categories">
+    &raquo; <a href="/category/ruby">ruby</a>
+</span>
 
-    
-        
-            
-            
-                <h4>2013</h4><div class="list-group">
-            
 
-            
+<div class="content">
+    <div class="post"><p>После обновления Ubuntu с 11.04 до версии 11.10 столкнулся с постоянной ошибкой при работе с ruby вида:</p>
 
-            <ul class="posts">
-                <li><a href="/2013/03/adding-facebook-comment-to-octopress.html" data-proofer-ignore>Добавление Facebook комментариев к Octopress</a> &raquo; <i><span>20 Mar 2013</span></i></li>
-            </ul>
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">Invalid gemspec <span class="k">in</span> <span class="o">[</span>/var/lib/gems/1.8/specifications/directory_watcher-1.4.1.gemspec]: invalid date format <span class="k">in </span>specification: <span class="s2">"2011-08-30 00:00:00.000000000Z"</span></code></pre></figure>
 
-            
-        
-            
-            
+<p>Версия ruby 1.8.7</p>
 
-            
-                
-                
-                
-                    </div><h4>2013</h4><div class="list-group">
-                
-            
+<p>Для лечения этой проблемы необходимо поправить строчку в проблемной спеке, заменив строчку:</p>
 
-            <ul class="posts">
-                <li><a href="/2013/02/github-jekyll-custom-plugins.html" data-proofer-ignore>Github pages, jekyll и custom plugins</a> &raquo; <i><span>28 Feb 2013</span></i></li>
-            </ul>
+<p><em>s.date = %q{2011-05-21 00:00:00.000000000Z}</em></p>
 
-            
-                </div>
-            
-        
-    
+<p>на</p>
+
+<p><em>s.date = %q{2011-05-21}</em></p>
+
+<p>Для конкретно моего случая надо править <em>/var/lib/gems/1.8/specifications/directory_watcher-1.4.1.gemspec</em></p>
+
+<p>WIN!</p>
 </div>
+</div>
+
+
+
+    
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+        
+            
+        
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+        
+            
+        
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+        
+            
+        
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+        
+            
+        
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+        
+            
+        
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+
+
+
+<div class="PageNavigation">
+  
+    <a class="prev" href="/2012/04/nagios-plugin-check_smsc.html">&laquo; Nagios plugin check_smsc</a>
+  
+  
+    <a class="next" href="/2012/08/install-debian-to-hp-proliant-with-bnx2.html">Install debian to HP ProLiant with bnx2 &raquo;</a>
+  
+</div>
+
+
+
+
+<div class="disqus-comments">
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* <![CDATA[ */
+
+        var disqus_shortname = "cyberflowblog";
+        var disqus_identifier = "https://cyberflow.net_Fix invalid date format in specification Ruby";
+        var disqus_title = "Fix invalid date format in specification Ruby";
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    /* ]]> */
+    </script>
+</div>
+
+
 
                 <footer>
                     &copy; Cyberflow

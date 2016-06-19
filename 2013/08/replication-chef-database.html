@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link rel="shortcut icon" href="/static/img/favicon.ico" />
+        <title>Репликация таблиц базы chef-server  - Cyberflow</title>
+        <meta name="author" content="Cyberflow" />
+        <meta name="description" content="Репликация таблиц базы chef-server " />
+        <meta name="keywords" content="Репликация таблиц базы chef-server , Cyberflow, chef, ha, linux" />
+        <link rel="alternate" type="application/rss+xml" title="RSS" href="/feed.xml">
+
+        <!-- syntax highlighting CSS -->
+        <link rel="stylesheet" href="/static/css/syntax.css">
+
+        <!-- Bootstrap core CSS -->
+        <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+
+        <!-- Fonts -->
+        <link href="//fonts.googleapis.com/css?family=Roboto+Condensed:400,300italic,300,400italic,700&amp;subset=latin,latin-ext" rel="stylesheet" type="text/css">
+
+        <!-- Custom CSS -->
+        <link rel="stylesheet" href="/static/css/super-search.css">
+        <link rel="stylesheet" href="/static/css/main.css">
+
+        <!-- Google Analytics -->
+        
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-31213444-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+    </head>
+
+    <body>
+        <div class="container">
+            <div class="col-sm-3">
+                <a href="/"><img id="about" src="https://www.gravatar.com/avatar/7ca36522be02d33e7d2f4ea209012ac3?s=68" alt="cyberflow_gravatar" height="75px" width="75px" /></a>
+                <h1 class="author-name">Cyberflow</h1>
+                
+                <div id="about">
+                    I am linux system administrator.
+                </div>
+                
+
+                <hr />
+                <div class="search" id="js-search">
+                  <input type="text" placeholder="(sitemap)~$ type to search" class="search__input form-control" id="js-search__input">
+                  <ul class="search__results" id="js-search__results"></ul>
+                </div>
+                <hr />
+
+                <strong>Navigation</strong><br />
+                    &raquo; <a href="/">Home</a> <br />
+                
+                    &raquo; <a class="about" href="/category/">Categories</a><br />
+                
+                    &raquo; <a class="about" href="https://github.com/cyberflow">Github</a><br />
+                
+                    &raquo; <a class="about" href="/feed.xml">XML Feed</a><br />
+                
+            </div>
+
+            <div class="col-sm-8 col-offset-1">
+                <h1>Репликация таблиц базы chef-server </h1>
+<span class="time">09 Aug 2013</span>
+
+<span class="categories">
+    &raquo; <a href="/category/chef">chef</a>, <a href="/category/ha">ha</a>, <a href="/category/linux">linux</a>
+</span>
+
+
+<div class="content">
+    <div class="post"><h3 id="intro">Intro</h3>
+<p>В данной статье я расскажу как настроить два сервера <a href="http://www.opscode.com" title="Opscode">chef-server</a> версии 11 с репликацией части таблиц базы postgresql для обеспечения отказоустойчивости. Основная цель репликации это хранения данных о клиентах и нодах для прозрачного доступа нод к любому из <a href="http://www.opscode.com" title="Opscode">chef</a> серверов и возможности работы без перерегистрации. Предлагаемое <a href="http://www.opscode.com" title="Opscode">opscode</a> решение репликации данных через DRBD показалось мне не самым удобным и, главное, надёжным. По сему было принято решение искать альтернативные пути. Так как реплицировать все данные из всех таблиц нет необходимости, то было решено посмотреть в сторону <a href="http://wiki.postgresql.org/wiki/Skytools">skytools</a> и <a href="http://wiki.postgresql.org/wiki/Skytools#Londiste">londiste</a>, которые позволяют реплицировать только определенные таблицы БД.</p>
+
+<p>Однако не обошлось без сюрпризов. <a href="http://www.opscode.com" title="Opscode">Opscode</a> распространяет shef-server 11 по средствам уже собранных omnibus пакетов, в котором свой postgres 9.2. Этот постгрес собран урезанным и не работает с skytools. В итоге в этой статье будет описано как поставить chef-server из omnibus пакета на дистрибутивный postgres 9.2 и прикрутить репликацию через londiste.</p>
+
+<!--more-->
+
+<p>Мы будем устанавливать всё на <a href="http://debian.org">debian 7</a>. Будет 2 сервера: <code class="highlighter-rouge">chef-master</code> и <code class="highlighter-rouge">chef-slave</code> соответственно.</p>
+
+<h3 id="postgresql-92">Добавление репозитория; Установка postgresql 9.2</h3>
+<p>К сожалению в дистрибутивном репозитории debian нет postgresql 9.2. По этому будем использовать не родной.
+Добавляем репозиторий для установки postgres-a и skytools и устанавливаем на обоих серверах:</p>
+
+<figure class="highlight"><pre><code class="language-console" data-lang="console">root@chef-master:~# wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+root@chef-master:~# echo "deb http://apt.postgresql.org/pub/repos/apt/ wheezy-pgdg main" &gt; /etc/apt/sources.list.d/postgresql.list
+root@chef-master:~# aptitude update
+root@chef-master:~# aptitude install skytools-modules-9.2 skytools3 skytools3-ticker skytools3-walmgr</code></pre></figure>
+
+<!-- more -->
+
+<h3 id="chef-server--">Установка chef-server на мастер</h3>
+<p>Теперь можно начинать устанавливать chef-server:</p>
+
+<figure class="highlight"><pre><code class="language-console" data-lang="console">root@chef-master:~# wget https://opscode-omnibus-packages.s3.amazonaws.com/ubuntu/11.04/x86_64/chef-server_11.0.4-1.ubuntu.11.04_amd64.deb
+root@chef-master:~# dpkg -i chef-server_11.0.4-1.ubuntu.11.04_amd64.deb</code></pre></figure>
+
+<p>Перед запуском <code class="highlighter-rouge">chef-server-ctl reconfigure</code> нужно немного поправить chef-solo рецепт для postgresql из omnibus пакета. Надо заменить исходный рецепт <code class="highlighter-rouge">/opt/chef-server/embedded/cookbooks/chef-server/recipes/postgresql.rb</code> на не исходный - <a href="/static/files/postgresql.rb">postgresql.rb</a></p>
+
+<p>Запускаем <code class="highlighter-rouge">sudo chef-server-ctl reconfigure</code></p>
+
+<p>Собственно после этих действий получаем chef-server на дистрибутивном postgresql 9.2, что уже не плохо. Далее надо повторить эту же операцию на втором сервере(chef-slave).</p>
+
+<h3 id="chef-server---">Установка chef-server; Подготовка к репликации</h3>
+<p>Процедура идентична за исключение нескольких дополнительных шагов.
+Необходимо настроить postgres на IP адресе, который позволит мастеру производить репликацию и добавить в <code class="highlighter-rouge">pg_hba.conf</code> разрешение для мастера.</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>root@chef-slave:~# sed -i "s/#listen_addresses = 'localhost'/listen_addresses = '*'/" /etc/postgresql/9.2/mainpostgresql.conf
+root@chef-slave:~# echo "host all all &lt;chef-master-ip&gt;/32 trust" &gt;&gt; /etc/postgresql/9.2/main/pg_hba.conf
+root@chef-slave:~# service postgresql restart
+</code></pre>
+</div>
+<p>Далее надо почистить текущую базу от данных:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>root@chef-slave:~# su postgres -c "psql -d 'opscode_chef' -c \"delete from clients; \""
+root@chef-slave:~# su postgres -c "psql -d 'opscode_chef' -c \"delete from osc_users; \""
+</code></pre>
+</div>
+<p>Ещё надо подменить содержимое директории <code class="highlighter-rouge">/etc/chef-server</code> на сервер <code class="highlighter-rouge">chef-slave</code> на содержимое той же директории с сервер <code class="highlighter-rouge">chef-master</code>. Там хранятся приватные ключи от системных пользователей chef-server-a.</p>
+
+<p>Теперь всё готово к запуску репликации.</p>
+
+<h3 id="section">Настройка репликации</h3>
+<p>Для начала нужно добавить londiste и pgq в нашу базу. Для этого воспользуемся утилитой qadmin, которая была добавлена в skytools3:</p>
+
+<figure class="highlight"><pre><code class="language-console" data-lang="console">root@chef-master:~# su postgres -c "qadmin -h localhost -U postgres -d opscode_chef -c 'install londiste'"
+INSTALL</code></pre></figure>
+
+<p>Пишем конфиги для мастера и слейва(оба конфига лежат на chef-master):</p>
+
+<blockquote class="filename">
+  <p>/etc/skytools/replication_master.ini</p>
+</blockquote>
+
+<figure class="highlight"><pre><code class="language-cfg" data-lang="cfg">[londiste3]
+job_name = replication_src
+db = host=master-db dbname=opscode_chef user=postgres
+queue_name = replica
+logfile = /var/log/skytools/replica_src.log
+pidfile = /var/run/skytools/replica_src.pid</code></pre></figure>
+
+<p>Добавляем мастер:</p>
+
+<figure class="highlight"><pre><code class="language-console" data-lang="console">root@chef-master:~# londiste3 /etc/skytools/replication_master.ini create-root master-server 'dbname=opscode_chef user=postgres'</code></pre></figure>
+
+<p>Конфиг для слейва:</p>
+
+<blockquote class="filename">
+  <p>/etc/skytools/replication_slave.ini</p>
+</blockquote>
+
+<figure class="highlight"><pre><code class="language-cfg" data-lang="cfg">[londiste3]
+job_name = replication_dst
+db = host=master-db dbname=opscode_chef user=postgres
+queue_name = replica
+logfile = /var/log/skytools/replica_dst.log
+pidfile = /var/run/skytools/replica_dst.pid</code></pre></figure>
+
+<p>Добавление слейва:</p>
+
+<figure class="highlight"><pre><code class="language-console" data-lang="console">root@chef-master:~# londiste3 /etc/skytools/replication_slave.ini create-leaf slave-server 'dbname=opscode_chef host=chef-slave user=postgres' --provider='host=localhost dbname=opscode_chef user=postgres'</code></pre></figure>
+
+<p>Добавляем конфиг для pgq демона:</p>
+
+<blockquote class="filename">
+  <p>/etc/skytools/pgqd.ini</p>
+</blockquote>
+
+<figure class="highlight"><pre><code class="language-cgf" data-lang="cgf">[pgqd]
+logfile = /var/log/skytools/pgqd.log
+pidfile = /var/run/skytools/pgqd.pid
+base_connstr = host=localhost user=postgres
+initial_database = opscode_chef</code></pre></figure>
+
+<p>Теперь запускаем skytools и проверяем, что всё настроено верно:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>root@chef-master:~# service skytools start
+root@chef-master:~# londiste3 /etc/skytools/replication_master.ini status
+Queue: replica   Local node: master-server
+
+master-server (root)
+  |                           Tables: 0/0/0
+  |                           Lag: 12s, Tick: 32
+  +--slave-server (leaf)
+                              Tables: 0/0/0
+                              Lag: 12s, Tick: 32
+</code></pre>
+</div>
+<p>Видим, что у нас есть 2 сервера но пока ничего не реплицируется.
+Добавляем необходимые таблицы:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>root@chef-master:~# londiste3 /etc/skytools/replication_master.ini add-table clients
+root@chef-master:~# londiste3 /etc/skytools/replication_master.ini add-table nodes
+root@chef-master:~# londiste3 /etc/skytools/replication_master.ini add-table osc_users
+root@chef-master:~# londiste3 /etc/skytools/replication_slave.ini add-table nodes
+root@chef-master:~# londiste3 /etc/skytools/replication_slave.ini add-table clients
+root@chef-master:~# londiste3 /etc/skytools/replication_slave.ini add-table osc_users
+root@chef-master:~# londiste3 /etc/skytools/replication_master.ini status
+</code></pre>
+</div>
+<p>Спустя несколько минут мы можем увидеть, что репликация завершилась:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>Queue: replica   Local node: master-server
+
+master-server (root)
+  |                           Tables: 3/0/0
+  |                           Lag: 14s, Tick: 52
+  +--slave-server (leaf)
+                              Tables: 3/0/0
+                              Lag: 14s, Tick: 52
+</code></pre>
+</div>
+
+</div>
+</div>
+
+
+
+    
+    
+        
+            
+        
+            
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+        
+            
+        
+    
+        
+            
+        
+            
+        
+            
+        
+    
+        
+            
+        
+            
+        
+            
+                
+                <div class="panel-body">
+                <h4>Related Posts</h4>
+                <ul>
+                
+                <li class="relatedPost">
+                    <a href="https://cyberflow.net/2016/05/optimization-standalone-elasticsearch-in-elk-stack.html" data-proofer-ignore>Оптимизация standalone сервера elasticsearch</a>
+                    
+                        (Categories: <a href="/category/elasticsearch">elasticsearch</a>, <a href="/category/monitoring">monitoring</a>, <a href="/category/linux">linux</a>)
+                    
+                </li>
+                
+                
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+        
+            
+                
+                <li class="relatedPost">
+                    <a href="https://cyberflow.net/2016/03/grafana-slash-nginx-auth-proxy-httpaswd.html" data-proofer-ignore>Grafana/nginx auth proxy httpaswd</a>
+                    
+                        (Categories: <a href="/category/linux">linux</a>, <a href="/category/monitoring">monitoring</a>)
+                    
+                </li>
+                
+                
+            
+        
+    
+        
+            
+        
+            
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+        
+            
+        
+    
+        
+            
+        
+            
+        
+            
+                
+                <li class="relatedPost">
+                    <a href="https://cyberflow.net/2015/09/use-ssh-x-session-from-user-to-root.html" data-proofer-ignore>Пробрасывание X сессии от пользователя к root</a>
+                    
+                        (Categories: <a href="/category/notice">notice</a>, <a href="/category/linux">linux</a>)
+                    
+                </li>
+                
+                
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+        
+            
+        
+    
+        
+            
+        
+            
+        
+            
+                
+                <li class="relatedPost">
+                    <a href="https://cyberflow.net/2014/07/monitoring-dmesg.html" data-proofer-ignore>Мониторинг dmesg</a>
+                    
+                        (Categories: <a href="/category/monitoring">monitoring</a>, <a href="/category/linux">linux</a>)
+                    
+                </li>
+                
+                
+            
+        
+    
+
+    
+    
+        
+            
+                
+                <li class="relatedPost">
+                    <a href="https://cyberflow.net/2014/05/erchef-no-connect-error.html" data-proofer-ignore>Erchef no_connect Error</a>
+                    
+                        (Categories: <a href="/category/chef">chef</a>)
+                    
+                </li>
+                
+                
+            
+        
+            
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+        
+            
+                
+                <li class="relatedPost">
+                    <a href="https://cyberflow.net/2014/05/ssh-config-tricks.html" data-proofer-ignore>Трюки с ssh config</a>
+                    
+                        (Categories: <a href="/category/linux">linux</a>)
+                    
+                </li>
+                
+                
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+        
+            
+        
+    
+        
+            
+        
+            
+        
+            
+        
+    
+        
+            
+        
+            
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+        
+            
+        
+    
+        
+            
+        
+            
+        
+            
+        
+    
+        
+            
+        
+            
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+        
+            
+        
+    
+        
+            
+        
+            
+        
+            
+        
+    
+        
+            
+        
+            
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+        
+            
+        
+    
+        
+            
+        
+            
+        
+            
+        
+    
+        
+            
+        
+            
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+        
+            
+        
+    
+        
+            
+        
+            
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+        
+            
+        
+    
+        
+            
+        
+            
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+        
+            
+        
+    
+        
+            
+        
+            
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+        
+            
+        
+    
+        
+            
+        
+            
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+        
+            
+        
+    
+
+
+    </ul>
+    </div>
+
+
+<div class="PageNavigation">
+  
+    <a class="prev" href="/2013/05/logstash-rotate-logs-in-elasticsearch.html">&laquo; logstash, ротация логов в elasticsearch</a>
+  
+  
+    <a class="next" href="/2014/05/install-slave-percona-server.html">Установка slave mysql-percona сервера &raquo;</a>
+  
+</div>
+
+
+
+
+<div class="disqus-comments">
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* <![CDATA[ */
+
+        var disqus_shortname = "cyberflowblog";
+        var disqus_identifier = "https://cyberflow.net_Репликация таблиц базы chef-server ";
+        var disqus_title = "Репликация таблиц базы chef-server ";
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    /* ]]> */
+    </script>
+</div>
+
+
+
+                <footer>
+                    &copy; Cyberflow
+                    
+                    - <a href="https://github.com/cyberflow">https://github.com/cyberflow</a> - Powered by Jekyll.
+                    
+                </footer>
+            </div><!-- end /.col-sm-8 -->
+        </div><!-- end /.container -->
+
+        <!-- Bootstrap core JavaScript
+        ================================================== -->
+        <!-- Placed at the end of the document so the pages load faster -->
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+        <script src="/static/js/bootstrap.min.js"></script>
+        <script src="/static/js/super-search.js"></script>
+    </body>
+</html>

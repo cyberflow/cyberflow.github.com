@@ -5,13 +5,13 @@
     <description>My Personal Blog</description>
     <link>https://cyberflow.net/</link>
     <atom:link href="https://cyberflow.net/sitemap.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Fri, 03 Jun 2016 12:54:43 +0300</pubDate>
-    <lastBuildDate>Fri, 03 Jun 2016 12:54:43 +0300</lastBuildDate>
+    <pubDate>Sun, 19 Jun 2016 10:58:15 +0000</pubDate>
+    <lastBuildDate>Sun, 19 Jun 2016 10:58:15 +0000</lastBuildDate>
     <generator>Jekyll v3.0.3</generator>
     
       <item>
         <title>Миграция старых indices elasticsearch на другую ноду</title>
-        <description>&lt;p&gt;Я использую &lt;code class=&quot;highlighter-rouge&quot;&gt;elasticsearch&lt;/code&gt; для централизованного хранения логов с серверов. Логов хранится много и каждый новый индекс ест ресурсы на сервере (статью об оптимизации используемых ресурсов для одной ноды можно посмотреть &lt;a href=&quot;/linux/monitoring/2016/05/12/optimization-standalone-elasticsearch-in-elk-stack.html&quot;&gt;здесь&lt;/a&gt;). Однако это решение не спасает при хранении логов за очень большие периоды, в связи с чем я решил рассмотреть вариант хранения старых логов на отдельном сервере.&lt;/p&gt;
+        <description>&lt;p&gt;Я использую &lt;code class=&quot;highlighter-rouge&quot;&gt;elasticsearch&lt;/code&gt; для централизованного хранения логов с серверов. Логов хранится много и каждый новый индекс ест ресурсы на сервере (статью об оптимизации используемых ресурсов для одной ноды можно посмотреть &lt;a href=&quot;/2016/05/optimization-standalone-elasticsearch-in-elk-stack.html&quot;&gt;здесь&lt;/a&gt;). Однако это решение не спасает при хранении логов за очень большие периоды, в связи с чем я решил рассмотреть вариант хранения старых логов на отдельном сервере.&lt;/p&gt;
 
 &lt;p&gt;Т.к. речь идет именно о логах, то шансы изменения данных из прошлого стремятся к нулю. Это позволяет нам не думать о необходимости записи в старые индексы и просто хранить их на сервере (например более дешевом с медленными дисками).
 Генеральная идея состоит в том, чтобы добавить дополнительную ноду данных в кластер и распределять индексы (indices) в зависимости от времени их создания.&lt;/p&gt;
@@ -70,9 +70,9 @@
 
 &lt;p&gt;Теперь можно добавить команду curator-а, описанную выше, в cron сервера и перемещение будет происходить автоматически.&lt;/p&gt;
 </description>
-        <pubDate>Fri, 03 Jun 2016 12:41:00 +0300</pubDate>
-        <link>https://cyberflow.net/elasticsearch/2016/06/03/elasticsearch-cluster-for-old-indice.html</link>
-        <guid isPermaLink="true">https://cyberflow.net/elasticsearch/2016/06/03/elasticsearch-cluster-for-old-indice.html</guid>
+        <pubDate>Fri, 03 Jun 2016 12:41:00 +0000</pubDate>
+        <link>https://cyberflow.net/2016/06/elasticsearch-cluster-for-old-indice.html</link>
+        <guid isPermaLink="true">https://cyberflow.net/2016/06/elasticsearch-cluster-for-old-indice.html</guid>
         
         <category>elasticsearch</category>
         
@@ -83,7 +83,7 @@
     
       <item>
         <title>Оптимизация standalone сервера elasticsearch</title>
-        <description>&lt;p&gt;При использовании &lt;a href=&quot;https://elastic.io&quot;&gt;elasticsearch&lt;/a&gt; для сбора и анализа логов возникает вопрос оптимизации для одного сервера. Т.к. &lt;code class=&quot;highlighter-rouge&quot;&gt;elasticsearch&lt;/code&gt; расчитан для использования в кластере, то большинство настроек “по умолчанию” выставлены так, что один сервер работает не эффективно. В этой заметке я разберу несколько примеров оптимизации &lt;code class=&quot;highlighter-rouge&quot;&gt;elasticsearch&lt;/code&gt; для работы на одном сервере.&lt;/p&gt;
+        <description>&lt;p&gt;При использовании &lt;a href=&quot;https://www.elastic.co&quot;&gt;elasticsearch&lt;/a&gt; для сбора и анализа логов возникает вопрос оптимизации для одного сервера. Т.к. &lt;code class=&quot;highlighter-rouge&quot;&gt;elasticsearch&lt;/code&gt; расчитан для использования в кластере, то большинство настроек “по умолчанию” выставлены так, что один сервер работает не эффективно. В этой заметке я разберу несколько примеров оптимизации &lt;code class=&quot;highlighter-rouge&quot;&gt;elasticsearch&lt;/code&gt; для работы на одном сервере.&lt;/p&gt;
 
 &lt;!--more--&gt;
 
@@ -124,9 +124,9 @@ logstash-2016.05.09 2 p STARTED    1520377    966mb 127.0.0.1 logstash1
 &lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 </description>
-        <pubDate>Thu, 12 May 2016 12:12:00 +0300</pubDate>
-        <link>https://cyberflow.net/monitoring/linux/2016/05/12/optimization-standalone-elasticsearch-in-elk-stack.html</link>
-        <guid isPermaLink="true">https://cyberflow.net/monitoring/linux/2016/05/12/optimization-standalone-elasticsearch-in-elk-stack.html</guid>
+        <pubDate>Thu, 12 May 2016 12:12:00 +0000</pubDate>
+        <link>https://cyberflow.net/2016/05/optimization-standalone-elasticsearch-in-elk-stack.html</link>
+        <guid isPermaLink="true">https://cyberflow.net/2016/05/optimization-standalone-elasticsearch-in-elk-stack.html</guid>
         
         <category>monitoring</category>
         
@@ -134,6 +134,8 @@ logstash-2016.05.09 2 p STARTED    1520377    966mb 127.0.0.1 logstash1
         
         <category>elasticsearch</category>
         
+        
+        <category>elasticsearch</category>
         
         <category>monitoring</category>
         
@@ -186,9 +188,9 @@ auto_sign_up = true
 
 &lt;p&gt;После сделать рестарт сервера Grafana и nginx.&lt;/p&gt;
 </description>
-        <pubDate>Thu, 17 Mar 2016 17:25:00 +0200</pubDate>
-        <link>https://cyberflow.net/linux/monitoring/2016/03/17/grafana-slash-nginx-auth-proxy-httpaswd.html</link>
-        <guid isPermaLink="true">https://cyberflow.net/linux/monitoring/2016/03/17/grafana-slash-nginx-auth-proxy-httpaswd.html</guid>
+        <pubDate>Thu, 17 Mar 2016 17:25:00 +0000</pubDate>
+        <link>https://cyberflow.net/2016/03/grafana-slash-nginx-auth-proxy-httpaswd.html</link>
+        <guid isPermaLink="true">https://cyberflow.net/2016/03/grafana-slash-nginx-auth-proxy-httpaswd.html</guid>
         
         <category>monitoring</category>
         
@@ -234,9 +236,9 @@ hostname/unix:10  MIT-MAGIC-COOKIE-1  f714ef310193878cae851635b871d840
 &lt;/div&gt;
 &lt;p&gt;Все! Можно запускать X приложение под root-ом.&lt;/p&gt;
 </description>
-        <pubDate>Wed, 09 Sep 2015 15:24:00 +0300</pubDate>
-        <link>https://cyberflow.net/notice/linux/2015/09/09/use-ssh-x-session-from-user-to-root.html</link>
-        <guid isPermaLink="true">https://cyberflow.net/notice/linux/2015/09/09/use-ssh-x-session-from-user-to-root.html</guid>
+        <pubDate>Wed, 09 Sep 2015 15:24:00 +0000</pubDate>
+        <link>https://cyberflow.net/2015/09/use-ssh-x-session-from-user-to-root.html</link>
+        <guid isPermaLink="true">https://cyberflow.net/2015/09/use-ssh-x-session-from-user-to-root.html</guid>
         
         <category>linux</category>
         
@@ -297,7 +299,7 @@ hostname/unix:10  MIT-MAGIC-COOKIE-1  f714ef310193878cae851635b871d840
 &lt;h3 id=&quot;section-2&quot;&gt;Оповещения при критических сообщениях ядра&lt;/h3&gt;
 &lt;p&gt;В моём случае я хочу отслеживать наличие OOM сообщений и рассылать оповещения об этом. &lt;code class=&quot;highlighter-rouge&quot;&gt;Logstash&lt;/code&gt; может отправлять письма с оповещениями сам, но мне интересно делать это событийным мониторингом.&lt;/p&gt;
 
-&lt;p&gt;В качестве событийного мониторинга я использую &lt;a href=&quot;www.shinken-monitoring.org&quot;&gt;shinken&lt;/a&gt;. Для реализации оповещения админов, по моему, лучше использовать сервисные чеки &lt;code class=&quot;highlighter-rouge&quot;&gt;is_volatile&lt;/code&gt;. Эта опция позволяет отправлять оповещения на каждый статус non-OK даже если он не менялся. Подробнее об этой опции можно почитать &lt;a href=&quot;https://shinken.readthedocs.org/en/latest/07_advanced/volatileservices.html&quot;&gt;тут&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;В качестве событийного мониторинга я использую &lt;a href=&quot;http://www.shinken-monitoring.org&quot;&gt;shinken&lt;/a&gt;. Для реализации оповещения админов, по моему, лучше использовать сервисные чеки &lt;code class=&quot;highlighter-rouge&quot;&gt;is_volatile&lt;/code&gt;. Эта опция позволяет отправлять оповещения на каждый статус non-OK даже если он не менялся. Подробнее об этой опции можно почитать &lt;a href=&quot;https://shinken.readthedocs.org/en/latest/07_advanced/volatileservices.html&quot;&gt;тут&lt;/a&gt;.&lt;/p&gt;
 
 &lt;p&gt;Чтобы не повторяться в описании каждого сервиса напишем template для volatile сервисов:&lt;/p&gt;
 
@@ -367,7 +369,7 @@ hostname/unix:10  MIT-MAGIC-COOKIE-1  f714ef310193878cae851635b871d840
     &lt;span class=&quot;err&quot;&gt;}&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
-&lt;p&gt;Осталось научить &lt;em&gt;logstash&lt;/em&gt; отправлять сообщения с тэгом &lt;code class=&quot;highlighter-rouge&quot;&gt;notify&lt;/code&gt;. Для отправки на сервер &lt;em&gt;Nagios&lt;/em&gt; можно использовать уже готовые плагины &lt;em&gt;logstash&lt;/em&gt; &lt;a href=&quot;http://logstash.net/docs/1.4.2/outputs/nagios&quot;&gt;nagios&lt;/a&gt; или &lt;a href=&quot;http://logstash.net/docs/1.4.2/outputs/nagios&quot;&gt;nagios_nsca&lt;/a&gt;. Я использую &lt;em&gt;shinken&lt;/em&gt; и хоть он и совместим с &lt;em&gt;Nagios&lt;/em&gt; в большинстве случаев, в этом я предпочёл использовать API &lt;em&gt;shinken&lt;/em&gt;. Для отправки сообщений я написал простенький скрипт на &lt;code class=&quot;highlighter-rouge&quot;&gt;bash&lt;/code&gt;:&lt;/p&gt;
+&lt;p&gt;Осталось научить &lt;em&gt;logstash&lt;/em&gt; отправлять сообщения с тэгом &lt;code class=&quot;highlighter-rouge&quot;&gt;notify&lt;/code&gt;. Для отправки на сервер &lt;em&gt;Nagios&lt;/em&gt; можно использовать уже готовые плагины logstash &lt;code class=&quot;highlighter-rouge&quot;&gt;nagios&lt;/code&gt; или &lt;code class=&quot;highlighter-rouge&quot;&gt;nagios_nsca&lt;/code&gt;. Я использую &lt;em&gt;shinken&lt;/em&gt; и хоть он и совместим с &lt;em&gt;Nagios&lt;/em&gt; в большинстве случаев, в этом я предпочёл использовать API &lt;em&gt;shinken&lt;/em&gt;. Для отправки сообщений я написал простенький скрипт на &lt;code class=&quot;highlighter-rouge&quot;&gt;bash&lt;/code&gt;:&lt;/p&gt;
 
 &lt;blockquote class=&quot;filename&quot;&gt;
   &lt;p&gt;log_event_sender.sh&lt;/p&gt;
@@ -401,9 +403,9 @@ hostname/unix:10  MIT-MAGIC-COOKIE-1  f714ef310193878cae851635b871d840
 &lt;/div&gt;
 &lt;p&gt;Дальнейшее расширение очевидно. Если нужно добавить оповещение о сообщениях другого типа, то нужно просто отлавливать их в &lt;em&gt;logstash&lt;/em&gt; и навешивать тэг &lt;code class=&quot;highlighter-rouge&quot;&gt;notify&lt;/code&gt;.&lt;/p&gt;
 </description>
-        <pubDate>Wed, 02 Jul 2014 09:58:00 +0300</pubDate>
-        <link>https://cyberflow.net/monitoring/linux/2014/07/02/monitoring-dmesg.html</link>
-        <guid isPermaLink="true">https://cyberflow.net/monitoring/linux/2014/07/02/monitoring-dmesg.html</guid>
+        <pubDate>Wed, 02 Jul 2014 09:58:00 +0000</pubDate>
+        <link>https://cyberflow.net/2014/07/monitoring-dmesg.html</link>
+        <guid isPermaLink="true">https://cyberflow.net/2014/07/monitoring-dmesg.html</guid>
         
         <category>monitoring</category>
         
@@ -434,7 +436,7 @@ hostname/unix:10  MIT-MAGIC-COOKIE-1  f714ef310193878cae851635b871d840
 &lt;p&gt;Столкнулся с тем, что при большом количестве нод в &lt;a href=&quot;http://opscode.com&quot;&gt;chef-server&lt;/a&gt; версий &lt;em&gt;11.0.4&lt;/em&gt; и &lt;em&gt;11.0.8&lt;/em&gt; поставленных из omnibus пакетов для Ubuntu, он с большой периодичностью стал отдавать &lt;code class=&quot;highlighter-rouge&quot;&gt;500 Internal server error&lt;/code&gt; нодам при выполнении куска рецепта, который делает поиск по data_bag’ам. При изучении логов выяснилось следующее:
 В логах nginx’a видно, что запросы на поиск отправляются на бэкэнд erchef’а (ядро chef-server написанное на эрланге) и в ответ получаем &lt;code class=&quot;highlighter-rouge&quot;&gt;500&lt;/code&gt;:&lt;/p&gt;
 
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;192.168.1.111 - - [27/May/2014:11:45:28 +0000] &quot;GET /search/databag1?q=id:node1&amp;amp;sort=X_CHEF_id_CHEF_X%20asc&amp;amp;start=0&amp;amp;rows=1000 HTTP/1.1&quot; 500 &quot;0.051&quot; 36 &quot;-&quot; &quot;Chef Client/11.6.0 (ruby-1.9.3-p429; ohai-6.18.0; x86_64-linux; +http://opscode.com)&quot; &quot;127.0.0.1:8000&quot; &quot;500&quot; &quot;0.046&quot; &quot;11.6.0&quot; &quot;algorithm=sha1;version=1.0;&quot; &quot;auth1&quot; &quot;2014-05-27T11:45:28Z&quot; &quot;2jmj7l5rSw0yVb/vlWAYkK/YBwk=&quot; 1011 
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;192.168.1.111 - - [27/May/2014:11:45:28 +0000] &quot;GET /search/databag1?q=id:node1&amp;amp;sort=X_CHEF_id_CHEF_X%20asc&amp;amp;start=0&amp;amp;rows=1000 HTTP/1.1&quot; 500 &quot;0.051&quot; 36 &quot;-&quot; &quot;Chef Client/11.6.0 (ruby-1.9.3-p429; ohai-6.18.0; x86_64-linux; +http://opscode.com)&quot; &quot;127.0.0.1:8000&quot; &quot;500&quot; &quot;0.046&quot; &quot;11.6.0&quot; &quot;algorithm=sha1;version=1.0;&quot; &quot;auth1&quot; &quot;2014-05-27T11:45:28Z&quot; &quot;2jmj7l5rSw0yVb/vlWAYkK/YBwk=&quot; 1011
 &lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 
@@ -489,9 +491,9 @@ hostname/unix:10  MIT-MAGIC-COOKIE-1  f714ef310193878cae851635b871d840
 &lt;/div&gt;
 &lt;p&gt;Правим значения для &lt;code class=&quot;highlighter-rouge&quot;&gt;max_count&lt;/code&gt; и &lt;code class=&quot;highlighter-rouge&quot;&gt;init_count&lt;/code&gt; с 20 на большие. В моём случае пока хватает 60 и 40.&lt;/p&gt;
 </description>
-        <pubDate>Wed, 28 May 2014 09:42:00 +0300</pubDate>
-        <link>https://cyberflow.net/chef/2014/05/28/erchef-no-connect-error.html</link>
-        <guid isPermaLink="true">https://cyberflow.net/chef/2014/05/28/erchef-no-connect-error.html</guid>
+        <pubDate>Wed, 28 May 2014 09:42:00 +0000</pubDate>
+        <link>https://cyberflow.net/2014/05/erchef-no-connect-error.html</link>
+        <guid isPermaLink="true">https://cyberflow.net/2014/05/erchef-no-connect-error.html</guid>
         
         <category>chef</category>
         
@@ -565,9 +567,9 @@ Host db*.dc2
 
 &lt;p&gt;Больше о конфиге ssh можно узнать из документации: &lt;a href=&quot;http://man.cx/ssh_config&quot;&gt;ssh_config&lt;/a&gt;&lt;/p&gt;
 </description>
-        <pubDate>Thu, 22 May 2014 20:57:00 +0300</pubDate>
-        <link>https://cyberflow.net/linux/2014/05/22/ssh-config-tricks.html</link>
-        <guid isPermaLink="true">https://cyberflow.net/linux/2014/05/22/ssh-config-tricks.html</guid>
+        <pubDate>Thu, 22 May 2014 20:57:00 +0000</pubDate>
+        <link>https://cyberflow.net/2014/05/ssh-config-tricks.html</link>
+        <guid isPermaLink="true">https://cyberflow.net/2014/05/ssh-config-tricks.html</guid>
         
         <category>linux</category>
         
@@ -612,9 +614,9 @@ mysql&amp;gt; slave start;
 &lt;/div&gt;
 
 </description>
-        <pubDate>Wed, 14 May 2014 18:03:00 +0300</pubDate>
-        <link>https://cyberflow.net/ha/linux/databases/2014/05/14/install-slave-percona-server.html</link>
-        <guid isPermaLink="true">https://cyberflow.net/ha/linux/databases/2014/05/14/install-slave-percona-server.html</guid>
+        <pubDate>Wed, 14 May 2014 18:03:00 +0000</pubDate>
+        <link>https://cyberflow.net/2014/05/install-slave-percona-server.html</link>
+        <guid isPermaLink="true">https://cyberflow.net/2014/05/install-slave-percona-server.html</guid>
         
         <category>linux</category>
         
@@ -661,7 +663,7 @@ root@chef-master:~# aptitude install skytools-modules-9.2 skytools3 skytools3-ti
 &lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-console&quot; data-lang=&quot;console&quot;&gt;root@chef-master:~# wget https://opscode-omnibus-packages.s3.amazonaws.com/ubuntu/11.04/x86_64/chef-server_11.0.4-1.ubuntu.11.04_amd64.deb
 root@chef-master:~# dpkg -i chef-server_11.0.4-1.ubuntu.11.04_amd64.deb&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
-&lt;p&gt;Перед запуском &lt;code class=&quot;highlighter-rouge&quot;&gt;chef-server-ctl reconfigure&lt;/code&gt; нужно немного поправить chef-solo рецепт для postgresql из omnibus пакета. Надо заменить исходный рецепт &lt;code class=&quot;highlighter-rouge&quot;&gt;/opt/chef-server/embedded/cookbooks/chef-server/recipes/postgresql.rb&lt;/code&gt; на не исходный - &lt;a href=&quot;/files/postgresql.rb&quot;&gt;postgresql.rb&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Перед запуском &lt;code class=&quot;highlighter-rouge&quot;&gt;chef-server-ctl reconfigure&lt;/code&gt; нужно немного поправить chef-solo рецепт для postgresql из omnibus пакета. Надо заменить исходный рецепт &lt;code class=&quot;highlighter-rouge&quot;&gt;/opt/chef-server/embedded/cookbooks/chef-server/recipes/postgresql.rb&lt;/code&gt; на не исходный - &lt;a href=&quot;/static/files/postgresql.rb&quot;&gt;postgresql.rb&lt;/a&gt;&lt;/p&gt;
 
 &lt;p&gt;Запускаем &lt;code class=&quot;highlighter-rouge&quot;&gt;sudo chef-server-ctl reconfigure&lt;/code&gt;&lt;/p&gt;
 
@@ -703,7 +705,7 @@ job_name = replication_src
 db = host=master-db dbname=opscode_chef user=postgres
 queue_name = replica
 logfile = /var/log/skytools/replica_src.log
-pidfile = /var/run/skytools/replica_src.pid &lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+pidfile = /var/run/skytools/replica_src.pid&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
 &lt;p&gt;Добавляем мастер:&lt;/p&gt;
 
@@ -720,11 +722,11 @@ job_name = replication_dst
 db = host=master-db dbname=opscode_chef user=postgres
 queue_name = replica
 logfile = /var/log/skytools/replica_dst.log
-pidfile = /var/run/skytools/replica_dst.pid &lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+pidfile = /var/run/skytools/replica_dst.pid&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
 &lt;p&gt;Добавление слейва:&lt;/p&gt;
 
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-console&quot; data-lang=&quot;console&quot;&gt;root@chef-master:~# londiste3 /etc/skytools/replication_slave.ini create-leaf slave-server &#39;dbname=opscode_chef host=chef-slave user=postgres&#39; --provider=&#39;host=localhost dbname=opscode_chef user=postgres&#39; &lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-console&quot; data-lang=&quot;console&quot;&gt;root@chef-master:~# londiste3 /etc/skytools/replication_slave.ini create-leaf slave-server &#39;dbname=opscode_chef host=chef-slave user=postgres&#39; --provider=&#39;host=localhost dbname=opscode_chef user=postgres&#39;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
 &lt;p&gt;Добавляем конфиг для pgq демона:&lt;/p&gt;
 
@@ -778,9 +780,9 @@ master-server (root)
 &lt;/div&gt;
 
 </description>
-        <pubDate>Fri, 09 Aug 2013 11:16:00 +0300</pubDate>
-        <link>https://cyberflow.net/chef/ha/linux/2013/08/09/replication-chef-database.html</link>
-        <guid isPermaLink="true">https://cyberflow.net/chef/ha/linux/2013/08/09/replication-chef-database.html</guid>
+        <pubDate>Fri, 09 Aug 2013 11:16:00 +0000</pubDate>
+        <link>https://cyberflow.net/2013/08/replication-chef-database.html</link>
+        <guid isPermaLink="true">https://cyberflow.net/2013/08/replication-chef-database.html</guid>
         
         <category>debian</category>
         
@@ -815,20 +817,22 @@ curl -XDELETE &quot;http://localhost:9200/logstash-${logdate}&quot;
 
 &lt;p&gt;Этот скрипт будет запускаться ежедневно и удалять все логи из elasticsearch 15-дневной давности.&lt;/p&gt;
 </description>
-        <pubDate>Fri, 31 May 2013 19:24:00 +0300</pubDate>
-        <link>https://cyberflow.net/notice/linux/2013/05/31/logstash-rotate-logs-in-elasticsearch.html</link>
-        <guid isPermaLink="true">https://cyberflow.net/notice/linux/2013/05/31/logstash-rotate-logs-in-elasticsearch.html</guid>
+        <pubDate>Fri, 31 May 2013 19:24:00 +0000</pubDate>
+        <link>https://cyberflow.net/2013/05/logstash-rotate-logs-in-elasticsearch.html</link>
+        <guid isPermaLink="true">https://cyberflow.net/2013/05/logstash-rotate-logs-in-elasticsearch.html</guid>
         
-        <category>logstash</category>
+        <category>elasticsearch</category>
         
         <category>logs</category>
         
-        <category>elasticsearch</category>
+        <category>logstash</category>
         
         
         <category>notice</category>
         
         <category>linux</category>
+        
+        <category>elasticsearch</category>
         
       </item>
     
@@ -1061,9 +1065,9 @@ function get_lag( $wpdb ) {
 
 &lt;p&gt;Собственно теперь мы отслеживаем лаги репликации и отдаём пользователям наисвежайшие данные из баз.&lt;/p&gt;
 </description>
-        <pubDate>Fri, 22 Mar 2013 18:02:00 +0200</pubDate>
-        <link>https://cyberflow.net/clusters/linux/ha/2013/03/22/hyperdb-to-wordpress.html</link>
-        <guid isPermaLink="true">https://cyberflow.net/clusters/linux/ha/2013/03/22/hyperdb-to-wordpress.html</guid>
+        <pubDate>Fri, 22 Mar 2013 18:02:00 +0000</pubDate>
+        <link>https://cyberflow.net/2013/03/hyperdb-to-wordpress.html</link>
+        <guid isPermaLink="true">https://cyberflow.net/2013/03/hyperdb-to-wordpress.html</guid>
         
         <category>availability</category>
         
@@ -1090,7 +1094,7 @@ function get_lag( $wpdb ) {
     
       <item>
         <title>Добавление Facebook комментариев к Octopress</title>
-        <description>&lt;p&gt;В этой небольшой статья я опишу как добавить комментарии facebook к блогу на &lt;a href=&quot;http://octopres.org&quot;&gt;octopress&lt;/a&gt;. В octopress есть поддержка комментариев с использованием &lt;a href=&quot;http://disqus.com/&quot;&gt;disqus&lt;/a&gt;, но мне ближе facebook.&lt;/p&gt;
+        <description>&lt;p&gt;В этой небольшой статья я опишу как добавить комментарии facebook к блогу на &lt;a href=&quot;http://octopress.org&quot;&gt;octopress&lt;/a&gt;. В octopress есть поддержка комментариев с использованием &lt;a href=&quot;http://disqus.com/&quot;&gt;disqus&lt;/a&gt;, но мне ближе facebook.&lt;/p&gt;
 
 &lt;p&gt;Для начала необходимо &lt;a href=&quot;https://developers.facebook.com/apps&quot;&gt;зарегистрировать приложение на facebook&lt;/a&gt; для своего блога. Когда регистрация пройдена facebook  должен выдать app id. Теперь можно приступить к настройке. Добавим facebook app id и параметры отображения комментариев в файл конфигурации &lt;code class=&quot;highlighter-rouge&quot;&gt;_config.yml&lt;/code&gt;&lt;/p&gt;
 
@@ -1142,12 +1146,10 @@ function get_lag( $wpdb ) {
 {% endif %}&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
 &lt;p&gt;Это должно разрешить модерацию всем админ пользователям вашего преложения в facebook.&lt;/p&gt;
-
-&lt;p&gt;В статье использовались материалы с сайта &lt;a href=&quot;http://blog.grambo.me.uk/blog/2012/02/20/adding-facebook-comments-to-octopress/&quot;&gt;blog.grambo.me.uk&lt;/a&gt;&lt;/p&gt;
 </description>
-        <pubDate>Wed, 20 Mar 2013 12:11:00 +0200</pubDate>
-        <link>https://cyberflow.net/jekyll/2013/03/20/adding-facebook-comment-to-octopress.html</link>
-        <guid isPermaLink="true">https://cyberflow.net/jekyll/2013/03/20/adding-facebook-comment-to-octopress.html</guid>
+        <pubDate>Wed, 20 Mar 2013 12:11:00 +0000</pubDate>
+        <link>https://cyberflow.net/2013/03/adding-facebook-comment-to-octopress.html</link>
+        <guid isPermaLink="true">https://cyberflow.net/2013/03/adding-facebook-comment-to-octopress.html</guid>
         
         <category>jekyll</category>
         
@@ -1168,7 +1170,7 @@ function get_lag( $wpdb ) {
 
 &lt;p&gt;Добавляем free хостинг на 5 серверов.&lt;/p&gt;
 
-&lt;p&gt;При создании необходимо скачать ключик валидотора и конфиг для &lt;a href=&quot;http://wiki.opscode.com/display/chef/Knife/&quot; title=&quot;Knife&quot;&gt;knife&lt;/a&gt; и поместить в &lt;code class=&quot;highlighter-rouge&quot;&gt;~/.chef/knife.rb&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;При создании необходимо скачать ключик валидотора и конфиг для &lt;a href=&quot;https://docs.chef.io/knife.html&quot; title=&quot;Knife&quot;&gt;knife&lt;/a&gt; и поместить в &lt;code class=&quot;highlighter-rouge&quot;&gt;~/.chef/knife.rb&lt;/code&gt;.&lt;/p&gt;
 
 &lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-ruby&quot; data-lang=&quot;ruby&quot;&gt;&lt;span class=&quot;n&quot;&gt;current_dir&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;File&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;dirname&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kp&quot;&gt;__FILE__&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
 &lt;span class=&quot;n&quot;&gt;log_level&lt;/span&gt;                &lt;span class=&quot;ss&quot;&gt;:info&lt;/span&gt;
@@ -1186,7 +1188,7 @@ function get_lag( $wpdb ) {
 &lt;!--more--&gt;
 &amp;gt;  При создании пользователя помните, что его имя не должно совпадать с именем аккаунта в &lt;a href=&quot;http://www.opscode.com/&quot; title=&quot;Opscode&quot;&gt;opscode&lt;/a&gt;. Это приведёт к коллизии и ошибке в доступе к функциям API и панели управления chef сервером.&lt;/p&gt;
 
-&lt;p&gt;Теперь можно установить &lt;a href=&quot;http://wiki.opscode.com/display/chef/Knife/&quot; title=&quot;Knife&quot;&gt;knife&lt;/a&gt; и плагин к нему от &lt;a href=&quot;http://clodo.ru/&quot; title=&quot;Clodo.ru&quot;&gt;clodo&lt;/a&gt;:&lt;/p&gt;
+&lt;p&gt;Теперь можно установить &lt;a href=&quot;https://docs.chef.io/knife.html&quot; title=&quot;Knife&quot;&gt;knife&lt;/a&gt; и плагин к нему от &lt;a href=&quot;http://clodo.ru/&quot; title=&quot;Clodo.ru&quot;&gt;clodo&lt;/a&gt;:&lt;/p&gt;
 
 &lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;gp&quot;&gt;$ &lt;/span&gt;curl -L https://www.opscode.com/chef/install.sh | sudo bash
 &lt;span class=&quot;gp&quot;&gt;$ &lt;/span&gt;sudo aptitude install libxml2-dev libxslt1-dev
@@ -1203,7 +1205,7 @@ function get_lag( $wpdb ) {
 &lt;span class=&quot;gp&quot;&gt;$ &lt;/span&gt;git clone git://github.com/opscode-cookbooks/build-essential.git
 &lt;span class=&quot;gp&quot;&gt;$ &lt;/span&gt;knife cookbook upload openssl wordpress php mysql apache2 build-essential xml&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
-&lt;p&gt;После установки можно приступать к магии. Для начала добавим в конфиг &lt;a href=&quot;http://wiki.opscode.com/display/chef/Knife/&quot; title=&quot;Knife&quot;&gt;knife&lt;/a&gt; данные аккаунта &lt;a href=&quot;http://clodo.ru/&quot; title=&quot;Clodo.ru&quot;&gt;clodo&lt;/a&gt;:&lt;/p&gt;
+&lt;p&gt;После установки можно приступать к магии. Для начала добавим в конфиг &lt;a href=&quot;https://docs.chef.io/knife.html&quot; title=&quot;Knife&quot;&gt;knife&lt;/a&gt; данные аккаунта &lt;a href=&quot;http://clodo.ru/&quot; title=&quot;Clodo.ru&quot;&gt;clodo&lt;/a&gt;:&lt;/p&gt;
 
 &lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;gp&quot;&gt;$ &lt;/span&gt;cat &amp;gt;&amp;gt; ~/.chef/knife.rb &lt;span class=&quot;sh&quot;&gt;&amp;lt;&amp;lt; EOF
 knife[:clodo_username] =         &#39;clodo@user.name&#39; 
@@ -1219,9 +1221,9 @@ knife[:clodo_api_auth_url]      = &#39;api.clodo.ru&#39;
 --no-ssl-verify-peer --clodo-api-auth-url api.mn.clodo.ru&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
 </description>
-        <pubDate>Thu, 28 Feb 2013 00:00:00 +0200</pubDate>
-        <link>https://cyberflow.net/chef/2013/02/28/use-opscode-chef-and-clodo-servers.html</link>
-        <guid isPermaLink="true">https://cyberflow.net/chef/2013/02/28/use-opscode-chef-and-clodo-servers.html</guid>
+        <pubDate>Thu, 28 Feb 2013 00:00:00 +0000</pubDate>
+        <link>https://cyberflow.net/2013/02/use-opscode-chef-and-clodo-servers.html</link>
+        <guid isPermaLink="true">https://cyberflow.net/2013/02/use-opscode-chef-and-clodo-servers.html</guid>
         
         <category>chef</category>
         
@@ -1269,9 +1271,9 @@ knife[:clodo_api_auth_url]      = &#39;api.clodo.ru&#39;
 &lt;a href=&quot;http://arademaker.github.com/blog/2011/12/01/github-pages-jekyll-plugins.html&quot;&gt;http://arademaker.github.com&lt;/a&gt;&lt;/p&gt;
 
 </description>
-        <pubDate>Thu, 28 Feb 2013 00:00:00 +0200</pubDate>
-        <link>https://cyberflow.net/jekyll/2013/02/28/github-jekyll-custom-plugins.html</link>
-        <guid isPermaLink="true">https://cyberflow.net/jekyll/2013/02/28/github-jekyll-custom-plugins.html</guid>
+        <pubDate>Thu, 28 Feb 2013 00:00:00 +0000</pubDate>
+        <link>https://cyberflow.net/2013/02/github-jekyll-custom-plugins.html</link>
+        <guid isPermaLink="true">https://cyberflow.net/2013/02/github-jekyll-custom-plugins.html</guid>
         
         <category>jekyll</category>
         
@@ -1311,9 +1313,9 @@ knife[:clodo_api_auth_url]      = &#39;api.clodo.ru&#39;
 &lt;p&gt;&lt;a href=&quot;http://oodavid.tumblr.com/post/15090798307/how-to-install-node-js-on-linux&quot;&gt;How to install node js on linux&lt;/a&gt;&lt;/p&gt;
 
 </description>
-        <pubDate>Mon, 25 Feb 2013 00:00:00 +0200</pubDate>
-        <link>https://cyberflow.net/debian/linux/2013/02/25/how-to-install-nodejs-on-linux-deb-base.html</link>
-        <guid isPermaLink="true">https://cyberflow.net/debian/linux/2013/02/25/how-to-install-nodejs-on-linux-deb-base.html</guid>
+        <pubDate>Mon, 25 Feb 2013 00:00:00 +0000</pubDate>
+        <link>https://cyberflow.net/2013/02/how-to-install-nodejs-on-linux-deb-base.html</link>
+        <guid isPermaLink="true">https://cyberflow.net/2013/02/how-to-install-nodejs-on-linux-deb-base.html</guid>
         
         <category>debian</category>
         
@@ -1334,9 +1336,9 @@ knife[:clodo_api_auth_url]      = &#39;api.clodo.ru&#39;
 
 &lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;ruby script/rails runner &lt;span class=&quot;s1&quot;&gt;&#39;user = User.find(:first, :conditions =&amp;gt; {:admin =&amp;gt; true}) ; user.password, user.password_confirmation = &quot;password&quot;; user.save!&#39;&lt;/span&gt; -e production&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 </description>
-        <pubDate>Thu, 13 Dec 2012 00:00:00 +0200</pubDate>
-        <link>https://cyberflow.net/notice/2012/12/13/redmine-2-admin-password-reset.html</link>
-        <guid isPermaLink="true">https://cyberflow.net/notice/2012/12/13/redmine-2-admin-password-reset.html</guid>
+        <pubDate>Thu, 13 Dec 2012 00:00:00 +0000</pubDate>
+        <link>https://cyberflow.net/2012/12/redmine-2-admin-password-reset.html</link>
+        <guid isPermaLink="true">https://cyberflow.net/2012/12/redmine-2-admin-password-reset.html</guid>
         
         <category>redmine</category>
         
@@ -1373,9 +1375,9 @@ gpg --export packages@opscode.com | sudo tee /etc/apt/trusted.gpg.d/opscode-keyr
 
 &lt;p&gt;При установке будет задан вопрос о пути к серверу chef, т.к. мы делаем установку для chef-solo, то указываем там “none”.&lt;/p&gt;
 </description>
-        <pubDate>Thu, 18 Oct 2012 00:00:00 +0300</pubDate>
-        <link>https://cyberflow.net/debian/chef/2012/10/18/install-chef-solo-to-debian-6-squeeze.html</link>
-        <guid isPermaLink="true">https://cyberflow.net/debian/chef/2012/10/18/install-chef-solo-to-debian-6-squeeze.html</guid>
+        <pubDate>Thu, 18 Oct 2012 00:00:00 +0000</pubDate>
+        <link>https://cyberflow.net/2012/10/install-chef-solo-to-debian-6-squeeze.html</link>
+        <guid isPermaLink="true">https://cyberflow.net/2012/10/install-chef-solo-to-debian-6-squeeze.html</guid>
         
         <category>chef</category>
         
@@ -1433,9 +1435,9 @@ Internal Bitmap : 8 sectors from superblock
 
 &lt;p&gt;Том, который использовался для примера содержит FS ext4&lt;/p&gt;
 </description>
-        <pubDate>Fri, 12 Oct 2012 00:00:00 +0300</pubDate>
-        <link>https://cyberflow.net/linux/2012/10/12/identify-fs-on-lvs-volume.html</link>
-        <guid isPermaLink="true">https://cyberflow.net/linux/2012/10/12/identify-fs-on-lvs-volume.html</guid>
+        <pubDate>Fri, 12 Oct 2012 00:00:00 +0000</pubDate>
+        <link>https://cyberflow.net/2012/10/identify-fs-on-lvs-volume.html</link>
+        <guid isPermaLink="true">https://cyberflow.net/2012/10/identify-fs-on-lvs-volume.html</guid>
         
         <category>lvs</category>
         
@@ -1454,7 +1456,7 @@ Internal Bitmap : 8 sectors from superblock
 &lt;p&gt;При установки Debian 6 на HP ProLiant DL360 сталкнулся с тем, что в образе netinstall нет fireware для сетевой карточки Broadcom Corporation NetXtreme II. Собственно инсталлятор в курсе этого и предлагает поискать соответствующий fireware на внешнем носителе. В этой заметке я опишу как быстро создать *.img файл с нужными fireware, который в последствии можно смонтировать через ipmi-kvm и скормить инсталлятору.&lt;/p&gt;
 
 &lt;h3 id=&quot;fireware&quot;&gt;Поиск fireware&lt;/h3&gt;
-&lt;p&gt;Собственно для debian 6 есть &lt;a href=&quot;http://packages.debian.org/squeeze/firmware-bnx2&quot;&gt;пакет&lt;/a&gt; со всем необходимым, и всё бы ничего, но вот без настроенной сетевой карты поставить этот пакет в систему не простая задача. Но т.к. в пакете есть всё необходимое, то качаем &lt;a href=&quot;http://ftp.de.debian.org/debian/pool/non-free/f/firmware-nonfree/firmware-nonfree_0.28+squeeze1.tar.gz&quot;&gt;сырцы&lt;/a&gt; пакета, распаковываем и приступаем к созданию образа.&lt;/p&gt;
+&lt;p&gt;Собственно для debian 6 есть &lt;a href=&quot;http://packages.debian.org/squeeze/firmware-bnx2&quot;&gt;пакет&lt;/a&gt; со всем необходимым, и всё бы ничего, но вот без настроенной сетевой карты поставить этот пакет в систему не простая задача. Но т.к. в пакете есть всё необходимое, то качаем сырцы пакета, распаковываем и приступаем к созданию образа.&lt;/p&gt;
 
 &lt;h3 id=&quot;img-&quot;&gt;Создание IMG файла&lt;/h3&gt;
 &lt;p&gt;Создайм бланковый файл, который будет у нас образом флоппи-диска, и создаём в нём файловую систему:&lt;/p&gt;
@@ -1470,9 +1472,9 @@ Internal Bitmap : 8 sectors from superblock
 &lt;p&gt;Теперь кладём файлы, который просит инстолятор в /media/floppy1/, отмонтируем образ и скармливаем файл с образом инсталятору.&lt;/p&gt;
 
 </description>
-        <pubDate>Mon, 27 Aug 2012 00:00:00 +0300</pubDate>
-        <link>https://cyberflow.net/debian/linux/2012/08/27/install-debian-to-hp-proliant-with-bnx2.html</link>
-        <guid isPermaLink="true">https://cyberflow.net/debian/linux/2012/08/27/install-debian-to-hp-proliant-with-bnx2.html</guid>
+        <pubDate>Mon, 27 Aug 2012 00:00:00 +0000</pubDate>
+        <link>https://cyberflow.net/2012/08/install-debian-to-hp-proliant-with-bnx2.html</link>
+        <guid isPermaLink="true">https://cyberflow.net/2012/08/install-debian-to-hp-proliant-with-bnx2.html</guid>
         
         <category>debian</category>
         
@@ -1507,9 +1509,9 @@ Internal Bitmap : 8 sectors from superblock
 
 &lt;p&gt;WIN!&lt;/p&gt;
 </description>
-        <pubDate>Sat, 05 May 2012 00:00:00 +0300</pubDate>
-        <link>https://cyberflow.net/ruby/2012/05/05/fix-invalid-date-format-in-specification-ruby.html</link>
-        <guid isPermaLink="true">https://cyberflow.net/ruby/2012/05/05/fix-invalid-date-format-in-specification-ruby.html</guid>
+        <pubDate>Sat, 05 May 2012 00:00:00 +0000</pubDate>
+        <link>https://cyberflow.net/2012/05/fix-invalid-date-format-in-specification-ruby.html</link>
+        <guid isPermaLink="true">https://cyberflow.net/2012/05/fix-invalid-date-format-in-specification-ruby.html</guid>
         
         <category>ruby</category>
         
@@ -1555,9 +1557,9 @@ Internal Bitmap : 8 sectors from superblock
 &lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nb&quot;&gt;echo&lt;/span&gt; -n &lt;span class=&quot;s2&quot;&gt;&quot;password&quot;&lt;/span&gt; | md5sum -&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
 </description>
-        <pubDate>Thu, 26 Apr 2012 00:00:00 +0300</pubDate>
-        <link>https://cyberflow.net/perl/monitoring/2012/04/26/nagios-plugin-check_smsc.html</link>
-        <guid isPermaLink="true">https://cyberflow.net/perl/monitoring/2012/04/26/nagios-plugin-check_smsc.html</guid>
+        <pubDate>Thu, 26 Apr 2012 00:00:00 +0000</pubDate>
+        <link>https://cyberflow.net/2012/04/nagios-plugin-check_smsc.html</link>
+        <guid isPermaLink="true">https://cyberflow.net/2012/04/nagios-plugin-check_smsc.html</guid>
         
         <category>bash</category>
         
@@ -1641,7 +1643,7 @@ Event broker module &#39;/usr/lib/icinga/idomod.o&#39; initialized successfully.
 
 &lt;h3 id=&quot;icinga-web-152&quot;&gt;Установка icinga-web 1.5.2&lt;/h3&gt;
 &lt;p&gt;На данный момент этот веб-интерфей icinga не упакован в пакет для Debian. По этому ставить будем руками.
-Для начала необходимо скачать &lt;a href=&quot;https://sourceforge.net/projects/icinga/files/icinga-web/1.5.2/icinga-web-1.5.2.tar.gz/download&quot;&gt;исходники&lt;/a&gt; с веб интерфейсом.
+Для начала необходимо скачать исходники с веб интерфейсом.
 Скачиваем архив в &lt;code class=&quot;highlighter-rouge&quot;&gt;/usr/src/&lt;/code&gt; и расспаковываем:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&quot;language-console&quot;&gt;# tar xzvf icinga-web-1.5.2.tar.gz
@@ -1695,9 +1697,9 @@ quit
 &lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;Icinga-web по умолчанию доступна по адресу http://serverhostname/icinga-web/.Также по умолчанию авторизация происходит с помощью логина &lt;code class=&quot;highlighter-rouge&quot;&gt;root&lt;/code&gt; и пароля &lt;code class=&quot;highlighter-rouge&quot;&gt;password&lt;/code&gt;.&lt;/p&gt;
 </description>
-        <pubDate>Thu, 03 Nov 2011 09:28:00 +0200</pubDate>
-        <link>https://cyberflow.net/monitoring/2011/11/03/idoutils-icinga-web-1-dot-5-2.html</link>
-        <guid isPermaLink="true">https://cyberflow.net/monitoring/2011/11/03/idoutils-icinga-web-1-dot-5-2.html</guid>
+        <pubDate>Thu, 03 Nov 2011 09:28:00 +0000</pubDate>
+        <link>https://cyberflow.net/2011/11/idoutils-icinga-web-1-dot-5-2.html</link>
+        <guid isPermaLink="true">https://cyberflow.net/2011/11/idoutils-icinga-web-1-dot-5-2.html</guid>
         
         <category>apache2</category>
         

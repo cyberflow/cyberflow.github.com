@@ -9,7 +9,7 @@
         <title>Cyberflow</title>
         <meta name="author" content="Cyberflow" />
         <meta name="description" content="My Personal Blog" />
-        <meta name="keywords" content="Cyberflow, monitoring, perl, ruby, debian, linux, chef, notice, jekyll, clusters, ha, databases, elasticsearch" />
+        <meta name="keywords" content="Cyberflow, monitoring, perl, ruby, debian, linux, chef, notice, jekyll, clusters, ha, elasticsearch, databases" />
         <link rel="alternate" type="application/rss+xml" title="RSS" href="/feed.xml">
 
         <!-- syntax highlighting CSS -->
@@ -80,12 +80,12 @@
       
       
 <header>
-  <h1 class="entry-title"><a href="/chef/2014/05/28/erchef-no-connect-error.html">Erchef no_connect Error</a></h1>
+  <h1 class="entry-title"><a href="/2014/05/erchef-no-connect-error.html">Erchef no_connect Error</a></h1>
   
     <p class="meta">
       28 May 2014
       
-       | <a href="/chef/2014/05/28/erchef-no-connect-error.html#disqus_thread">Comments</a>
+       | <a href="/2014/05/erchef-no-connect-error.html#disqus_thread">Comments</a>
       
     </p>
   
@@ -94,7 +94,7 @@
 <p>Столкнулся с тем, что при большом количестве нод в <a href="http://opscode.com">chef-server</a> версий <em>11.0.4</em> и <em>11.0.8</em> поставленных из omnibus пакетов для Ubuntu, он с большой периодичностью стал отдавать <code class="highlighter-rouge">500 Internal server error</code> нодам при выполнении куска рецепта, который делает поиск по data_bag’ам. При изучении логов выяснилось следующее:
 В логах nginx’a видно, что запросы на поиск отправляются на бэкэнд erchef’а (ядро chef-server написанное на эрланге) и в ответ получаем <code class="highlighter-rouge">500</code>:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>192.168.1.111 - - [27/May/2014:11:45:28 +0000] "GET /search/databag1?q=id:node1&amp;sort=X_CHEF_id_CHEF_X%20asc&amp;start=0&amp;rows=1000 HTTP/1.1" 500 "0.051" 36 "-" "Chef Client/11.6.0 (ruby-1.9.3-p429; ohai-6.18.0; x86_64-linux; +http://opscode.com)" "127.0.0.1:8000" "500" "0.046" "11.6.0" "algorithm=sha1;version=1.0;" "auth1" "2014-05-27T11:45:28Z" "2jmj7l5rSw0yVb/vlWAYkK/YBwk=" 1011 
+<div class="highlighter-rouge"><pre class="highlight"><code>192.168.1.111 - - [27/May/2014:11:45:28 +0000] "GET /search/databag1?q=id:node1&amp;sort=X_CHEF_id_CHEF_X%20asc&amp;start=0&amp;rows=1000 HTTP/1.1" 500 "0.051" 36 "-" "Chef Client/11.6.0 (ruby-1.9.3-p429; ohai-6.18.0; x86_64-linux; +http://opscode.com)" "127.0.0.1:8000" "500" "0.046" "11.6.0" "algorithm=sha1;version=1.0;" "auth1" "2014-05-27T11:45:28Z" "2jmj7l5rSw0yVb/vlWAYkK/YBwk=" 1011
 </code></pre>
 </div>
 
@@ -129,7 +129,7 @@
 </div>
 
   <footer>
-    <a rel="full-article" href="/chef/2014/05/28/erchef-no-connect-error.html">Read on &rarr;</a>
+    <a rel="full-article" href="/2014/05/erchef-no-connect-error.html">Read on &rarr;</a>
   </footer>
 
 
@@ -137,12 +137,12 @@
       
       
 <header>
-  <h1 class="entry-title"><a href="/linux/2014/05/22/ssh-config-tricks.html">Трюки с ssh config</a></h1>
+  <h1 class="entry-title"><a href="/2014/05/ssh-config-tricks.html">Трюки с ssh config</a></h1>
   
     <p class="meta">
       22 May 2014
       
-       | <a href="/linux/2014/05/22/ssh-config-tricks.html#disqus_thread">Comments</a>
+       | <a href="/2014/05/ssh-config-tricks.html#disqus_thread">Comments</a>
       
     </p>
   
@@ -165,7 +165,7 @@ ControlPath /tmp/ssh_%h_%p_%r
 </div>
 
   <footer>
-    <a rel="full-article" href="/linux/2014/05/22/ssh-config-tricks.html">Read on &rarr;</a>
+    <a rel="full-article" href="/2014/05/ssh-config-tricks.html">Read on &rarr;</a>
   </footer>
 
 
@@ -173,12 +173,12 @@ ControlPath /tmp/ssh_%h_%p_%r
       
       
 <header>
-  <h1 class="entry-title"><a href="/ha/linux/databases/2014/05/14/install-slave-percona-server.html">Установка slave mysql-percona сервера</a></h1>
+  <h1 class="entry-title"><a href="/2014/05/install-slave-percona-server.html">Установка slave mysql-percona сервера</a></h1>
   
     <p class="meta">
       14 May 2014
       
-       | <a href="/ha/linux/databases/2014/05/14/install-slave-percona-server.html#disqus_thread">Comments</a>
+       | <a href="/2014/05/install-slave-percona-server.html#disqus_thread">Comments</a>
       
     </p>
   
@@ -217,12 +217,12 @@ mysql&gt; slave start;
       
       
 <header>
-  <h1 class="entry-title"><a href="/chef/ha/linux/2013/08/09/replication-chef-database.html">Репликация таблиц базы chef-server </a></h1>
+  <h1 class="entry-title"><a href="/2013/08/replication-chef-database.html">Репликация таблиц базы chef-server </a></h1>
   
     <p class="meta">
       09 Aug 2013
       
-       | <a href="/chef/ha/linux/2013/08/09/replication-chef-database.html#disqus_thread">Comments</a>
+       | <a href="/2013/08/replication-chef-database.html#disqus_thread">Comments</a>
       
     </p>
   
@@ -235,7 +235,7 @@ mysql&gt; slave start;
 </div>
 
   <footer>
-    <a rel="full-article" href="/chef/ha/linux/2013/08/09/replication-chef-database.html">Read on &rarr;</a>
+    <a rel="full-article" href="/2013/08/replication-chef-database.html">Read on &rarr;</a>
   </footer>
 
 
@@ -243,12 +243,12 @@ mysql&gt; slave start;
       
       
 <header>
-  <h1 class="entry-title"><a href="/notice/linux/2013/05/31/logstash-rotate-logs-in-elasticsearch.html">logstash, ротация логов в elasticsearch</a></h1>
+  <h1 class="entry-title"><a href="/2013/05/logstash-rotate-logs-in-elasticsearch.html">logstash, ротация логов в elasticsearch</a></h1>
   
     <p class="meta">
       31 May 2013
       
-       | <a href="/notice/linux/2013/05/31/logstash-rotate-logs-in-elasticsearch.html#disqus_thread">Comments</a>
+       | <a href="/2013/05/logstash-rotate-logs-in-elasticsearch.html#disqus_thread">Comments</a>
       
     </p>
   
