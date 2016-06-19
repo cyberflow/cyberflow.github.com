@@ -13,3 +13,5 @@ exclude: [vendor]
 script:
   - bundle exec jekyll build
   - bundle exec htmlproofer ./_site/
+after_success:
+  - bundle exec rake site:deploy

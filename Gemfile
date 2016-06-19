@@ -10,4 +10,5 @@ end
 
 group :tests do
   gem 'html-proofer'
+  gem 'rake'
 end

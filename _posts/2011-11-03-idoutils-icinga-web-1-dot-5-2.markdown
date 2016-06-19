@@ -72,7 +72,7 @@ Event broker module '/usr/lib/icinga/idomod.o' initialized successfully.
 
 ### Установка icinga-web 1.5.2
 На данный момент этот веб-интерфей icinga не упакован в пакет для Debian. По этому ставить будем руками.
-Для начала необходимо скачать [исходники](https://sourceforge.net/projects/icinga/files/icinga-web/1.5.2/icinga-web-1.5.2.tar.gz/download) с веб интерфейсом.
+Для начала необходимо скачать исходники с веб интерфейсом.
 Скачиваем архив в `/usr/src/` и расспаковываем:
 
 ``` console

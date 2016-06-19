@@ -120,7 +120,7 @@ filter {
         ...
     }
 ```
-Осталось научить *logstash* отправлять сообщения с тэгом `notify`. Для отправки на сервер *Nagios* можно использовать уже готовые плагины *logstash* [nagios](http://logstash.net/docs/1.4.2/outputs/nagios) или [nagios_nsca](http://logstash.net/docs/1.4.2/outputs/nagios). Я использую *shinken* и хоть он и совместим с *Nagios* в большинстве случаев, в этом я предпочёл использовать API *shinken*. Для отправки сообщений я написал простенький скрипт на `bash`:
+Осталось научить *logstash* отправлять сообщения с тэгом `notify`. Для отправки на сервер *Nagios* можно использовать уже готовые плагины logstash `nagios` или `nagios_nsca`. Я использую *shinken* и хоть он и совместим с *Nagios* в большинстве случаев, в этом я предпочёл использовать API *shinken*. Для отправки сообщений я написал простенький скрипт на `bash`:
 
 >log_event_sender.sh
 {:.filename}
