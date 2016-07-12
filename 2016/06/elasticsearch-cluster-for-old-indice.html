@@ -130,13 +130,38 @@
 
 <p>Убедиться, что ноды теперь в кластере можно командой:</p>
 
-<pre><code class="language-console">$ curl http://localhost:9200/_nodes/process?pretty
+<pre><code class="language-console">$ curl http://localhost:9200/_cat/nodes
 </code></pre>
 
-<p>Следующая команда поставит аттрибут аллокации для всех индексов старше 7 дней:</p>
+<p>Следующая команда (для elasticsearch-curator &lt; 4.X) поставит аттрибут аллокации для всех индексов старше 7 дней:</p>
 
 <pre><code class="language-console">$ curator --logfile /var/log/curator.log --loglevel INFO --logformat default --master-only --host localhost --port 9200 allocation --rule node_type=warm indices --time-unit days --older-than 7 --timestring '%Y.%m.%d'
 </code></pre>
+
+<p>ниже конфиг <code class="highlighter-rouge">action.yml</code> для elasticsearch-curator &gt;= 4.X:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="nn">---</span>
+<span class="s">actions</span><span class="pi">:</span>
+  <span class="s1">'</span><span class="s">1'</span><span class="pi">:</span>
+    <span class="s">action</span><span class="pi">:</span> <span class="s">allocation</span>
+    <span class="s">description</span><span class="pi">:</span> <span class="s">Apply shard allocation routing to 'node_type=warm' node</span>
+    <span class="s">options</span><span class="pi">:</span>
+      <span class="s">key</span><span class="pi">:</span> <span class="s">node_type</span>
+      <span class="s">value</span><span class="pi">:</span> <span class="s">warm</span>
+      <span class="s">allocation_type</span><span class="pi">:</span> <span class="s">require</span>
+      <span class="s">wait_for_completion</span><span class="pi">:</span> <span class="s">False</span>
+      <span class="s">continue_if_exception</span><span class="pi">:</span> <span class="s">False</span>
+    <span class="s">filters</span><span class="pi">:</span>
+    <span class="pi">-</span> <span class="s">filtertype</span><span class="pi">:</span> <span class="s">pattern</span>
+      <span class="s">kind</span><span class="pi">:</span> <span class="s">prefix</span>
+      <span class="s">value</span><span class="pi">:</span> <span class="s">logstash-</span>
+    <span class="pi">-</span> <span class="s">filtertype</span><span class="pi">:</span> <span class="s">age</span>
+      <span class="s">source</span><span class="pi">:</span> <span class="s">creation_date</span>
+      <span class="s">direction</span><span class="pi">:</span> <span class="s">older</span>
+      <span class="s">unit</span><span class="pi">:</span> <span class="s">days</span>
+      <span class="s">unit_count</span><span class="pi">:</span> <span class="s">7</span>
+</code></pre>
+</div>
 
 <p>Теперь можно добавить команду curator-а, описанную выше, в cron сервера и перемещение будет происходить автоматически.</p>
 </div>

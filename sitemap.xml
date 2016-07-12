@@ -5,8 +5,8 @@
     <description>My Personal Blog</description>
     <link>https://cyberflow.net/</link>
     <atom:link href="https://cyberflow.net/sitemap.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Sun, 19 Jun 2016 23:24:18 +0300</pubDate>
-    <lastBuildDate>Sun, 19 Jun 2016 23:24:18 +0300</lastBuildDate>
+    <pubDate>Tue, 12 Jul 2016 08:12:42 +0000</pubDate>
+    <lastBuildDate>Tue, 12 Jul 2016 08:12:42 +0000</lastBuildDate>
     <generator>Jekyll v3.0.3</generator>
     
       <item>
@@ -195,7 +195,7 @@ Make sure not to add deploy_key to the git repository.
 Commit all changes to your .travis.yml.
 &lt;/code&gt;&lt;/pre&gt;
 </description>
-        <pubDate>Sun, 19 Jun 2016 12:46:00 +0300</pubDate>
+        <pubDate>Sun, 19 Jun 2016 12:46:00 +0000</pubDate>
         <link>https://cyberflow.net/2016/06/jekyll-auto-deploy-and-tests.html</link>
         <guid isPermaLink="true">https://cyberflow.net/2016/06/jekyll-auto-deploy-and-tests.html</guid>
         
@@ -259,17 +259,42 @@ Commit all changes to your .travis.yml.
 
 &lt;p&gt;Убедиться, что ноды теперь в кластере можно командой:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code class=&quot;language-console&quot;&gt;$ curl http://localhost:9200/_nodes/process?pretty
+&lt;pre&gt;&lt;code class=&quot;language-console&quot;&gt;$ curl http://localhost:9200/_cat/nodes
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;Следующая команда поставит аттрибут аллокации для всех индексов старше 7 дней:&lt;/p&gt;
+&lt;p&gt;Следующая команда (для elasticsearch-curator &amp;lt; 4.X) поставит аттрибут аллокации для всех индексов старше 7 дней:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&quot;language-console&quot;&gt;$ curator --logfile /var/log/curator.log --loglevel INFO --logformat default --master-only --host localhost --port 9200 allocation --rule node_type=warm indices --time-unit days --older-than 7 --timestring &#39;%Y.%m.%d&#39;
 &lt;/code&gt;&lt;/pre&gt;
 
+&lt;p&gt;ниже конфиг &lt;code class=&quot;highlighter-rouge&quot;&gt;action.yml&lt;/code&gt; для elasticsearch-curator &amp;gt;= 4.X:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nn&quot;&gt;---&lt;/span&gt;
+&lt;span class=&quot;s&quot;&gt;actions&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;s1&quot;&gt;&#39;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;1&#39;&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;s&quot;&gt;action&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;allocation&lt;/span&gt;
+    &lt;span class=&quot;s&quot;&gt;description&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;Apply shard allocation routing to &#39;node_type=warm&#39; node&lt;/span&gt;
+    &lt;span class=&quot;s&quot;&gt;options&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;s&quot;&gt;key&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;node_type&lt;/span&gt;
+      &lt;span class=&quot;s&quot;&gt;value&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;warm&lt;/span&gt;
+      &lt;span class=&quot;s&quot;&gt;allocation_type&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;require&lt;/span&gt;
+      &lt;span class=&quot;s&quot;&gt;wait_for_completion&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;False&lt;/span&gt;
+      &lt;span class=&quot;s&quot;&gt;continue_if_exception&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;False&lt;/span&gt;
+    &lt;span class=&quot;s&quot;&gt;filters&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;filtertype&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;pattern&lt;/span&gt;
+      &lt;span class=&quot;s&quot;&gt;kind&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;prefix&lt;/span&gt;
+      &lt;span class=&quot;s&quot;&gt;value&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;logstash-&lt;/span&gt;
+    &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;filtertype&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;age&lt;/span&gt;
+      &lt;span class=&quot;s&quot;&gt;source&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;creation_date&lt;/span&gt;
+      &lt;span class=&quot;s&quot;&gt;direction&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;older&lt;/span&gt;
+      &lt;span class=&quot;s&quot;&gt;unit&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;days&lt;/span&gt;
+      &lt;span class=&quot;s&quot;&gt;unit_count&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;7&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
 &lt;p&gt;Теперь можно добавить команду curator-а, описанную выше, в cron сервера и перемещение будет происходить автоматически.&lt;/p&gt;
 </description>
-        <pubDate>Fri, 03 Jun 2016 12:41:00 +0300</pubDate>
+        <pubDate>Fri, 03 Jun 2016 12:41:00 +0000</pubDate>
         <link>https://cyberflow.net/2016/06/elasticsearch-cluster-for-old-indice.html</link>
         <guid isPermaLink="true">https://cyberflow.net/2016/06/elasticsearch-cluster-for-old-indice.html</guid>
         
@@ -323,7 +348,7 @@ logstash-2016.05.09 2 p STARTED    1520377    966mb 127.0.0.1 logstash1
 &lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 </description>
-        <pubDate>Thu, 12 May 2016 12:12:00 +0300</pubDate>
+        <pubDate>Thu, 12 May 2016 12:12:00 +0000</pubDate>
         <link>https://cyberflow.net/2016/05/optimization-standalone-elasticsearch-in-elk-stack.html</link>
         <guid isPermaLink="true">https://cyberflow.net/2016/05/optimization-standalone-elasticsearch-in-elk-stack.html</guid>
         
@@ -387,7 +412,7 @@ auto_sign_up = true
 
 &lt;p&gt;После сделать рестарт сервера Grafana и nginx.&lt;/p&gt;
 </description>
-        <pubDate>Thu, 17 Mar 2016 17:25:00 +0200</pubDate>
+        <pubDate>Thu, 17 Mar 2016 17:25:00 +0000</pubDate>
         <link>https://cyberflow.net/2016/03/grafana-slash-nginx-auth-proxy-httpaswd.html</link>
         <guid isPermaLink="true">https://cyberflow.net/2016/03/grafana-slash-nginx-auth-proxy-httpaswd.html</guid>
         
@@ -435,7 +460,7 @@ hostname/unix:10  MIT-MAGIC-COOKIE-1  f714ef310193878cae851635b871d840
 &lt;/div&gt;
 &lt;p&gt;Все! Можно запускать X приложение под root-ом.&lt;/p&gt;
 </description>
-        <pubDate>Wed, 09 Sep 2015 15:24:00 +0300</pubDate>
+        <pubDate>Wed, 09 Sep 2015 15:24:00 +0000</pubDate>
         <link>https://cyberflow.net/2015/09/use-ssh-x-session-from-user-to-root.html</link>
         <guid isPermaLink="true">https://cyberflow.net/2015/09/use-ssh-x-session-from-user-to-root.html</guid>
         
@@ -602,7 +627,7 @@ hostname/unix:10  MIT-MAGIC-COOKIE-1  f714ef310193878cae851635b871d840
 &lt;/div&gt;
 &lt;p&gt;Дальнейшее расширение очевидно. Если нужно добавить оповещение о сообщениях другого типа, то нужно просто отлавливать их в &lt;em&gt;logstash&lt;/em&gt; и навешивать тэг &lt;code class=&quot;highlighter-rouge&quot;&gt;notify&lt;/code&gt;.&lt;/p&gt;
 </description>
-        <pubDate>Wed, 02 Jul 2014 09:58:00 +0300</pubDate>
+        <pubDate>Wed, 02 Jul 2014 09:58:00 +0000</pubDate>
         <link>https://cyberflow.net/2014/07/monitoring-dmesg.html</link>
         <guid isPermaLink="true">https://cyberflow.net/2014/07/monitoring-dmesg.html</guid>
         
@@ -690,7 +715,7 @@ hostname/unix:10  MIT-MAGIC-COOKIE-1  f714ef310193878cae851635b871d840
 &lt;/div&gt;
 &lt;p&gt;Правим значения для &lt;code class=&quot;highlighter-rouge&quot;&gt;max_count&lt;/code&gt; и &lt;code class=&quot;highlighter-rouge&quot;&gt;init_count&lt;/code&gt; с 20 на большие. В моём случае пока хватает 60 и 40.&lt;/p&gt;
 </description>
-        <pubDate>Wed, 28 May 2014 09:42:00 +0300</pubDate>
+        <pubDate>Wed, 28 May 2014 09:42:00 +0000</pubDate>
         <link>https://cyberflow.net/2014/05/erchef-no-connect-error.html</link>
         <guid isPermaLink="true">https://cyberflow.net/2014/05/erchef-no-connect-error.html</guid>
         
@@ -766,7 +791,7 @@ Host db*.dc2
 
 &lt;p&gt;Больше о конфиге ssh можно узнать из документации: &lt;a href=&quot;http://man.cx/ssh_config&quot;&gt;ssh_config&lt;/a&gt;&lt;/p&gt;
 </description>
-        <pubDate>Thu, 22 May 2014 20:57:00 +0300</pubDate>
+        <pubDate>Thu, 22 May 2014 20:57:00 +0000</pubDate>
         <link>https://cyberflow.net/2014/05/ssh-config-tricks.html</link>
         <guid isPermaLink="true">https://cyberflow.net/2014/05/ssh-config-tricks.html</guid>
         
@@ -813,7 +838,7 @@ mysql&amp;gt; slave start;
 &lt;/div&gt;
 
 </description>
-        <pubDate>Wed, 14 May 2014 18:03:00 +0300</pubDate>
+        <pubDate>Wed, 14 May 2014 18:03:00 +0000</pubDate>
         <link>https://cyberflow.net/2014/05/install-slave-percona-server.html</link>
         <guid isPermaLink="true">https://cyberflow.net/2014/05/install-slave-percona-server.html</guid>
         
@@ -979,7 +1004,7 @@ master-server (root)
 &lt;/div&gt;
 
 </description>
-        <pubDate>Fri, 09 Aug 2013 11:16:00 +0300</pubDate>
+        <pubDate>Fri, 09 Aug 2013 11:16:00 +0000</pubDate>
         <link>https://cyberflow.net/2013/08/replication-chef-database.html</link>
         <guid isPermaLink="true">https://cyberflow.net/2013/08/replication-chef-database.html</guid>
         
@@ -1016,7 +1041,7 @@ curl -XDELETE &quot;http://localhost:9200/logstash-${logdate}&quot;
 
 &lt;p&gt;Этот скрипт будет запускаться ежедневно и удалять все логи из elasticsearch 15-дневной давности.&lt;/p&gt;
 </description>
-        <pubDate>Fri, 31 May 2013 19:24:00 +0300</pubDate>
+        <pubDate>Fri, 31 May 2013 19:24:00 +0000</pubDate>
         <link>https://cyberflow.net/2013/05/logstash-rotate-logs-in-elasticsearch.html</link>
         <guid isPermaLink="true">https://cyberflow.net/2013/05/logstash-rotate-logs-in-elasticsearch.html</guid>
         
@@ -1264,7 +1289,7 @@ function get_lag( $wpdb ) {
 
 &lt;p&gt;Собственно теперь мы отслеживаем лаги репликации и отдаём пользователям наисвежайшие данные из баз.&lt;/p&gt;
 </description>
-        <pubDate>Fri, 22 Mar 2013 18:02:00 +0200</pubDate>
+        <pubDate>Fri, 22 Mar 2013 18:02:00 +0000</pubDate>
         <link>https://cyberflow.net/2013/03/hyperdb-to-wordpress.html</link>
         <guid isPermaLink="true">https://cyberflow.net/2013/03/hyperdb-to-wordpress.html</guid>
         
@@ -1346,7 +1371,7 @@ function get_lag( $wpdb ) {
 
 &lt;p&gt;Это должно разрешить модерацию всем админ пользователям вашего преложения в facebook.&lt;/p&gt;
 </description>
-        <pubDate>Wed, 20 Mar 2013 12:11:00 +0200</pubDate>
+        <pubDate>Wed, 20 Mar 2013 12:11:00 +0000</pubDate>
         <link>https://cyberflow.net/2013/03/adding-facebook-comment-to-octopress.html</link>
         <guid isPermaLink="true">https://cyberflow.net/2013/03/adding-facebook-comment-to-octopress.html</guid>
         
@@ -1420,7 +1445,7 @@ knife[:clodo_api_auth_url]      = &#39;api.clodo.ru&#39;
 --no-ssl-verify-peer --clodo-api-auth-url api.mn.clodo.ru&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
 </description>
-        <pubDate>Thu, 28 Feb 2013 00:00:00 +0200</pubDate>
+        <pubDate>Thu, 28 Feb 2013 00:00:00 +0000</pubDate>
         <link>https://cyberflow.net/2013/02/use-opscode-chef-and-clodo-servers.html</link>
         <guid isPermaLink="true">https://cyberflow.net/2013/02/use-opscode-chef-and-clodo-servers.html</guid>
         
@@ -1470,7 +1495,7 @@ knife[:clodo_api_auth_url]      = &#39;api.clodo.ru&#39;
 &lt;a href=&quot;http://arademaker.github.com/blog/2011/12/01/github-pages-jekyll-plugins.html&quot;&gt;http://arademaker.github.com&lt;/a&gt;&lt;/p&gt;
 
 </description>
-        <pubDate>Thu, 28 Feb 2013 00:00:00 +0200</pubDate>
+        <pubDate>Thu, 28 Feb 2013 00:00:00 +0000</pubDate>
         <link>https://cyberflow.net/2013/02/github-jekyll-custom-plugins.html</link>
         <guid isPermaLink="true">https://cyberflow.net/2013/02/github-jekyll-custom-plugins.html</guid>
         
@@ -1512,7 +1537,7 @@ knife[:clodo_api_auth_url]      = &#39;api.clodo.ru&#39;
 &lt;p&gt;&lt;a href=&quot;http://oodavid.tumblr.com/post/15090798307/how-to-install-node-js-on-linux&quot;&gt;How to install node js on linux&lt;/a&gt;&lt;/p&gt;
 
 </description>
-        <pubDate>Mon, 25 Feb 2013 00:00:00 +0200</pubDate>
+        <pubDate>Mon, 25 Feb 2013 00:00:00 +0000</pubDate>
         <link>https://cyberflow.net/2013/02/how-to-install-nodejs-on-linux-deb-base.html</link>
         <guid isPermaLink="true">https://cyberflow.net/2013/02/how-to-install-nodejs-on-linux-deb-base.html</guid>
         
@@ -1535,7 +1560,7 @@ knife[:clodo_api_auth_url]      = &#39;api.clodo.ru&#39;
 
 &lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;ruby script/rails runner &lt;span class=&quot;s1&quot;&gt;&#39;user = User.find(:first, :conditions =&amp;gt; {:admin =&amp;gt; true}) ; user.password, user.password_confirmation = &quot;password&quot;; user.save!&#39;&lt;/span&gt; -e production&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 </description>
-        <pubDate>Thu, 13 Dec 2012 00:00:00 +0200</pubDate>
+        <pubDate>Thu, 13 Dec 2012 00:00:00 +0000</pubDate>
         <link>https://cyberflow.net/2012/12/redmine-2-admin-password-reset.html</link>
         <guid isPermaLink="true">https://cyberflow.net/2012/12/redmine-2-admin-password-reset.html</guid>
         
@@ -1574,7 +1599,7 @@ gpg --export packages@opscode.com | sudo tee /etc/apt/trusted.gpg.d/opscode-keyr
 
 &lt;p&gt;При установке будет задан вопрос о пути к серверу chef, т.к. мы делаем установку для chef-solo, то указываем там “none”.&lt;/p&gt;
 </description>
-        <pubDate>Thu, 18 Oct 2012 00:00:00 +0300</pubDate>
+        <pubDate>Thu, 18 Oct 2012 00:00:00 +0000</pubDate>
         <link>https://cyberflow.net/2012/10/install-chef-solo-to-debian-6-squeeze.html</link>
         <guid isPermaLink="true">https://cyberflow.net/2012/10/install-chef-solo-to-debian-6-squeeze.html</guid>
         
@@ -1634,7 +1659,7 @@ Internal Bitmap : 8 sectors from superblock
 
 &lt;p&gt;Том, который использовался для примера содержит FS ext4&lt;/p&gt;
 </description>
-        <pubDate>Fri, 12 Oct 2012 00:00:00 +0300</pubDate>
+        <pubDate>Fri, 12 Oct 2012 00:00:00 +0000</pubDate>
         <link>https://cyberflow.net/2012/10/identify-fs-on-lvs-volume.html</link>
         <guid isPermaLink="true">https://cyberflow.net/2012/10/identify-fs-on-lvs-volume.html</guid>
         
@@ -1671,7 +1696,7 @@ Internal Bitmap : 8 sectors from superblock
 &lt;p&gt;Теперь кладём файлы, который просит инстолятор в /media/floppy1/, отмонтируем образ и скармливаем файл с образом инсталятору.&lt;/p&gt;
 
 </description>
-        <pubDate>Mon, 27 Aug 2012 00:00:00 +0300</pubDate>
+        <pubDate>Mon, 27 Aug 2012 00:00:00 +0000</pubDate>
         <link>https://cyberflow.net/2012/08/install-debian-to-hp-proliant-with-bnx2.html</link>
         <guid isPermaLink="true">https://cyberflow.net/2012/08/install-debian-to-hp-proliant-with-bnx2.html</guid>
         
@@ -1708,7 +1733,7 @@ Internal Bitmap : 8 sectors from superblock
 
 &lt;p&gt;WIN!&lt;/p&gt;
 </description>
-        <pubDate>Sat, 05 May 2012 00:00:00 +0300</pubDate>
+        <pubDate>Sat, 05 May 2012 00:00:00 +0000</pubDate>
         <link>https://cyberflow.net/2012/05/fix-invalid-date-format-in-specification-ruby.html</link>
         <guid isPermaLink="true">https://cyberflow.net/2012/05/fix-invalid-date-format-in-specification-ruby.html</guid>
         
@@ -1756,7 +1781,7 @@ Internal Bitmap : 8 sectors from superblock
 &lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nb&quot;&gt;echo&lt;/span&gt; -n &lt;span class=&quot;s2&quot;&gt;&quot;password&quot;&lt;/span&gt; | md5sum -&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
 </description>
-        <pubDate>Thu, 26 Apr 2012 00:00:00 +0300</pubDate>
+        <pubDate>Thu, 26 Apr 2012 00:00:00 +0000</pubDate>
         <link>https://cyberflow.net/2012/04/nagios-plugin-check_smsc.html</link>
         <guid isPermaLink="true">https://cyberflow.net/2012/04/nagios-plugin-check_smsc.html</guid>
         
@@ -1896,7 +1921,7 @@ quit
 &lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;Icinga-web по умолчанию доступна по адресу http://serverhostname/icinga-web/.Также по умолчанию авторизация происходит с помощью логина &lt;code class=&quot;highlighter-rouge&quot;&gt;root&lt;/code&gt; и пароля &lt;code class=&quot;highlighter-rouge&quot;&gt;password&lt;/code&gt;.&lt;/p&gt;
 </description>
-        <pubDate>Thu, 03 Nov 2011 09:28:00 +0200</pubDate>
+        <pubDate>Thu, 03 Nov 2011 09:28:00 +0000</pubDate>
         <link>https://cyberflow.net/2011/11/idoutils-icinga-web-1-dot-5-2.html</link>
         <guid isPermaLink="true">https://cyberflow.net/2011/11/idoutils-icinga-web-1-dot-5-2.html</guid>
         
