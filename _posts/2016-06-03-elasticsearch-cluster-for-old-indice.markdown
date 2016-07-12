@@ -56,13 +56,38 @@ discovery.zen.ping.unicast.hosts: ["10.0.0.1"]
 Убедиться, что ноды теперь в кластере можно командой:
 
 ``` console
-$ curl http://localhost:9200/_nodes/process?pretty
+$ curl http://localhost:9200/_cat/nodes
 ```
 
-Следующая команда поставит аттрибут аллокации для всех индексов старше 7 дней:
+Следующая команда (для elasticsearch-curator < 4.X) поставит аттрибут аллокации для всех индексов старше 7 дней:
 
 ``` console
 $ curator --logfile /var/log/curator.log --loglevel INFO --logformat default --master-only --host localhost --port 9200 allocation --rule node_type=warm indices --time-unit days --older-than 7 --timestring '%Y.%m.%d'
+```
+
+ниже конфиг `action.yml` для elasticsearch-curator >= 4.X:
+
+``` yaml
+---
+actions:
+  '1':
+    action: allocation
+    description: Apply shard allocation routing to 'node_type=warm' node
+    options:
+      key: node_type
+      value: warm
+      allocation_type: require
+      wait_for_completion: False
+      continue_if_exception: False
+    filters:
+    - filtertype: pattern
+      kind: prefix
+      value: logstash-
+    - filtertype: age
+      source: creation_date
+      direction: older
+      unit: days
+      unit_count: 7
 ```
 
 Теперь можно добавить команду curator-а, описанную выше, в cron сервера и перемещение будет происходить автоматически.
