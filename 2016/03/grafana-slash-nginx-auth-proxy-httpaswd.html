@@ -85,7 +85,7 @@
 
 <p>Необходимые настройки конфига Grafana:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>[server]
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[server]
 protocol = http
 http_port = 3000
 domain = localhost
@@ -101,12 +101,11 @@ auto_assign_org_role = Editor
 enabled = true
 header_name = X-WEBAUTH-USER
 auto_sign_up = true
-</code></pre>
-</div>
+</code></pre></div></div>
 <!--more-->
 <p>Настройка nginx:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>server {
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>server {
   listen                &lt;server_ip&gt;:80;
 
   server_name           &lt;server_hostname&gt;;
@@ -119,8 +118,7 @@ auto_sign_up = true
     proxy_pass http://grafana;
   }
 }
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>После сделать рестарт сервера Grafana и nginx.</p>
 </div>
@@ -134,34 +132,53 @@ auto_sign_up = true
             
         
             
-        
-    
-
-    
-    
-        
-            
-        
-            
-        
-    
-
-    
-    
-        
-            
-        
-            
-        
-    
-        
-            
-        
-            
                 
                 <div class="panel-body">
                 <h4>Related Posts</h4>
                 <ul>
+                
+                <li class="relatedPost">
+                    <a href="https://cyberflow.net/2017/12/kapacitor-alert-to-icinga2.html" data-proofer-ignore>send kapacitor alert to Icinga 2</a>
+                    
+                        (Categories: <a href="/category/monitoring">monitoring</a>)
+                    
+                </li>
+                
+                
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+        
+    
+        
+            
+        
+            
                 
                 <li class="relatedPost">
                     <a href="https://cyberflow.net/2016/05/optimization-standalone-elasticsearch-in-elk-stack.html" data-proofer-ignore>Оптимизация standalone сервера elasticsearch</a>
@@ -320,16 +337,6 @@ auto_sign_up = true
         
     
         
-            
-                
-                <li class="relatedPost">
-                    <a href="https://cyberflow.net/2013/08/replication-chef-database.html" data-proofer-ignore>Репликация таблиц базы chef-server </a>
-                    
-                        (Categories: <a href="/category/chef">chef</a>, <a href="/category/ha">ha</a>, <a href="/category/linux">linux</a>)
-                    
-                </li>
-                
-                
             
         
             

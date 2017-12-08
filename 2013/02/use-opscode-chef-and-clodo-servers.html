@@ -81,7 +81,7 @@
 
 
 <div class="content">
-    <div class="post"><p>Данная статья описывает возможность автоматической настройки виртуальных серверов (на примере хостинга <a href="http://clodo.ru/" title="Clodo.ru">clodo</a>) с помощью <a href="http://www.opscode.com">chef</a>.</p>
+    <div class="post"><p>Данная статья описывает возможность автоматической настройки виртуальных серверов (на примере хостинга clodo.ru) с помощью <a href="http://www.opscode.com">chef</a>.</p>
 
 <p>Заводим аккаунт в <a href="http://www.opscode.com/" title="Opscode">opscode</a></p>
 
@@ -89,58 +89,41 @@
 
 <p>При создании необходимо скачать ключик валидотора и конфиг для <a href="https://docs.chef.io/knife.html" title="Knife">knife</a> и поместить в <code class="highlighter-rouge">~/.chef/knife.rb</code>.</p>
 
-<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="n">current_dir</span> <span class="o">=</span> <span class="no">File</span><span class="p">.</span><span class="nf">dirname</span><span class="p">(</span><span class="kp">__FILE__</span><span class="p">)</span>
-<span class="n">log_level</span>                <span class="ss">:info</span>
-<span class="n">log_location</span>             <span class="no">STDOUT</span>
-<span class="n">node_name</span>                <span class="s2">"cyberflow"</span>
-<span class="n">client_key</span>               <span class="s2">"</span><span class="si">#{</span><span class="n">current_dir</span><span class="si">}</span><span class="s2">/cyberflow.pem"</span>
-<span class="n">validation_client_name</span>   <span class="s2">"clodo-test-validator"</span>
-<span class="n">validation_key</span>           <span class="s2">"</span><span class="si">#{</span><span class="n">current_dir</span><span class="si">}</span><span class="s2">/clodo-test-validator.pem"</span>
-<span class="n">chef_server_url</span>          <span class="s2">"https://api.opscode.com/organizations/clodo-test"</span>
-<span class="n">cache_type</span>               <span class="s1">'BasicFile'</span>
-<span class="n">cache_options</span><span class="p">(</span> <span class="ss">:path</span> <span class="o">=&gt;</span> <span class="s2">"</span><span class="si">#{</span><span class="no">ENV</span><span class="p">[</span><span class="s1">'HOME'</span><span class="p">]</span><span class="si">}</span><span class="s2">/.chef/checksums"</span> <span class="p">)</span>
-<span class="n">cookbook_path</span>            <span class="p">[</span><span class="s2">"</span><span class="si">#{</span><span class="n">current_dir</span><span class="si">}</span><span class="s2">/../cookbooks"</span><span class="p">]</span></code></pre></figure>
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="n">current_dir</span> <span class="o">=</span> <span class="no">File</span><span class="p">.</span><span class="nf">dirname</span><span class="p">(</span><span class="kp">__FILE__</span><span class="p">)</span><br data-jekyll-commonmark-ghpages="" /><span class="n">log_level</span>                <span class="ss">:info</span><br data-jekyll-commonmark-ghpages="" /><span class="n">log_location</span>             <span class="no">STDOUT</span><br data-jekyll-commonmark-ghpages="" /><span class="n">node_name</span>                <span class="s2">"cyberflow"</span><br data-jekyll-commonmark-ghpages="" /><span class="n">client_key</span>               <span class="s2">"</span><span class="si">#{</span><span class="n">current_dir</span><span class="si">}</span><span class="s2">/cyberflow.pem"</span><br data-jekyll-commonmark-ghpages="" /><span class="n">validation_client_name</span>   <span class="s2">"clodo-test-validator"</span><br data-jekyll-commonmark-ghpages="" /><span class="n">validation_key</span>           <span class="s2">"</span><span class="si">#{</span><span class="n">current_dir</span><span class="si">}</span><span class="s2">/clodo-test-validator.pem"</span><br data-jekyll-commonmark-ghpages="" /><span class="n">chef_server_url</span>          <span class="s2">"https://api.opscode.com/organizations/clodo-test"</span><br data-jekyll-commonmark-ghpages="" /><span class="n">cache_type</span>               <span class="s1">'BasicFile'</span><br data-jekyll-commonmark-ghpages="" /><span class="n">cache_options</span><span class="p">(</span> <span class="ss">:path</span> <span class="o">=&gt;</span> <span class="s2">"</span><span class="si">#{</span><span class="no">ENV</span><span class="p">[</span><span class="s1">'HOME'</span><span class="p">]</span><span class="si">}</span><span class="s2">/.chef/checksums"</span> <span class="p">)</span><br data-jekyll-commonmark-ghpages="" /><span class="n">cookbook_path</span>            <span class="p">[</span><span class="s2">"</span><span class="si">#{</span><span class="n">current_dir</span><span class="si">}</span><span class="s2">/../cookbooks"</span><span class="p">]</span></code></pre></figure>
 
 <p>Далее идём в <a href="http://www.opscode.com/" title="Opscode">opscode</a>, заводим клиента, и ключик для клиента кладём так же в <code class="highlighter-rouge">~/.chef/</code>.
-<!--more-->
-&gt;  При создании пользователя помните, что его имя не должно совпадать с именем аккаунта в <a href="http://www.opscode.com/" title="Opscode">opscode</a>. Это приведёт к коллизии и ошибке в доступе к функциям API и панели управления chef сервером.</p>
+<!--more--></p>
+<blockquote>
+  <p>При создании пользователя помните, что его имя не должно совпадать с именем аккаунта в <a href="http://www.opscode.com/" title="Opscode">opscode</a>. Это приведёт к коллизии и ошибке в доступе к функциям API и панели управления chef сервером.</p>
+</blockquote>
 
-<p>Теперь можно установить <a href="https://docs.chef.io/knife.html" title="Knife">knife</a> и плагин к нему от <a href="http://clodo.ru/" title="Clodo.ru">clodo</a>:</p>
+<p>Теперь можно установить <a href="https://docs.chef.io/knife.html" title="Knife">knife</a> и плагин к нему от clodo.ru:</p>
 
-<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="gp">$ </span>curl -L https://www.opscode.com/chef/install.sh | sudo bash
-<span class="gp">$ </span>sudo aptitude install libxml2-dev libxslt1-dev
-<span class="gp">$ </span>sudo gem install knife-clodo</code></pre></figure>
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">$ </span>curl <span class="nt">-L</span> https://www.opscode.com/chef/install.sh | <span class="nb">sudo </span>bash<br data-jekyll-commonmark-ghpages="" /><span class="nv">$ </span><span class="nb">sudo </span>aptitude install libxml2-dev libxslt1-dev<br data-jekyll-commonmark-ghpages="" /><span class="nv">$ </span><span class="nb">sudo </span>gem install knife-clodo</code></pre></figure>
 
 <p>Определимся с целью. Для тестов допустим, что нам нужно устанавливать ВПС с <a href="http://wordpress.org/" title="WordPress">wordpress</a> на борту. Для это в <a href="http://www.opscode.com/" title="Opscode">opscode</a> уже есть соответствующий <a href="https://github.com/opscode-cookbooks/wordpress">рецепт</a>. Но для его использования нам надо залить его(и ещё пару рецептов которые нужны по зависимостям) на наш chef-server. Делается это следующим образом:</p>
 
-<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="gp">$ </span>mkdir ~/cookbook <span class="o">&amp;&amp;</span> <span class="nb">cd</span> ~/cookbook
-<span class="gp">$ </span>git clone git://github.com/opscode-cookbooks/wordpress.git
-<span class="gp">$ </span>git clone git://github.com/opscode-cookbooks/apache2.git
-<span class="gp">$ </span>git clone git://github.com/opscode-cookbooks/mysql.git
-<span class="gp">$ </span>git clone git://github.com/opscode-cookbooks/php.git
-<span class="gp">$ </span>git clone git://github.com/opscode-cookbooks/openssl.git
-<span class="gp">$ </span>git clone git://github.com/opscode-cookbooks/build-essential.git
-<span class="gp">$ </span>knife cookbook upload openssl wordpress php mysql apache2 build-essential xml</code></pre></figure>
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">$ </span>mkdir ~/cookbook <span class="o">&amp;&amp;</span> <span class="nb">cd</span> ~/cookbook<br data-jekyll-commonmark-ghpages="" /><span class="nv">$ </span>git clone git://github.com/opscode-cookbooks/wordpress.git<br data-jekyll-commonmark-ghpages="" /><span class="nv">$ </span>git clone git://github.com/opscode-cookbooks/apache2.git<br data-jekyll-commonmark-ghpages="" /><span class="nv">$ </span>git clone git://github.com/opscode-cookbooks/mysql.git<br data-jekyll-commonmark-ghpages="" /><span class="nv">$ </span>git clone git://github.com/opscode-cookbooks/php.git<br data-jekyll-commonmark-ghpages="" /><span class="nv">$ </span>git clone git://github.com/opscode-cookbooks/openssl.git<br data-jekyll-commonmark-ghpages="" /><span class="nv">$ </span>git clone git://github.com/opscode-cookbooks/build-essential.git<br data-jekyll-commonmark-ghpages="" /><span class="nv">$ </span>knife cookbook upload openssl wordpress php mysql apache2 build-essential xml</code></pre></figure>
 
-<p>После установки можно приступать к магии. Для начала добавим в конфиг <a href="https://docs.chef.io/knife.html" title="Knife">knife</a> данные аккаунта <a href="http://clodo.ru/" title="Clodo.ru">clodo</a>:</p>
+<p>После установки можно приступать к магии. Для начала добавим в конфиг <a href="https://docs.chef.io/knife.html" title="Knife">knife</a> данные аккаунта clodo.ru:</p>
 
-<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="gp">$ </span>cat &gt;&gt; ~/.chef/knife.rb <span class="sh">&lt;&lt; EOF
-knife[:clodo_username] =         'clodo@user.name' 
-knife[:clodo_api_key]   =        '12345678890qwertyasdfgh'
-knife[:clodo_api_auth_url]      = 'api.clodo.ru'
-</span><span class="err">EOF</span></code></pre></figure>
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">$ </span><span class="nb">cat</span> <span class="o">&gt;&gt;</span> ~/.chef/knife.rb <span class="o">&lt;&lt;</span> <span class="no">EOF</span><span class="sh"><br data-jekyll-commonmark-ghpages="" />knife[:clodo_username] =         'clodo@user.name'<br data-jekyll-commonmark-ghpages="" />knife[:clodo_api_key]   =        '12345678890qwertyasdfgh'<br data-jekyll-commonmark-ghpages="" />knife[:clodo_api_auth_url]      = 'api.clodo.ru'<br data-jekyll-commonmark-ghpages="" />EOF</span></code></pre></figure>
 
 <p>Волшебство</p>
 
-<figure class="highlight"><pre><code class="language-bash" data-lang="bash">knife clodo server create -r <span class="s2">"recipe[apt]"</span> -c ~/.chef/knife-clodo-test.rb <span class="se">\</span>
---server-disk<span class="o">=</span>5 --server-memory<span class="o">=</span>256 --server-memory-max<span class="o">=</span>512 -I 541 <span class="se">\</span>
---node-name test1 --server-name opscode-test --template-file ~/.chef/chef-full.erb <span class="se">\</span>
---no-ssl-verify-peer --clodo-api-auth-url api.mn.clodo.ru</code></pre></figure>
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">knife clodo server create <span class="nt">-r</span> <span class="s2">"recipe[apt]"</span> <span class="nt">-c</span> ~/.chef/knife-clodo-test.rb <span class="se">\</span><br data-jekyll-commonmark-ghpages="" /><span class="nt">--server-disk</span><span class="o">=</span>5 <span class="nt">--server-memory</span><span class="o">=</span>256 <span class="nt">--server-memory-max</span><span class="o">=</span>512 <span class="nt">-I</span> 541 <span class="se">\</span><br data-jekyll-commonmark-ghpages="" /><span class="nt">--node-name</span> test1 <span class="nt">--server-name</span> opscode-test <span class="nt">--template-file</span> ~/.chef/chef-full.erb <span class="se">\</span><br data-jekyll-commonmark-ghpages="" /><span class="nt">--no-ssl-verify-peer</span> <span class="nt">--clodo-api-auth-url</span> api.mn.clodo.ru</code></pre></figure>
 
 </div>
 </div>
 
 
+
+    
+    
+        
+            
+        
+    
 
     
     

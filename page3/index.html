@@ -80,6 +80,32 @@
       
       
 <header>
+  <h1 class="entry-title"><a href="/2013/08/replication-chef-database.html">Репликация таблиц базы chef-server </a></h1>
+  
+    <p class="meta">
+      09 Aug 2013
+      
+       | <a href="/2013/08/replication-chef-database.html#disqus_thread">Comments</a>
+      
+    </p>
+  
+</header>
+<div class="content"><h3 id="intro">Intro</h3>
+<p>В данной статье я расскажу как настроить два сервера <a href="http://www.opscode.com" title="Opscode">chef-server</a> версии 11 с репликацией части таблиц базы postgresql для обеспечения отказоустойчивости. Основная цель репликации это хранения данных о клиентах и нодах для прозрачного доступа нод к любому из <a href="http://www.opscode.com" title="Opscode">chef</a> серверов и возможности работы без перерегистрации. Предлагаемое <a href="http://www.opscode.com" title="Opscode">opscode</a> решение репликации данных через DRBD показалось мне не самым удобным и, главное, надёжным. По сему было принято решение искать альтернативные пути. Так как реплицировать все данные из всех таблиц нет необходимости, то было решено посмотреть в сторону <a href="http://wiki.postgresql.org/wiki/Skytools">skytools</a> и <a href="http://wiki.postgresql.org/wiki/Skytools#Londiste">londiste</a>, которые позволяют реплицировать только определенные таблицы БД.</p>
+
+<p>Однако не обошлось без сюрпризов. <a href="http://www.opscode.com" title="Opscode">Opscode</a> распространяет shef-server 11 по средствам уже собранных omnibus пакетов, в котором свой postgres 9.2. Этот постгрес собран урезанным и не работает с skytools. В итоге в этой статье будет описано как поставить chef-server из omnibus пакета на дистрибутивный postgres 9.2 и прикрутить репликацию через londiste.</p>
+
+</div>
+
+  <footer>
+    <a rel="full-article" href="/2013/08/replication-chef-database.html">Read on &rarr;</a>
+  </footer>
+
+
+    
+      
+      
+<header>
   <h1 class="entry-title"><a href="/2013/05/logstash-rotate-logs-in-elasticsearch.html">logstash, ротация логов в elasticsearch</a></h1>
   
     <p class="meta">
@@ -94,11 +120,7 @@
 
 <p>В крон добавляем:</p>
 
-<figure class="highlight"><pre><code class="language-bash" data-lang="bash">cat <span class="sh">&lt;&lt;'EOF' &gt; /etc/cron.daily/logstash
-#!/bin/bash
-logdate=$(date -d'-15 days' +"%Y.%m.%d")
-curl -XDELETE "http://localhost:9200/logstash-${logdate}"
-</span><span class="err">EOF</span></code></pre></figure>
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nb">cat</span> <span class="o">&lt;&lt;</span><span class="sh">'</span><span class="no">EOF</span><span class="sh">' &gt; /etc/cron.daily/logstash<br data-jekyll-commonmark-ghpages="" />#!/bin/bash<br data-jekyll-commonmark-ghpages="" />logdate=</span><span class="k">$(</span>date <span class="nt">-d</span><span class="s1">'-15 days'</span> +<span class="s2">"%Y.%m.%d"</span><span class="k">)</span><span class="sh"><br data-jekyll-commonmark-ghpages="" />curl -XDELETE "http://localhost:9200/logstash-</span><span class="k">${</span><span class="nv">logdate</span><span class="k">}</span><span class="sh">"<br data-jekyll-commonmark-ghpages="" />EOF</span></code></pre></figure>
 
 <p>Этот скрипт будет запускаться ежедневно и удалять все логи из elasticsearch 15-дневной давности.</p>
 </div>
@@ -123,7 +145,7 @@ curl -XDELETE "http://localhost:9200/logstash-${logdate}"
 
 <p>Настройка самих фронтендов оставим за кадром, т.к. это выходит за рамки данной статьи. Что касается серверов БД, то мы будем использовать мастер-слэйв репликацию и mk-heartbeat для отслеживания lag-ов на слэйве. Сервера геораспределены и каждый сервер БД располагается в отдельном ДЦ в паре с фронтендом. На настройке баз я остановлючь подробнее:</p>
 
-<h2 id="db">Настройка репликации DB:</h2>
+<h2 id="Настройка-репликации-db">Настройка репликации DB:</h2>
 
 <p>Здесь не описано ничего принципиально нового. Используется стандартная <a href="http://dev.mysql.com/doc/refman/5.1/en/replication.html">репликация Мастер-Слэйв</a> средствами MySql.</p>
 
@@ -156,12 +178,7 @@ curl -XDELETE "http://localhost:9200/logstash-${logdate}"
   <p>_config.yml</p>
 </blockquote>
 
-<figure class="highlight"><pre><code class="language-yml" data-lang="yml"><span class="c1"># Facebook comments</span>
-<span class="s">facebook</span><span class="pi">:</span>
-  <span class="s">appid</span><span class="pi">:</span> <span class="s">222612811167194</span>
-  <span class="s">num_post</span><span class="pi">:</span> <span class="s">5</span>
-  <span class="s">width</span><span class="pi">:</span> <span class="s">789</span>
-  <span class="s">colorscheme</span><span class="pi">:</span> <span class="s">light</span></code></pre></figure>
+<figure class="highlight"><pre><code class="language-yml" data-lang="yml"><span class="c1"># Facebook comments</span><br data-jekyll-commonmark-ghpages="" /><span class="na">facebook</span><span class="pi">:</span><br data-jekyll-commonmark-ghpages="" />  <span class="na">appid</span><span class="pi">:</span> <span class="s">222612811167194</span><br data-jekyll-commonmark-ghpages="" />  <span class="na">num_post</span><span class="pi">:</span> <span class="s">5</span><br data-jekyll-commonmark-ghpages="" />  <span class="na">width</span><span class="pi">:</span> <span class="s">789</span><br data-jekyll-commonmark-ghpages="" />  <span class="na">colorscheme</span><span class="pi">:</span> <span class="s">light</span></code></pre></figure>
 
 <p>Следующим шагом добавим facebook javascript API на нашу страницу. Для этого можно воспользоваться уже имеющимся в octopress функционалом facebook like. И так, открываем <code class="highlighter-rouge">siurce/_includes/facebook_like.html</code> и меняем строчку содержащую <code class="highlighter-rouge">js.src=</code> заменив в ней цифры на app id полученный от facebook.</p>
 
@@ -186,7 +203,7 @@ curl -XDELETE "http://localhost:9200/logstash-${logdate}"
     </p>
   
 </header>
-<div class="content"><p>Данная статья описывает возможность автоматической настройки виртуальных серверов (на примере хостинга <a href="http://clodo.ru/" title="Clodo.ru">clodo</a>) с помощью <a href="http://www.opscode.com">chef</a>.</p>
+<div class="content"><p>Данная статья описывает возможность автоматической настройки виртуальных серверов (на примере хостинга clodo.ru) с помощью <a href="http://www.opscode.com">chef</a>.</p>
 
 <p>Заводим аккаунт в <a href="http://www.opscode.com/" title="Opscode">opscode</a></p>
 
@@ -194,17 +211,7 @@ curl -XDELETE "http://localhost:9200/logstash-${logdate}"
 
 <p>При создании необходимо скачать ключик валидотора и конфиг для <a href="https://docs.chef.io/knife.html" title="Knife">knife</a> и поместить в <code class="highlighter-rouge">~/.chef/knife.rb</code>.</p>
 
-<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="n">current_dir</span> <span class="o">=</span> <span class="no">File</span><span class="p">.</span><span class="nf">dirname</span><span class="p">(</span><span class="kp">__FILE__</span><span class="p">)</span>
-<span class="n">log_level</span>                <span class="ss">:info</span>
-<span class="n">log_location</span>             <span class="no">STDOUT</span>
-<span class="n">node_name</span>                <span class="s2">"cyberflow"</span>
-<span class="n">client_key</span>               <span class="s2">"</span><span class="si">#{</span><span class="n">current_dir</span><span class="si">}</span><span class="s2">/cyberflow.pem"</span>
-<span class="n">validation_client_name</span>   <span class="s2">"clodo-test-validator"</span>
-<span class="n">validation_key</span>           <span class="s2">"</span><span class="si">#{</span><span class="n">current_dir</span><span class="si">}</span><span class="s2">/clodo-test-validator.pem"</span>
-<span class="n">chef_server_url</span>          <span class="s2">"https://api.opscode.com/organizations/clodo-test"</span>
-<span class="n">cache_type</span>               <span class="s1">'BasicFile'</span>
-<span class="n">cache_options</span><span class="p">(</span> <span class="ss">:path</span> <span class="o">=&gt;</span> <span class="s2">"</span><span class="si">#{</span><span class="no">ENV</span><span class="p">[</span><span class="s1">'HOME'</span><span class="p">]</span><span class="si">}</span><span class="s2">/.chef/checksums"</span> <span class="p">)</span>
-<span class="n">cookbook_path</span>            <span class="p">[</span><span class="s2">"</span><span class="si">#{</span><span class="n">current_dir</span><span class="si">}</span><span class="s2">/../cookbooks"</span><span class="p">]</span></code></pre></figure>
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="n">current_dir</span> <span class="o">=</span> <span class="no">File</span><span class="p">.</span><span class="nf">dirname</span><span class="p">(</span><span class="kp">__FILE__</span><span class="p">)</span><br data-jekyll-commonmark-ghpages="" /><span class="n">log_level</span>                <span class="ss">:info</span><br data-jekyll-commonmark-ghpages="" /><span class="n">log_location</span>             <span class="no">STDOUT</span><br data-jekyll-commonmark-ghpages="" /><span class="n">node_name</span>                <span class="s2">"cyberflow"</span><br data-jekyll-commonmark-ghpages="" /><span class="n">client_key</span>               <span class="s2">"</span><span class="si">#{</span><span class="n">current_dir</span><span class="si">}</span><span class="s2">/cyberflow.pem"</span><br data-jekyll-commonmark-ghpages="" /><span class="n">validation_client_name</span>   <span class="s2">"clodo-test-validator"</span><br data-jekyll-commonmark-ghpages="" /><span class="n">validation_key</span>           <span class="s2">"</span><span class="si">#{</span><span class="n">current_dir</span><span class="si">}</span><span class="s2">/clodo-test-validator.pem"</span><br data-jekyll-commonmark-ghpages="" /><span class="n">chef_server_url</span>          <span class="s2">"https://api.opscode.com/organizations/clodo-test"</span><br data-jekyll-commonmark-ghpages="" /><span class="n">cache_type</span>               <span class="s1">'BasicFile'</span><br data-jekyll-commonmark-ghpages="" /><span class="n">cache_options</span><span class="p">(</span> <span class="ss">:path</span> <span class="o">=&gt;</span> <span class="s2">"</span><span class="si">#{</span><span class="no">ENV</span><span class="p">[</span><span class="s1">'HOME'</span><span class="p">]</span><span class="si">}</span><span class="s2">/.chef/checksums"</span> <span class="p">)</span><br data-jekyll-commonmark-ghpages="" /><span class="n">cookbook_path</span>            <span class="p">[</span><span class="s2">"</span><span class="si">#{</span><span class="n">current_dir</span><span class="si">}</span><span class="s2">/../cookbooks"</span><span class="p">]</span></code></pre></figure>
 
 <p>Далее идём в <a href="http://www.opscode.com/" title="Opscode">opscode</a>, заводим клиента, и ключик для клиента кладём так же в <code class="highlighter-rouge">~/.chef/</code>.</p>
 
@@ -213,55 +220,6 @@ curl -XDELETE "http://localhost:9200/logstash-${logdate}"
   <footer>
     <a rel="full-article" href="/2013/02/use-opscode-chef-and-clodo-servers.html">Read on &rarr;</a>
   </footer>
-
-
-    
-      
-      
-<header>
-  <h1 class="entry-title"><a href="/2013/02/github-jekyll-custom-plugins.html">Github pages, jekyll и custom plugins</a></h1>
-  
-    <p class="meta">
-      28 Feb 2013
-      
-       | <a href="/2013/02/github-jekyll-custom-plugins.html#disqus_thread">Comments</a>
-      
-    </p>
-  
-</header>
-<div class="content"><p>Не секрет, что <a href="https://github.com/mojombo/jekyll">jekyll</a> отличный движок для блогинга. Так же не секрет, что многие пользователи <a href="https://github.com/mojombo/jekyll">jekyll</a> используют в качестве хостинга <a href="http://pages.github.com/">github pages</a>. Однако, как всегда, есть нюансы. В случае с <a href="http://pages.github.com/">github pages</a> это отсутствие поддержки custom plugins, коих для <a href="https://github.com/mojombo/jekyll">jekyll</a> имеется в количестве. Есть масса вариантов хостить статику, но в этой статье речь пойдёт о том, как можно продолжать хоститься на <a href="http://pages.github.com/">github pages</a> и использовать при этом плагины.</p>
-
-<p>Собственно и в этом вопросе не обошлось без вариантов, но лично для себя я выбрал вариант, который предложил <a href="http://arademaker.github.com/blog/2011/12/01/github-pages-jekyll-plugins.html">Alexandre Rademaker</a>. Суть этого решения заключается в том, чтобы отказаться от генерации статики на стороне <a href="http://github.com">github</a>, а генерить её локально. Однако красота метода заключается в том, что при этом все исходные данные продолжают находиться под контролем git-a.</p>
-
-<p>Теперь по сути:</p>
-
-<p>Мы будем использовать branch source для хранения сырых данных и самой начинки <a href="https://github.com/mojombo/jekyll">jekyll</a>, тогда как в master бранче будет только статика, которая и будет раздаваться по средствам <a href="http://pages.github.com/">github pages</a>.</p>
-
-<p>Далее предполагается, что у нас уже есть репозиторий на <a href="http://github.com">github</a>, где в мастер ветке лежит jekyll и сырые данные без статики. Теперь создаём новый branch:</p>
-
-<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="gp">$ </span>git branch <span class="nb">source</span>
-<span class="gp">$ </span>git push origin <span class="nb">source</span>
-<span class="gp">$ </span>git checkout <span class="nb">source</span></code></pre></figure>
-
-<p>Теперь создаём что нам надо, добавляем плагины и т.п.</p>
-
-<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="gp">$ </span>git status / git add / git commit</code></pre></figure>
-
-<p>Запускаем <a href="https://github.com/mojombo/jekyll">jekyll</a>:</p>
-
-<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="gp">$ </span>jekyll</code></pre></figure>
-
-<p>Всё готово для выкладки на <a href="http://pages.github.com/">github pages</a>:</p>
-
-<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="gp">$ </span>checkout master
-<span class="gp">$ </span>cp -r _site/<span class="k">*</span> . <span class="o">&amp;&amp;</span> rm -rf _site/ <span class="o">&amp;&amp;</span> touch .nojekyll
-<span class="gp">$ </span>git status &gt; git add &gt; git commit
-<span class="gp">$ </span>git push -all origin</code></pre></figure>
-
-<p>В статье используются материалы с сайта:
-<a href="http://arademaker.github.com/blog/2011/12/01/github-pages-jekyll-plugins.html">http://arademaker.github.com</a></p>
-
-</div>
 
 
     

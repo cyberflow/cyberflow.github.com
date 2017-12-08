@@ -80,6 +80,40 @@
       
       
 <header>
+  <h1 class="entry-title"><a href="/2012/08/install-debian-to-hp-proliant-with-bnx2.html">Install debian to HP ProLiant with bnx2</a></h1>
+  
+    <p class="meta">
+      27 Aug 2012
+      
+       | <a href="/2012/08/install-debian-to-hp-proliant-with-bnx2.html#disqus_thread">Comments</a>
+      
+    </p>
+  
+</header>
+<div class="content"><h3 id="Введение">Введение</h3>
+<p>При установки Debian 6 на HP ProLiant DL360 сталкнулся с тем, что в образе netinstall нет fireware для сетевой карточки Broadcom Corporation NetXtreme II. Собственно инсталлятор в курсе этого и предлагает поискать соответствующий fireware на внешнем носителе. В этой заметке я опишу как быстро создать *.img файл с нужными fireware, который в последствии можно смонтировать через ipmi-kvm и скормить инсталлятору.</p>
+
+<h3 id="Поиск-fireware">Поиск fireware</h3>
+<p>Собственно для debian 6 есть <a href="http://packages.debian.org/squeeze/firmware-bnx2">пакет</a> со всем необходимым, и всё бы ничего, но вот без настроенной сетевой карты поставить этот пакет в систему не простая задача. Но т.к. в пакете есть всё необходимое, то качаем сырцы пакета, распаковываем и приступаем к созданию образа.</p>
+
+<h3 id="Создание-img-файла">Создание IMG файла</h3>
+<p>Создайм бланковый файл, который будет у нас образом флоппи-диска, и создаём в нём файловую систему:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">$ </span>dd <span class="nv">bs</span><span class="o">=</span>512 <span class="nv">count</span><span class="o">=</span>2880 <span class="k">if</span><span class="o">=</span>/dev/zero <span class="nv">of</span><span class="o">=</span>imagefile.img<br data-jekyll-commonmark-ghpages="" /><span class="nv">$ </span>mkfs.msdos imagefile.img</code></pre></figure>
+
+<p>Далее монтируем наш флоппи-образ:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">$ </span><span class="nb">sudo </span>mkdir /media/floppy1/<br data-jekyll-commonmark-ghpages="" /><span class="nv">$ </span><span class="nb">sudo </span>mount <span class="nt">-o</span> loop imagefile.img /media/floppy1/</code></pre></figure>
+
+<p>Теперь кладём файлы, который просит инстолятор в /media/floppy1/, отмонтируем образ и скармливаем файл с образом инсталятору.</p>
+
+</div>
+
+
+    
+      
+      
+<header>
   <h1 class="entry-title"><a href="/2012/05/fix-invalid-date-format-in-specification-ruby.html">Fix invalid date format in specification Ruby</a></h1>
   
     <p class="meta">
@@ -128,13 +162,13 @@
 
 <p><a href="https://github.com/cyberflow/nagios_plugin/tree/master/check_smsc">check_smsc</a></p>
 
-<h3 id="section">Документация</h3>
+<h3 id="Документация">Документация</h3>
 
 <p>Данный плагин позволяет получить данные о состоянии счёт <a href="http://smsc.ru">smsc.ru</a> и устанавливать значения для предупреждений. В качестве параметров плагину передаются логин и пароль в md5hash (пароль можно передать и в явном виде, но делать этого не рекомендуется).</p>
 
 <p><em>Опции:</em></p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>-l/--login
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>-l/--login
 	Логин от аккаунта smsc.ru
 -p/--pass
 	Пароль от аккаунта в md5hash
@@ -144,19 +178,18 @@
 -c/--critical
 	Определяется значение баланса, меньше которого будет выдаваться критическое предупреждение.
 	По умолчанию выключено.
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p><br />
 <em>Пример использования:</em></p>
 
-<figure class="highlight"><pre><code class="language-bash" data-lang="bash">check_smsc.sh -l login -p 50207fa2814e81a067bd2662ba10b0f1 -w 200 -c 100</code></pre></figure>
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">check_smsc.sh <span class="nt">-l</span> login <span class="nt">-p</span> 50207fa2814e81a067bd2662ba10b0f1 <span class="nt">-w</span> 200 <span class="nt">-c</span> 100</code></pre></figure>
 
-<h3 id="section-1">Дополнительная информация</h3>
+<h3 id="Дополнительная-информация">Дополнительная информация</h3>
 
 <p>Для перевода пароля в md5hash можно воспользоваться командой:</p>
 
-<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nb">echo</span> -n <span class="s2">"password"</span> | md5sum -</code></pre></figure>
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nb">echo</span> <span class="nt">-n</span> <span class="s2">"password"</span> | md5sum -</code></pre></figure>
 
 </div>
 
@@ -175,15 +208,14 @@
     </p>
   
 </header>
-<div class="content"><h3 id="section">Для чего это нужно?</h3>
+<div class="content"><h3 id="Для-чего-это-нужно">Для чего это нужно?</h3>
 <p>В дефолтной инсталляции <a href="http://www.icinga.org">icinga</a> пишет все данные в файлики. Но есть возможность перенаправлять эти данные в базу при помощи idoutils. В целом в базе будут храниться все события, perf-data и другие данные.</p>
 
-<h3 id="section-1">Перед тем как начать</h3>
+<h3 id="Перед-тем-как-начать">Перед тем как начать</h3>
 <p>Подразумевается, что icinga 1.5.1 уже установлена и дальше будет только описание необходимых действия для установки idoutils и icinga-web 1.5.2. И то и другое требует базу данных. По этому убедитесь, что в вашем debian установлен соответствующий пакет. Если это не так, то установите его. Также необходимо наличии libdbi:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code># apt-get install mysql-server mysql-client libdbi0 libdbi0-dev libdbd-mysql
-</code></pre>
-</div>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code># apt-get install mysql-server mysql-client libdbi0 libdbi0-dev libdbd-mysql
+</code></pre></div></div>
 <p>Для установки icinga-web 1.5.2 необходимы следующие пакеты:</p>
 
 </div>

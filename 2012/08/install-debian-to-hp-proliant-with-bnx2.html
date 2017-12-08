@@ -81,22 +81,20 @@
 
 
 <div class="content">
-    <div class="post"><h3 id="section">Введение</h3>
+    <div class="post"><h3 id="Введение">Введение</h3>
 <p>При установки Debian 6 на HP ProLiant DL360 сталкнулся с тем, что в образе netinstall нет fireware для сетевой карточки Broadcom Corporation NetXtreme II. Собственно инсталлятор в курсе этого и предлагает поискать соответствующий fireware на внешнем носителе. В этой заметке я опишу как быстро создать *.img файл с нужными fireware, который в последствии можно смонтировать через ipmi-kvm и скормить инсталлятору.</p>
 
-<h3 id="fireware">Поиск fireware</h3>
+<h3 id="Поиск-fireware">Поиск fireware</h3>
 <p>Собственно для debian 6 есть <a href="http://packages.debian.org/squeeze/firmware-bnx2">пакет</a> со всем необходимым, и всё бы ничего, но вот без настроенной сетевой карты поставить этот пакет в систему не простая задача. Но т.к. в пакете есть всё необходимое, то качаем сырцы пакета, распаковываем и приступаем к созданию образа.</p>
 
-<h3 id="img-">Создание IMG файла</h3>
+<h3 id="Создание-img-файла">Создание IMG файла</h3>
 <p>Создайм бланковый файл, который будет у нас образом флоппи-диска, и создаём в нём файловую систему:</p>
 
-<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="gp">$ </span>dd <span class="nv">bs</span><span class="o">=</span>512 <span class="nv">count</span><span class="o">=</span>2880 <span class="k">if</span><span class="o">=</span>/dev/zero <span class="nv">of</span><span class="o">=</span>imagefile.img
-<span class="gp">$ </span>mkfs.msdos imagefile.img</code></pre></figure>
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">$ </span>dd <span class="nv">bs</span><span class="o">=</span>512 <span class="nv">count</span><span class="o">=</span>2880 <span class="k">if</span><span class="o">=</span>/dev/zero <span class="nv">of</span><span class="o">=</span>imagefile.img<br data-jekyll-commonmark-ghpages="" /><span class="nv">$ </span>mkfs.msdos imagefile.img</code></pre></figure>
 
 <p>Далее монтируем наш флоппи-образ:</p>
 
-<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="gp">$ </span>sudo mkdir /media/floppy1/
-<span class="gp">$ </span>sudo mount -o loop imagefile.img /media/floppy1/</code></pre></figure>
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">$ </span><span class="nb">sudo </span>mkdir /media/floppy1/<br data-jekyll-commonmark-ghpages="" /><span class="nv">$ </span><span class="nb">sudo </span>mount <span class="nt">-o</span> loop imagefile.img /media/floppy1/</code></pre></figure>
 
 <p>Теперь кладём файлы, который просит инстолятор в /media/floppy1/, отмонтируем образ и скармливаем файл с образом инсталятору.</p>
 
@@ -104,6 +102,15 @@
 </div>
 
 
+
+    
+    
+        
+            
+        
+            
+        
+    
 
     
     

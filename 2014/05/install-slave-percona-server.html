@@ -87,31 +87,39 @@
 
 <p>Теперь надо сделать dump баз данных, при этом будем использовать атрибуты <code class="highlighter-rouge">add-drop-database</code> для добавление в dump строчки удаляющей базу перед её созданием и <code class="highlighter-rouge">master-data</code> для добавления информации о бин-логах и их позиции на момент создания dump’a. Так же, чтобы избежать переноса служебных баз, формируем список баз для переноса исключив из них все служебные базы mysql (в список можно добавить и другие базы по аналогии). После создания dump’a переносим его на slave сервер.</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code># DATABASE_LIST=$(mysql -NBe 'show schemas' | grep -wv 'mysql\|performance_schema\|information_schema')
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code># DATABASE_LIST=$(mysql -NBe 'show schemas' | grep -wv 'mysql\|performance_schema\|information_schema')
 # mysqldump  --databases $DATABASE_LIST --add-drop-database --master-data -u root -p &gt; dbdump.db
 # scp dbdump.db mysql-slave-host:~/
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>На slave сервере добавляем необходиму информацию для репликации. Это можно сделать и после развертывания dump’a. Так же я пропущу описание настройки репликации в конфигурации mysql.</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code># mysql
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code># mysql
 mysql&gt; CHANGE MASTER TO MASTER_HOST='mysql-master-host', MASTER_USER='$replica_user', MASTER_PASSWORD='$slavepass';
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>Теперь можно залить сделанный dump и после этого включить репликацию.</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code># mysql -p &lt; ~/dbdump.db
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code># mysql -p &lt; ~/dbdump.db
 # mysql
 mysql&gt; slave start;
-</code></pre>
-</div>
+</code></pre></div></div>
 
 </div>
 </div>
 
 
+
+    
+    
+        
+            
+        
+            
+        
+            
+        
+    
 
     
     

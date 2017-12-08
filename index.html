@@ -80,6 +80,35 @@
       
       
 <header>
+  <h1 class="entry-title"><a href="/2017/12/kapacitor-alert-to-icinga2.html">send kapacitor alert to Icinga 2</a></h1>
+  
+    <p class="meta">
+      08 Dec 2017
+      
+       | <a href="/2017/12/kapacitor-alert-to-icinga2.html#disqus_thread">Comments</a>
+      
+    </p>
+  
+</header>
+<div class="content"><p>Сталкнулся с необходимостью мониторить метрики собираймые с хостов при помощи <a href="">telegraf</a>.</p>
+
+<h1 id="Описание-задачи">Описание задачи</h1>
+<p>Есть хост с <a href="https://www.icinga.com" title="Icinga2">icinga2</a> занимающийся мониторингом разного и рассылающий алерты соответствующим людям. Так же есть метрики с хостов, собираемые <a href="https://www.influxdata.com" title="influxdata">telegraf</a>, хранящиеся в <a href="https://www.influxdata.com" title="influxdata">influxdb</a>. Нужно реагировать на метрики и присылать алерты с <a href="https://www.icinga.com" title="Icinga2">incinga2</a>.</p>
+
+<h1 id="Реагирование-на-метрики">Реагирование на метрики</h1>
+<p>Можно насти разные подходы для процуссинга метрик с хоста, но разработчики <a href="https://www.influxdata.com" title="influxdata">influxdb</a> имеют специализированный engine для этой задачи. Дополнительно он решает вопрос реагирования на пики между активными проверками. А этот вопрос обязательно возникнет, если выбрать подход опроса <a href="https://www.influxdata.com" title="influxdata">influxdb</a> активными проверками со стороны <a href="https://www.icinga.com" title="Icinga2">icinga2</a>. Таким образом мы вибираем подход в котором данные с хостов процессятся в <a href="https://www.influxdata.com/time-series-platform/kapacitor/">kapacitor</a>.</p>
+
+</div>
+
+  <footer>
+    <a rel="full-article" href="/2017/12/kapacitor-alert-to-icinga2.html">Read on &rarr;</a>
+  </footer>
+
+
+    
+      
+      
+<header>
   <h1 class="entry-title"><a href="/2016/06/jekyll-auto-deploy-and-tests.html">Тестирование сайта на jekyll и авто-deploy на github pages</a></h1>
   
     <p class="meta">
@@ -96,9 +125,8 @@
 <p>Первым инструментом тестирования я выбрал <a href="https://github.com/gjtorikian/html-proofer">html-proofer</a>. Он позволяет проверять ссылки сайта, правильность оформления изображений а так же работоспособность внутренних и внешних скриптов.
 Для работы нужно установить gem или добавить строчку в Gemfile:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>gem 'html-proofer'
-</code></pre>
-</div>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>gem 'html-proofer'
+</code></pre></div></div>
 
 </div>
 
@@ -174,7 +202,7 @@
 
 <p>Необходимые настройки конфига Grafana:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>[server]
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[server]
 protocol = http
 http_port = 3000
 domain = localhost
@@ -190,55 +218,13 @@ auto_assign_org_role = Editor
 enabled = true
 header_name = X-WEBAUTH-USER
 auto_sign_up = true
-</code></pre>
-</div>
+</code></pre></div></div>
 
 </div>
 
   <footer>
     <a rel="full-article" href="/2016/03/grafana-slash-nginx-auth-proxy-httpaswd.html">Read on &rarr;</a>
   </footer>
-
-
-    
-      
-      
-<header>
-  <h1 class="entry-title"><a href="/2015/09/use-ssh-x-session-from-user-to-root.html">Пробрасывание X сессии от пользователя к root</a></h1>
-  
-    <p class="meta">
-      09 Sep 2015
-      
-       | <a href="/2015/09/use-ssh-x-session-from-user-to-root.html#disqus_thread">Comments</a>
-      
-    </p>
-  
-</header>
-<div class="content"><p>Сталкнулся с необходимостью запуска графической утилиты на удаленном сервере под пользователем root, но доступ для root по ssh закрыт.</p>
-
-<p>В итоге нашел такой workaround:</p>
-
-<p>Заходим на сервер под пользователем прокинув X сессию через ssh:</p>
-
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="gp">~$ </span>ssh -X user@hostname
-</code></pre>
-</div>
-
-<p>Находим X сессию, потом свитчемся в root:</p>
-
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="gp">~$ </span>xauth list
-hostname/unix:10  MIT-MAGIC-COOKIE-1  f714ef310193878cae851635b871d840
-<span class="gp">~$ </span>sudo -s
-</code></pre>
-</div>
-
-<p>Добавляем имеющуюся сессию пользователю root</p>
-
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="gp">~# </span>xauth add hostname/unix:10  MIT-MAGIC-COOKIE-1 f714ef310193878cae851635b871d840
-</code></pre>
-</div>
-<p>Все! Можно запускать X приложение под root-ом.</p>
-</div>
 
 
     

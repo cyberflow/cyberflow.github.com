@@ -85,17 +85,24 @@
 
 <p>В крон добавляем:</p>
 
-<figure class="highlight"><pre><code class="language-bash" data-lang="bash">cat <span class="sh">&lt;&lt;'EOF' &gt; /etc/cron.daily/logstash
-#!/bin/bash
-logdate=$(date -d'-15 days' +"%Y.%m.%d")
-curl -XDELETE "http://localhost:9200/logstash-${logdate}"
-</span><span class="err">EOF</span></code></pre></figure>
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nb">cat</span> <span class="o">&lt;&lt;</span><span class="sh">'</span><span class="no">EOF</span><span class="sh">' &gt; /etc/cron.daily/logstash<br data-jekyll-commonmark-ghpages="" />#!/bin/bash<br data-jekyll-commonmark-ghpages="" />logdate=</span><span class="k">$(</span>date <span class="nt">-d</span><span class="s1">'-15 days'</span> +<span class="s2">"%Y.%m.%d"</span><span class="k">)</span><span class="sh"><br data-jekyll-commonmark-ghpages="" />curl -XDELETE "http://localhost:9200/logstash-</span><span class="k">${</span><span class="nv">logdate</span><span class="k">}</span><span class="sh">"<br data-jekyll-commonmark-ghpages="" />EOF</span></code></pre></figure>
 
 <p>Этот скрипт будет запускаться ежедневно и удалять все логи из elasticsearch 15-дневной давности.</p>
 </div>
 </div>
 
 
+
+    
+    
+        
+            
+        
+            
+        
+            
+        
+    
 
     
     

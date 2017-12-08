@@ -95,7 +95,7 @@
 
 <p>Однако что делать, если сервер уже работает какое-то время с дефолтными настройками? Можно заметить, что API <code class="highlighter-rouge">elasticsearch</code> возвращает следующее:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="gp">$ </span>curl -XGET http://localhost:9200/_cat/shards
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>curl <span class="nt">-XGET</span> http://localhost:9200/_cat/shards
 logstash-2016.05.09 1 p STARTED    1520055  985.3mb 127.0.0.1 logstash1
 logstash-2016.05.09 1 r UNASSIGNED
 logstash-2016.05.09 3 p STARTED    1520640  985.9mb 127.0.0.1 logstash1
@@ -103,24 +103,21 @@ logstash-2016.05.09 3 r UNASSIGNED
 logstash-2016.05.09 4 p STARTED    1520955  981.4mb 127.0.0.1 logstash1
 logstash-2016.05.09 4 r UNASSIGNED
 logstash-2016.05.09 2 p STARTED    1520377    966mb 127.0.0.1 logstash1
-</code></pre>
-</div>
+</code></pre></div></div>
 <p>где <code class="highlighter-rouge">UNASSIGNED</code> - это шарды-реплики, которые ожидают репликации.</p>
 
 <p>Исправить это можно следующим обращением к api:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>curl -XPUT "localhost:9200/logstash-2016.05.09/_settings" -d '{
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl -XPUT "localhost:9200/logstash-2016.05.09/_settings" -d '{
     "index" : {
         "number_of_replicas" : 0
     }
 }'
-</code></pre>
-</div>
+</code></pre></div></div>
 <p>если количество индексов с шардами, ожидающими репликации большое, то можно воспользоваться следующим однострочником:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="gp">$ </span><span class="k">for </span>ind <span class="k">in</span> <span class="sb">`</span>curl -XGET http://localhost:9200/_cat/shards | grep UNASSIGNED | awk <span class="s1">'{print $1}'</span> | uniq<span class="sb">`</span>; <span class="k">do </span>curl -XPUT <span class="s2">"localhost:9200/</span><span class="nv">$ind</span><span class="s2">/_settings"</span> -d <span class="s1">'{ "index" : { "number_of_replicas" : 0 } }'</span>; <span class="k">done</span>
-</code></pre>
-</div>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span><span class="k">for </span>ind <span class="k">in</span> <span class="sb">`</span>curl <span class="nt">-XGET</span> http://localhost:9200/_cat/shards | <span class="nb">grep </span>UNASSIGNED | awk <span class="s1">'{print $1}'</span> | uniq<span class="sb">`</span><span class="p">;</span> <span class="k">do </span>curl <span class="nt">-XPUT</span> <span class="s2">"localhost:9200/</span><span class="nv">$ind</span><span class="s2">/_settings"</span> <span class="nt">-d</span> <span class="s1">'{ "index" : { "number_of_replicas" : 0 } }'</span><span class="p">;</span> <span class="k">done</span>
+</code></pre></div></div>
 </div>
 </div>
 
@@ -130,21 +127,42 @@ logstash-2016.05.09 2 p STARTED    1520377    966mb 127.0.0.1 logstash1
     
         
             
-        
-            
-        
-            
-        
-    
-
-    
-    
         
             
                 
                 <div class="panel-body">
                 <h4>Related Posts</h4>
                 <ul>
+                
+                <li class="relatedPost">
+                    <a href="https://cyberflow.net/2017/12/kapacitor-alert-to-icinga2.html" data-proofer-ignore>send kapacitor alert to Icinga 2</a>
+                    
+                        (Categories: <a href="/category/monitoring">monitoring</a>)
+                    
+                </li>
+                
+                
+            
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+        
+            
+        
+    
+
+    
+    
+        
+            
                 
                 <li class="relatedPost">
                     <a href="https://cyberflow.net/2016/06/elasticsearch-cluster-for-old-indice.html" data-proofer-ignore>Миграция старых indices elasticsearch на другую ноду</a>
@@ -323,16 +341,6 @@ logstash-2016.05.09 2 p STARTED    1520377    966mb 127.0.0.1 logstash1
         
             
         
-            
-                
-                <li class="relatedPost">
-                    <a href="https://cyberflow.net/2014/05/install-slave-percona-server.html" data-proofer-ignore>Установка slave mysql-percona сервера</a>
-                    
-                        (Categories: <a href="/category/ha">ha</a>, <a href="/category/linux">linux</a>, <a href="/category/databases">databases</a>)
-                    
-                </li>
-                
-                
             
         
     

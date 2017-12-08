@@ -83,31 +83,38 @@
 <div class="content">
     <div class="post"><p>Для начала установим необходимые пакеты для установки и работы cfeh-solo.</p>
 
-<figure class="highlight"><pre><code class="language-bash" data-lang="bash">apt-get install sudo wget lsb-release</code></pre></figure>
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">apt-get install <span class="nb">sudo </span>wget lsb-release</code></pre></figure>
 
 <p>Далее добавляем репозиторий opscode в списки репозиториев командой:</p>
 
-<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nb">echo</span> <span class="s2">"deb http://apt.opscode.com/ </span><span class="sb">`</span>lsb_release -cs<span class="sb">`</span><span class="s2">-0.10 main"</span> | sudo tee /etc/apt/sources.list.d/opscode.list</code></pre></figure>
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nb">echo</span> <span class="s2">"deb http://apt.opscode.com/ </span><span class="sb">`</span>lsb_release <span class="nt">-cs</span><span class="sb">`</span><span class="s2">-0.10 main"</span> | <span class="nb">sudo </span>tee /etc/apt/sources.list.d/opscode.list</code></pre></figure>
 
 <p>Теперь необходимо добавить ключи к репозиторию:</p>
 
-<figure class="highlight"><pre><code class="language-bash" data-lang="bash">sudo mkdir -p /etc/apt/trusted.gpg.d
-gpg --keyserver keys.gnupg.net --recv-keys 83EF826A
-gpg --export packages@opscode.com | sudo tee /etc/apt/trusted.gpg.d/opscode-keyring.gpg &gt; /dev/null</code></pre></figure>
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nb">sudo </span>mkdir <span class="nt">-p</span> /etc/apt/trusted.gpg.d<br data-jekyll-commonmark-ghpages="" />gpg <span class="nt">--keyserver</span> keys.gnupg.net <span class="nt">--recv-keys</span> 83EF826A<br data-jekyll-commonmark-ghpages="" />gpg <span class="nt">--export</span> packages@opscode.com | <span class="nb">sudo </span>tee /etc/apt/trusted.gpg.d/opscode-keyring.gpg <span class="o">&gt;</span> /dev/null</code></pre></figure>
 
 <p>Обновим информацию о пакетах с учётом добавленного репозитория и установим opscode-keyring:</p>
 
-<figure class="highlight"><pre><code class="language-bash" data-lang="bash">sudo apt-get update <span class="o">&amp;&amp;</span> sudo apt-get install opscode-keyring</code></pre></figure>
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nb">sudo </span>apt-get update <span class="o">&amp;&amp;</span> <span class="nb">sudo </span>apt-get install opscode-keyring</code></pre></figure>
 
 <p>Устанавливаем chef:</p>
 
-<figure class="highlight"><pre><code class="language-bash" data-lang="bash">sudo apt-get install chef</code></pre></figure>
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nb">sudo </span>apt-get install chef</code></pre></figure>
 
 <p>При установке будет задан вопрос о пути к серверу chef, т.к. мы делаем установку для chef-solo, то указываем там “none”.</p>
 </div>
 </div>
 
 
+
+    
+    
+        
+            
+        
+            
+        
+    
 
     
     

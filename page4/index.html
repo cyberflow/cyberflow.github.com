@@ -80,6 +80,50 @@
       
       
 <header>
+  <h1 class="entry-title"><a href="/2013/02/github-jekyll-custom-plugins.html">Github pages, jekyll и custom plugins</a></h1>
+  
+    <p class="meta">
+      28 Feb 2013
+      
+       | <a href="/2013/02/github-jekyll-custom-plugins.html#disqus_thread">Comments</a>
+      
+    </p>
+  
+</header>
+<div class="content"><p>Не секрет, что <a href="https://github.com/mojombo/jekyll">jekyll</a> отличный движок для блогинга. Так же не секрет, что многие пользователи <a href="https://github.com/mojombo/jekyll">jekyll</a> используют в качестве хостинга <a href="http://pages.github.com/">github pages</a>. Однако, как всегда, есть нюансы. В случае с <a href="http://pages.github.com/">github pages</a> это отсутствие поддержки custom plugins, коих для <a href="https://github.com/mojombo/jekyll">jekyll</a> имеется в количестве. Есть масса вариантов хостить статику, но в этой статье речь пойдёт о том, как можно продолжать хоститься на <a href="http://pages.github.com/">github pages</a> и использовать при этом плагины.</p>
+
+<p>Собственно и в этом вопросе не обошлось без вариантов, но лично для себя я выбрал вариант, который предложил <a href="http://arademaker.github.com/blog/2011/12/01/github-pages-jekyll-plugins.html">Alexandre Rademaker</a>. Суть этого решения заключается в том, чтобы отказаться от генерации статики на стороне <a href="http://github.com">github</a>, а генерить её локально. Однако красота метода заключается в том, что при этом все исходные данные продолжают находиться под контролем git-a.</p>
+
+<p>Теперь по сути:</p>
+
+<p>Мы будем использовать branch source для хранения сырых данных и самой начинки <a href="https://github.com/mojombo/jekyll">jekyll</a>, тогда как в master бранче будет только статика, которая и будет раздаваться по средствам <a href="http://pages.github.com/">github pages</a>.</p>
+
+<p>Далее предполагается, что у нас уже есть репозиторий на <a href="http://github.com">github</a>, где в мастер ветке лежит jekyll и сырые данные без статики. Теперь создаём новый branch:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">$ </span>git branch <span class="nb">source</span><br data-jekyll-commonmark-ghpages="" /><span class="nv">$ </span>git push origin <span class="nb">source</span><br data-jekyll-commonmark-ghpages="" /><span class="nv">$ </span>git checkout <span class="nb">source</span></code></pre></figure>
+
+<p>Теперь создаём что нам надо, добавляем плагины и т.п.</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">$ </span>git status / git add / git commit</code></pre></figure>
+
+<p>Запускаем <a href="https://github.com/mojombo/jekyll">jekyll</a>:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">$ </span>jekyll</code></pre></figure>
+
+<p>Всё готово для выкладки на <a href="http://pages.github.com/">github pages</a>:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">$ </span>checkout master<br data-jekyll-commonmark-ghpages="" /><span class="nv">$ </span>cp <span class="nt">-r</span> _site/<span class="k">*</span> <span class="nb">.</span> <span class="o">&amp;&amp;</span> rm <span class="nt">-rf</span> _site/ <span class="o">&amp;&amp;</span> touch .nojekyll<br data-jekyll-commonmark-ghpages="" /><span class="nv">$ </span>git status <span class="o">&gt;</span> git add <span class="o">&gt;</span> git commit<br data-jekyll-commonmark-ghpages="" /><span class="nv">$ </span>git push <span class="nt">-all</span> origin</code></pre></figure>
+
+<p>В статье используются материалы с сайта:
+<a href="http://arademaker.github.com/blog/2011/12/01/github-pages-jekyll-plugins.html">http://arademaker.github.com</a></p>
+
+</div>
+
+
+    
+      
+      
+<header>
   <h1 class="entry-title"><a href="/2013/02/how-to-install-nodejs-on-linux-deb-base.html">Установка node.js на Linux (deb base)</a></h1>
   
     <p class="meta">
@@ -94,7 +138,7 @@
 
 <p>Устанавливаем пакеты, необходимые для сборки и удовлетворения зависимостей:</p>
 
-<figure class="highlight"><pre><code class="language-bash" data-lang="bash">sudo aptitude install g++ curl python libssl-dev apache2-utils git-core checkinstall</code></pre></figure>
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nb">sudo </span>aptitude install g++ curl python libssl-dev apache2-utils git-core checkinstall</code></pre></figure>
 
 <p>Клонируем репозиторий с <a href="http://github.com">github</a>:</p>
 
@@ -106,11 +150,11 @@
 
 <p>Теперь можно собрать пакет для нашей системы:</p>
 
-<figure class="highlight"><pre><code class="language-bash" data-lang="bash">checkinstall --fstrans<span class="o">=</span>no --install<span class="o">=</span>no --pkgname<span class="o">=</span>node.js --pkgversion <span class="s2">"0.5.9"</span> --default</code></pre></figure>
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">checkinstall <span class="nt">--fstrans</span><span class="o">=</span>no <span class="nt">--install</span><span class="o">=</span>no <span class="nt">--pkgname</span><span class="o">=</span>node.js <span class="nt">--pkgversion</span> <span class="s2">"0.5.9"</span> <span class="nt">--default</span></code></pre></figure>
 
 <p>После сборки пакета его можно поставить:</p>
 
-<figure class="highlight"><pre><code class="language-bash" data-lang="bash">dpkg -i node.js_0.5.9-1_amd64.deb</code></pre></figure>
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">dpkg <span class="nt">-i</span> node.js_0.5.9-1_amd64.deb</code></pre></figure>
 
 <p>В статье использовались материалы со следующих сайтов:</p>
 
@@ -135,7 +179,7 @@
 </header>
 <div class="content"><p>Для обнуления пароля от пользователя admin в redmine 2.x выполните следующую команду из консоли находясь в директории с redmine</p>
 
-<figure class="highlight"><pre><code class="language-bash" data-lang="bash">ruby script/rails runner <span class="s1">'user = User.find(:first, :conditions =&gt; {:admin =&gt; true}) ; user.password, user.password_confirmation = "password"; user.save!'</span> -e production</code></pre></figure>
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">ruby script/rails runner <span class="s1">'user = User.find(:first, :conditions =&gt; {:admin =&gt; true}) ; user.password, user.password_confirmation = "password"; user.save!'</span> <span class="nt">-e</span> production</code></pre></figure>
 </div>
 
 
@@ -155,25 +199,23 @@
 </header>
 <div class="content"><p>Для начала установим необходимые пакеты для установки и работы cfeh-solo.</p>
 
-<figure class="highlight"><pre><code class="language-bash" data-lang="bash">apt-get install sudo wget lsb-release</code></pre></figure>
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">apt-get install <span class="nb">sudo </span>wget lsb-release</code></pre></figure>
 
 <p>Далее добавляем репозиторий opscode в списки репозиториев командой:</p>
 
-<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nb">echo</span> <span class="s2">"deb http://apt.opscode.com/ </span><span class="sb">`</span>lsb_release -cs<span class="sb">`</span><span class="s2">-0.10 main"</span> | sudo tee /etc/apt/sources.list.d/opscode.list</code></pre></figure>
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nb">echo</span> <span class="s2">"deb http://apt.opscode.com/ </span><span class="sb">`</span>lsb_release <span class="nt">-cs</span><span class="sb">`</span><span class="s2">-0.10 main"</span> | <span class="nb">sudo </span>tee /etc/apt/sources.list.d/opscode.list</code></pre></figure>
 
 <p>Теперь необходимо добавить ключи к репозиторию:</p>
 
-<figure class="highlight"><pre><code class="language-bash" data-lang="bash">sudo mkdir -p /etc/apt/trusted.gpg.d
-gpg --keyserver keys.gnupg.net --recv-keys 83EF826A
-gpg --export packages@opscode.com | sudo tee /etc/apt/trusted.gpg.d/opscode-keyring.gpg &gt; /dev/null</code></pre></figure>
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nb">sudo </span>mkdir <span class="nt">-p</span> /etc/apt/trusted.gpg.d<br data-jekyll-commonmark-ghpages="" />gpg <span class="nt">--keyserver</span> keys.gnupg.net <span class="nt">--recv-keys</span> 83EF826A<br data-jekyll-commonmark-ghpages="" />gpg <span class="nt">--export</span> packages@opscode.com | <span class="nb">sudo </span>tee /etc/apt/trusted.gpg.d/opscode-keyring.gpg <span class="o">&gt;</span> /dev/null</code></pre></figure>
 
 <p>Обновим информацию о пакетах с учётом добавленного репозитория и установим opscode-keyring:</p>
 
-<figure class="highlight"><pre><code class="language-bash" data-lang="bash">sudo apt-get update <span class="o">&amp;&amp;</span> sudo apt-get install opscode-keyring</code></pre></figure>
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nb">sudo </span>apt-get update <span class="o">&amp;&amp;</span> <span class="nb">sudo </span>apt-get install opscode-keyring</code></pre></figure>
 
 <p>Устанавливаем chef:</p>
 
-<figure class="highlight"><pre><code class="language-bash" data-lang="bash">sudo apt-get install chef</code></pre></figure>
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nb">sudo </span>apt-get install chef</code></pre></figure>
 
 <p>При установке будет задан вопрос о пути к серверу chef, т.к. мы делаем установку для chef-solo, то указываем там “none”.</p>
 </div>
@@ -197,76 +239,13 @@ gpg --export packages@opscode.com | sudo tee /etc/apt/trusted.gpg.d/opscode-keyr
 
 <p>Для начала нужно посотреть смещение на томе, чтобы определить откуда начинаются необходимые нам данные. Для этого можно выполнить команду:</p>
 
-<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="gp">$ </span>mdadm -E /dev/sas00/51501_24
-/dev/sas00/51501_24:
-          Magic : a92b4efc
-        Version : 1.2
-    Feature Map : 0x1
-     Array UUID : a11a9dae:fa6f187e:fdce9334:ec1fe46b
-           Name : xen10:md51501_24
-  Creation Time : Wed Sep 26 12:01:52 2012
-     Raid Level : raid1
-   Raid Devices : 2
-
- Avail Dev Size : 10491904 <span class="o">(</span>5.00 GiB 5.37 GB<span class="o">)</span>
-     Array Size : 10491880 <span class="o">(</span>5.00 GiB 5.37 GB<span class="o">)</span>
-  Used Dev Size : 10491880 <span class="o">(</span>5.00 GiB 5.37 GB<span class="o">)</span>
-    <span class="k">**</span>Data Offset : 2048 sectors<span class="k">**</span>
-   Super Offset : 8 sectors
-          State : clean
-    Device UUID : 58297892:37844649:cb27316e:2e2f8c0e
-
-Internal Bitmap : 8 sectors from superblock
-    Update Time : Fri Oct 12 10:30:43 2012
-       Checksum : 6b31c0a0 - correct
-         Events : 6786
-
-
-   Device Role : Active device 0
-   Array State : AA <span class="o">(</span><span class="s1">'A'</span> <span class="o">==</span> active, <span class="s1">'.'</span> <span class="o">==</span> missing<span class="o">)</span></code></pre></figure>
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">$ </span>mdadm <span class="nt">-E</span> /dev/sas00/51501_24<br data-jekyll-commonmark-ghpages="" />/dev/sas00/51501_24:<br data-jekyll-commonmark-ghpages="" />          Magic : a92b4efc<br data-jekyll-commonmark-ghpages="" />        Version : 1.2<br data-jekyll-commonmark-ghpages="" />    Feature Map : 0x1<br data-jekyll-commonmark-ghpages="" />     Array UUID : a11a9dae:fa6f187e:fdce9334:ec1fe46b<br data-jekyll-commonmark-ghpages="" />           Name : xen10:md51501_24<br data-jekyll-commonmark-ghpages="" />  Creation Time : Wed Sep 26 12:01:52 2012<br data-jekyll-commonmark-ghpages="" />     Raid Level : raid1<br data-jekyll-commonmark-ghpages="" />   Raid Devices : 2<br data-jekyll-commonmark-ghpages="" /><br data-jekyll-commonmark-ghpages="" /> Avail Dev Size : 10491904 <span class="o">(</span>5.00 GiB 5.37 GB<span class="o">)</span><br data-jekyll-commonmark-ghpages="" />     Array Size : 10491880 <span class="o">(</span>5.00 GiB 5.37 GB<span class="o">)</span><br data-jekyll-commonmark-ghpages="" />  Used Dev Size : 10491880 <span class="o">(</span>5.00 GiB 5.37 GB<span class="o">)</span><br data-jekyll-commonmark-ghpages="" />    <span class="k">**</span>Data Offset : 2048 sectors<span class="k">**</span><br data-jekyll-commonmark-ghpages="" />   Super Offset : 8 sectors<br data-jekyll-commonmark-ghpages="" />          State : clean<br data-jekyll-commonmark-ghpages="" />    Device UUID : 58297892:37844649:cb27316e:2e2f8c0e<br data-jekyll-commonmark-ghpages="" /><br data-jekyll-commonmark-ghpages="" />Internal Bitmap : 8 sectors from superblock<br data-jekyll-commonmark-ghpages="" />    Update Time : Fri Oct 12 10:30:43 2012<br data-jekyll-commonmark-ghpages="" />       Checksum : 6b31c0a0 - correct<br data-jekyll-commonmark-ghpages="" />         Events : 6786<br data-jekyll-commonmark-ghpages="" /><br data-jekyll-commonmark-ghpages="" /><br data-jekyll-commonmark-ghpages="" />   Device Role : Active device 0<br data-jekyll-commonmark-ghpages="" />   Array State : AA <span class="o">(</span><span class="s1">'A'</span> <span class="o">==</span> active, <span class="s1">'.'</span> <span class="o">==</span> missing<span class="o">)</span></code></pre></figure>
 
 <p>Далее мы можем получить суберблок и определить тип файловой системы:</p>
 
-<figure class="highlight"><pre><code class="language-bash" data-lang="bash">dd <span class="k">if</span><span class="o">=</span>/dev/sas00/51501_24 <span class="nv">skip</span><span class="o">=</span>2048 <span class="nv">bs</span><span class="o">=</span>1k <span class="nv">count</span><span class="o">=</span>1024 | file -
-/dev/stdin: Linux rev 1.0 ext4 filesystem data, <span class="nv">UUID</span><span class="o">=</span>afb28ffa-9663-4f2e-94cb-9d05abfd1b76 <span class="o">(</span>needs journal recovery<span class="o">)</span> <span class="o">(</span>extents<span class="o">)</span> <span class="o">(</span>large files<span class="o">)</span> <span class="o">(</span>huge files<span class="o">)</span></code></pre></figure>
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">dd <span class="k">if</span><span class="o">=</span>/dev/sas00/51501_24 <span class="nv">skip</span><span class="o">=</span>2048 <span class="nv">bs</span><span class="o">=</span>1k <span class="nv">count</span><span class="o">=</span>1024 | file -<br data-jekyll-commonmark-ghpages="" />/dev/stdin: Linux rev 1.0 ext4 filesystem data, <span class="nv">UUID</span><span class="o">=</span>afb28ffa-9663-4f2e-94cb-9d05abfd1b76 <span class="o">(</span>needs journal recovery<span class="o">)</span> <span class="o">(</span>extents<span class="o">)</span> <span class="o">(</span>large files<span class="o">)</span> <span class="o">(</span>huge files<span class="o">)</span></code></pre></figure>
 
 <p>Том, который использовался для примера содержит FS ext4</p>
-</div>
-
-
-    
-      
-      
-<header>
-  <h1 class="entry-title"><a href="/2012/08/install-debian-to-hp-proliant-with-bnx2.html">Install debian to HP ProLiant with bnx2</a></h1>
-  
-    <p class="meta">
-      27 Aug 2012
-      
-       | <a href="/2012/08/install-debian-to-hp-proliant-with-bnx2.html#disqus_thread">Comments</a>
-      
-    </p>
-  
-</header>
-<div class="content"><h3 id="section">Введение</h3>
-<p>При установки Debian 6 на HP ProLiant DL360 сталкнулся с тем, что в образе netinstall нет fireware для сетевой карточки Broadcom Corporation NetXtreme II. Собственно инсталлятор в курсе этого и предлагает поискать соответствующий fireware на внешнем носителе. В этой заметке я опишу как быстро создать *.img файл с нужными fireware, который в последствии можно смонтировать через ipmi-kvm и скормить инсталлятору.</p>
-
-<h3 id="fireware">Поиск fireware</h3>
-<p>Собственно для debian 6 есть <a href="http://packages.debian.org/squeeze/firmware-bnx2">пакет</a> со всем необходимым, и всё бы ничего, но вот без настроенной сетевой карты поставить этот пакет в систему не простая задача. Но т.к. в пакете есть всё необходимое, то качаем сырцы пакета, распаковываем и приступаем к созданию образа.</p>
-
-<h3 id="img-">Создание IMG файла</h3>
-<p>Создайм бланковый файл, который будет у нас образом флоппи-диска, и создаём в нём файловую систему:</p>
-
-<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="gp">$ </span>dd <span class="nv">bs</span><span class="o">=</span>512 <span class="nv">count</span><span class="o">=</span>2880 <span class="k">if</span><span class="o">=</span>/dev/zero <span class="nv">of</span><span class="o">=</span>imagefile.img
-<span class="gp">$ </span>mkfs.msdos imagefile.img</code></pre></figure>
-
-<p>Далее монтируем наш флоппи-образ:</p>
-
-<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="gp">$ </span>sudo mkdir /media/floppy1/
-<span class="gp">$ </span>sudo mount -o loop imagefile.img /media/floppy1/</code></pre></figure>
-
-<p>Теперь кладём файлы, который просит инстолятор в /media/floppy1/, отмонтируем образ и скармливаем файл с образом инсталятору.</p>
-
 </div>
 
 

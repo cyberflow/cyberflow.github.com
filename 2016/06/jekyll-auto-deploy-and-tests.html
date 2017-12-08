@@ -87,23 +87,21 @@
 <p>Первым инструментом тестирования я выбрал <a href="https://github.com/gjtorikian/html-proofer">html-proofer</a>. Он позволяет проверять ссылки сайта, правильность оформления изображений а так же работоспособность внутренних и внешних скриптов.
 Для работы нужно установить gem или добавить строчку в Gemfile:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>gem 'html-proofer'
-</code></pre>
-</div>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>gem 'html-proofer'
+</code></pre></div></div>
 
 <!--more-->
 
 <p>Для быстрой ручной проверки можно выполнить следующие команды:</p>
 
-<pre><code class="language-console"># bundle exec jekyll build
-# bundle exec htmlproofer ./_site
-</code></pre>
+<div class="language-console highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gp">#</span> bundle <span class="nb">exec </span>jekyll build
+<span class="gp">#</span> bundle <span class="nb">exec </span>htmlproofer ./_site
+</code></pre></div></div>
 
 <p>Чтобы не проверять генерируемые jekyll кросслинки (например список категорий), можно добавить в шаблоны тэг <code class="highlighter-rouge">data-proofer-ignore</code>. ТАким образом можно уменьшить количество проверяемых ссылок:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">"http://notareallink"</span> <span class="na">data-proofer-ignore</span><span class="nt">&gt;</span>Not checked.<span class="nt">&lt;/a&gt;</span>
-</code></pre>
-</div>
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">"http://notareallink"</span> <span class="na">data-proofer-ignore</span><span class="nt">&gt;</span>Not checked.<span class="nt">&lt;/a&gt;</span>
+</code></pre></div></div>
 
 <p>Добавляем конфиг для travis-ci:</p>
 
@@ -111,22 +109,21 @@
   <p>.travis.yml</p>
 </blockquote>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="s">language</span><span class="pi">:</span> <span class="s">ruby</span>
-<span class="s">rvm</span><span class="pi">:</span>
+<div class="language-yml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">language</span><span class="pi">:</span> <span class="s">ruby</span>
+<span class="na">rvm</span><span class="pi">:</span>
   <span class="pi">-</span> <span class="s">2.1</span>
-<span class="s">branches</span><span class="pi">:</span>
-  <span class="s">only</span><span class="pi">:</span>
+<span class="na">branches</span><span class="pi">:</span>
+  <span class="na">only</span><span class="pi">:</span>
   <span class="pi">-</span> <span class="s">source</span>
-<span class="s">env</span><span class="pi">:</span>
-  <span class="s">global</span><span class="pi">:</span>
+<span class="na">env</span><span class="pi">:</span>
+  <span class="na">global</span><span class="pi">:</span>
   <span class="pi">-</span> <span class="s">NOKOGIRI_USE_SYSTEM_LIBRARIES=true</span>
-<span class="s">gemfile</span><span class="pi">:</span>
+<span class="na">gemfile</span><span class="pi">:</span>
   <span class="pi">-</span> <span class="s">Gemfile</span>
-<span class="s">script</span><span class="pi">:</span>
+<span class="na">script</span><span class="pi">:</span>
   <span class="pi">-</span> <span class="s">bundle exec jekyll build</span>
   <span class="pi">-</span> <span class="s">bundle exec htmlproofer ./_site/</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>Так же надо добавить строчку в конфиг jekyll:</p>
 
@@ -134,15 +131,14 @@
   <p>_config.yml</p>
 </blockquote>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="s">exclude</span><span class="pi">:</span> <span class="pi">[</span><span class="nv">vendor</span><span class="pi">]</span>
-</code></pre>
-</div>
+<div class="language-yml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">exclude</span><span class="pi">:</span> <span class="pi">[</span><span class="nv">vendor</span><span class="pi">]</span>
+</code></pre></div></div>
 
 <p><code class="highlighter-rouge">exclude: [vendor]</code> - крайне важная строчка, т.к. travis ставит gem в корень проекта в директорию vendor. Если не добавить ее в исключения, jekyll будет пытаться обработать фалы gem-ов.</p>
 
 <p>Тесты можно обернуть в <code class="highlighter-rouge">rake</code> таски для удобства.</p>
 
-<h3 id="github-pages">Автодеплой на github pages</h3>
+<h3 id="Автодеплой-на-github-pages">Автодеплой на github pages</h3>
 <p>После удачного тестирования можно и залить изменения на сайт. Я использую две ветки в репозитории: <code class="highlighter-rouge">source</code> - для хранения исходников постов и потрошков <code class="highlighter-rouge">jekyll</code> и, соответственно, <code class="highlighter-rouge">master</code> - для самого блога. В итоге задача сводится к генерации сайта средствами <code class="highlighter-rouge">jekyll</code> на стороне CI и push в определенную ветку репозитория.
 Для этого можно использовать <code class="highlighter-rouge">rake</code> таски ruby. Вот пример:</p>
 
@@ -150,7 +146,7 @@
   <p>Rakefile</p>
 </blockquote>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="c1">#############################################################################</span>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">#############################################################################</span>
 <span class="c1">#</span>
 <span class="c1"># Modified version of jekyllrb Rakefile</span>
 <span class="c1"># https://github.com/jekyll/jekyll/blob/master/Rakefile</span>
@@ -214,8 +210,7 @@
     <span class="k">end</span>
   <span class="k">end</span>
 <span class="k">end</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>и теперь можно добавить деплой после удачного тестирования:</p>
 
@@ -223,7 +218,7 @@
   <p>.travis.yml</p>
 </blockquote>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>...
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>...
 before_install:
   - openssl aes-256-cbc -K $encrypted_d1eeda8dc2f5_key -iv $encrypted_d1eeda8dc2f5_iv -in travis_rsa.enc -out .travis/travis_rsa -d
 script:
@@ -234,40 +229,46 @@ after_success:
   - chmod 600 .travis/travis_rsa # this key should have push access
   - ssh-add .travis/travis_rsa
   - bundle exec rake site:deploy
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>Ниже пояснения к блокам <code class="highlighter-rouge">before_install</code> и <code class="highlighter-rouge">after_success</code>. Необходимо добавить ключ для travis, чтобы иметь возможность деплоить в репозиторий.</p>
 
-<h3 id="travis">Добавление ключа для деплоя из travis</h3>
+<h3 id="Добавление-ключа-для-деплоя-из-travis">Добавление ключа для деплоя из travis</h3>
 <p>Для того, чтобы travis смог деплоить наш сайт необходимо проделать еще один шаг. Надо добавить ключ в репозиторий.
 Для начала сгенерим новый ключ (я не советую использовать уже созданные ключи). Посмотреть как это нужно делать можно <a href="https://help.github.com/articles/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent/">тут</a></p>
 
-<pre><code class="language-console"># ssh-keygen -t rsa -b 4096 -C "travis"
-</code></pre>
+<div class="language-console highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gp">#</span> ssh-keygen <span class="nt">-t</span> rsa <span class="nt">-b</span> 4096 <span class="nt">-C</span> <span class="s2">"travis"</span>
+</code></pre></div></div>
 
 <p>После этого добавьте сгенеренный ключ в ваш репозиторий в настройках репозитория на github.
 Теперь надо закриптовать ключ для travis:</p>
 
-<pre><code class="language-console">$ travis encrypt-file deploy_key
-encrypting deploy_key for domenic/travis-encrypt-file-example
+<div class="language-console highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gp">$</span> travis encrypt-file deploy_key
+<span class="go">encrypting deploy_key for domenic/travis-encrypt-file-example
 storing result as deploy_key.enc
 storing secure env variables for decryption
 
 Please add the following to your build script (before_install stage in your .travis.yml, for instance):
 
-    openssl aes-256-cbc -K $encrypted_0a6446eb3ae3_key -iv $encrypted_0a6446eb3ae3_key -in super_secret.txt.enc -out super_secret.txt -d
-
+</span><span class="gp">    openssl aes-256-cbc -K $</span>encrypted_0a6446eb3ae3_key <span class="nt">-iv</span> <span class="nv">$encrypted_0a6446eb3ae3_key</span> <span class="nt">-in</span> super_secret.txt.enc <span class="nt">-out</span> super_secret.txt <span class="nt">-d</span>
+<span class="go">
 Pro Tip: You can add it automatically by running with --add.
 
 Make sure to add deploy_key.enc to the git repository.
 Make sure not to add deploy_key to the git repository.
 Commit all changes to your .travis.yml.
-</code></pre>
+</span></code></pre></div></div>
 </div>
 </div>
 
 
+
+    
+    
+        
+            
+        
+    
 
     
     
@@ -531,6 +532,8 @@ Commit all changes to your .travis.yml.
   
     <a class="prev" href="/2016/06/elasticsearch-cluster-for-old-indice.html">&laquo; Миграция старых indices elasticsearch на другую ноду</a>
   
+  
+    <a class="next" href="/2017/12/kapacitor-alert-to-icinga2.html">send kapacitor alert to Icinga 2 &raquo;</a>
   
 </div>
 

@@ -91,24 +91,19 @@
 
 <p>Далее предполагается, что у нас уже есть репозиторий на <a href="http://github.com">github</a>, где в мастер ветке лежит jekyll и сырые данные без статики. Теперь создаём новый branch:</p>
 
-<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="gp">$ </span>git branch <span class="nb">source</span>
-<span class="gp">$ </span>git push origin <span class="nb">source</span>
-<span class="gp">$ </span>git checkout <span class="nb">source</span></code></pre></figure>
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">$ </span>git branch <span class="nb">source</span><br data-jekyll-commonmark-ghpages="" /><span class="nv">$ </span>git push origin <span class="nb">source</span><br data-jekyll-commonmark-ghpages="" /><span class="nv">$ </span>git checkout <span class="nb">source</span></code></pre></figure>
 
 <p>Теперь создаём что нам надо, добавляем плагины и т.п.</p>
 
-<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="gp">$ </span>git status / git add / git commit</code></pre></figure>
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">$ </span>git status / git add / git commit</code></pre></figure>
 
 <p>Запускаем <a href="https://github.com/mojombo/jekyll">jekyll</a>:</p>
 
-<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="gp">$ </span>jekyll</code></pre></figure>
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">$ </span>jekyll</code></pre></figure>
 
 <p>Всё готово для выкладки на <a href="http://pages.github.com/">github pages</a>:</p>
 
-<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="gp">$ </span>checkout master
-<span class="gp">$ </span>cp -r _site/<span class="k">*</span> . <span class="o">&amp;&amp;</span> rm -rf _site/ <span class="o">&amp;&amp;</span> touch .nojekyll
-<span class="gp">$ </span>git status &gt; git add &gt; git commit
-<span class="gp">$ </span>git push -all origin</code></pre></figure>
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">$ </span>checkout master<br data-jekyll-commonmark-ghpages="" /><span class="nv">$ </span>cp <span class="nt">-r</span> _site/<span class="k">*</span> <span class="nb">.</span> <span class="o">&amp;&amp;</span> rm <span class="nt">-rf</span> _site/ <span class="o">&amp;&amp;</span> touch .nojekyll<br data-jekyll-commonmark-ghpages="" /><span class="nv">$ </span>git status <span class="o">&gt;</span> git add <span class="o">&gt;</span> git commit<br data-jekyll-commonmark-ghpages="" /><span class="nv">$ </span>git push <span class="nt">-all</span> origin</code></pre></figure>
 
 <p>В статье используются материалы с сайта:
 <a href="http://arademaker.github.com/blog/2011/12/01/github-pages-jekyll-plugins.html">http://arademaker.github.com</a></p>
@@ -117,6 +112,13 @@
 </div>
 
 
+
+    
+    
+        
+            
+        
+    
 
     
     

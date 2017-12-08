@@ -83,54 +83,50 @@
 <div class="content">
     <div class="post"><p>Конфиг ssh очень полезная и удобная штука. Пользуюсь им давно, но недавно открыл ещё несколько замечательных возможностей. Решил поделиться парой полезных фич и рассказать об одном маленьком лайфхаке.</p>
 
-<h3 id="section">Шаринг соединений</h3>
+<h3 id="Шаринг-соединений">Шаринг соединений</h3>
 <p>Часто бывает необходимо по работе держать много консолей с ssh на один сервер. Для упрощения такой работы (с точки зрения компьютера) в OpenSSH есть возможность шарить соединения. Т.е. если вы зашли на сервер, то в системе создается <em>ControlSocket</em> и все последующие соединения на этот сервер будут использовать уже созданный сокет, а не создавать новое подключение. И если при первом соединении сервер спрашивает у вас пароль, то при повторном использовании уже сокета авторизация не потребуется.</p>
 
 <p>Для настройки <em>Connection sharing</em> необходимо добавить следующие строчки в начало конфига ssh:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>ControlMaster auto
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ControlMaster auto
 ControlPath /tmp/ssh_%h_%p_%r
-</code></pre>
-</div>
+</code></pre></div></div>
 
-<h3 id="section-1">Проброс соединений через сервер</h3>
+<h3 id="Проброс-соединений-через-сервер">Проброс соединений через сервер</h3>
 <p>Другая не менее полезная штука - это возможность настроить соединение через сервер. Т.е. вместо двух команд: <code class="highlighter-rouge">ssh server1</code> и потом уже оттуда <code class="highlighter-rouge">ssh server2</code>, можно сразу в конфиге всё прописать и ходить одной командой.</p>
 
 <!--more-->
 
 <p>Выглядеть такой конфиг будет примерно так:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>Host server2
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Host server2
     HostName server2.domain.org
     ProxyCommand ssh -W %h:%p -C server1
-</code></pre>
-</div>
+</code></pre></div></div>
 <p>Тут стоит пояснить, что ssh подставит вместо <code class="highlighter-rouge">%h</code> хост, а вместо <code class="highlighter-rouge">%p</code> порт.</p>
 
 <p>Но и это ещё не всё. Помимо это ssh понимает паттерны внутри своего конфига.
 Приведу пример:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>Host db*
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Host db*
    ProxyCommand ssh -W %h:%p -C gateway
-</code></pre>
-</div>
+</code></pre></div></div>
 <p>Теперь мы можем одной командой, скажем <code class="highlighter-rouge">ssh db2.domain.org</code> попасть на сервер пробросив соединение через другой.</p>
 
 <p>Этот метод в сочетании с шарингом соединений даёт мощный инструмент.</p>
 
-<h3 id="section-2">Проброс соединений для серверов с похожими именами</h3>
+<h3 id="Проброс-соединений-для-серверов-с-похожими-именами">Проброс соединений для серверов с похожими именами</h3>
 <p>А теперь о проблеме с которой я столкнулся и “героически” решил.
 ПРоблема была в том, что есть два набора серверов с одинаковыми именами, пусть для примера это будут <em>db1</em> <em>db2</em> <em>dbN</em>, находящихся за разными серверами, через которые на них надо ходить, пусть это будет <em>gate1</em> и <em>gate2</em>. Предыдущий пример с использованием паттернов покрывает задачу лишь частично. Можно, конечно, выкрутиться используя паттерны с доменным именем, но в таком случае надо набирать полное доменное имя сервера, хотя с гейта на него можно попасть по короткому имени без домена.
 Решить эту проблему удалось с помощью использования факта, что <code class="highlighter-rouge">ProxyCommand</code> интерпретируется bash’ем =)
 В итоге конфиг выглядит приблизительно так:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>Host db*.dc1
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Host db*.dc1
     ProxyCommand ssh -W $(echo %h| cut -d. -f1):%p -C gate1
 
 Host db*.dc2
     ProxyCommand ssh -W $(echo %h| cut -d. -f1):%p -C gate2
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>Т.е. в консоле мы вводим <code class="highlighter-rouge">ssh db5.dc2</code>, данный сервер матчится со вторым паттерном, но пре передачи имени хоста в прокси-команду ненужная часть домена отбрасывается.</p>
 
@@ -139,6 +135,13 @@ Host db*.dc2
 </div>
 
 
+
+    
+    
+        
+            
+        
+    
 
     
     

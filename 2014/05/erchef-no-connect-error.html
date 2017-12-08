@@ -81,17 +81,16 @@
 
 
 <div class="content">
-    <div class="post"><h3 id="section">Предпосылки</h3>
+    <div class="post"><h3 id="Предпосылки">Предпосылки</h3>
 <p>Столкнулся с тем, что при большом количестве нод в <a href="http://opscode.com">chef-server</a> версий <em>11.0.4</em> и <em>11.0.8</em> поставленных из omnibus пакетов для Ubuntu, он с большой периодичностью стал отдавать <code class="highlighter-rouge">500 Internal server error</code> нодам при выполнении куска рецепта, который делает поиск по data_bag’ам. При изучении логов выяснилось следующее:
 В логах nginx’a видно, что запросы на поиск отправляются на бэкэнд erchef’а (ядро chef-server написанное на эрланге) и в ответ получаем <code class="highlighter-rouge">500</code>:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>192.168.1.111 - - [27/May/2014:11:45:28 +0000] "GET /search/databag1?q=id:node1&amp;sort=X_CHEF_id_CHEF_X%20asc&amp;start=0&amp;rows=1000 HTTP/1.1" 500 "0.051" 36 "-" "Chef Client/11.6.0 (ruby-1.9.3-p429; ohai-6.18.0; x86_64-linux; +http://opscode.com)" "127.0.0.1:8000" "500" "0.046" "11.6.0" "algorithm=sha1;version=1.0;" "auth1" "2014-05-27T11:45:28Z" "2jmj7l5rSw0yVb/vlWAYkK/YBwk=" 1011
-</code></pre>
-</div>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>192.168.1.111 - - [27/May/2014:11:45:28 +0000] "GET /search/databag1?q=id:node1&amp;sort=X_CHEF_id_CHEF_X%20asc&amp;start=0&amp;rows=1000 HTTP/1.1" 500 "0.051" 36 "-" "Chef Client/11.6.0 (ruby-1.9.3-p429; ohai-6.18.0; x86_64-linux; +http://opscode.com)" "127.0.0.1:8000" "500" "0.046" "11.6.0" "algorithm=sha1;version=1.0;" "auth1" "2014-05-27T11:45:28Z" "2jmj7l5rSw0yVb/vlWAYkK/YBwk=" 1011
+</code></pre></div></div>
 
 <p>Смотрим далее в логи <code class="highlighter-rouge">erchef</code>:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="o">=</span><span class="nv">ERROR</span> <span class="nv">REPORT</span><span class="o">====</span> <span class="mi">27</span><span class="o">-</span><span class="nv">May</span><span class="o">-</span><span class="mi">2014</span><span class="p">::</span><span class="mi">11</span><span class="p">:</span><span class="mi">45</span><span class="p">:</span><span class="mi">28</span> <span class="o">===</span>
+<div class="language-erlang highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">=</span><span class="nv">ERROR</span> <span class="nv">REPORT</span><span class="o">====</span> <span class="mi">27</span><span class="o">-</span><span class="nv">May</span><span class="o">-</span><span class="mi">2014</span><span class="p">::</span><span class="mi">11</span><span class="p">:</span><span class="mi">45</span><span class="p">:</span><span class="mi">28</span> <span class="o">===</span>
 <span class="n">webmachine</span> <span class="nn">error</span><span class="p">:</span> <span class="n">path</span><span class="o">=</span><span class="s">"/search/databag1"</span>
 <span class="p">{</span><span class="n">error</span><span class="p">,</span>
     <span class="p">{</span><span class="n">error</span><span class="p">,</span><span class="n">function_clause</span><span class="p">,</span>
@@ -113,13 +112,12 @@
              <span class="p">[{</span><span class="n">file</span><span class="p">,</span><span class="s">"src/webmachine_decision_core.erl"</span><span class="p">},{</span><span class="n">line</span><span class="p">,</span><span class="mi">48</span><span class="p">}]},</span>
          <span class="p">{</span><span class="n">webmachine_decision_core</span><span class="p">,</span><span class="n">decision</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span>
              <span class="p">[{</span><span class="n">file</span><span class="p">,</span><span class="s">"src/webmachine_decision_core.erl"</span><span class="p">},{</span><span class="n">line</span><span class="p">,</span><span class="mi">532</span><span class="p">}]}]}}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 <p>К сожалению то, что erchef пишет в свой лог не информативно. Однако путём длительного перебора удалось понять, что проблема в соединении к базе.</p>
 
 <!--more-->
 
-<h3 id="section-1">Решение</h3>
+<h3 id="Решение">Решение</h3>
 <p>Суть проблемы в том, что erchef открывает <em>N</em> соединений к базе <em>postgresql</em> (по умолчанию 20) и вываливается с выше указанной ошибкой, если этих 20-и соединений ему не хватает.
 Чтобы увеличить количество соединений нужно поправить конфиг erchef’a.</p>
 
@@ -127,7 +125,7 @@
   <p>/var/opt/chef-server/erchef/etc/app.config</p>
 </blockquote>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="p">...</span>
+<div class="language-erlang highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">...</span>
 <span class="p">{</span><span class="n">pooler</span><span class="p">,</span> <span class="p">[</span>
            <span class="p">{</span><span class="n">pools</span><span class="p">,</span> <span class="p">[[{</span><span class="n">name</span><span class="p">,</span> <span class="s">"sqerl"</span><span class="p">},</span>
                      <span class="p">{</span><span class="n">max_count</span><span class="p">,</span> <span class="mi">60</span><span class="p">},</span>
@@ -136,13 +134,19 @@
            <span class="p">{</span><span class="n">metrics_module</span><span class="p">,</span> <span class="n">folsom_metrics</span><span class="p">}</span>
           <span class="p">]},</span>
 <span class="p">...</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 <p>Правим значения для <code class="highlighter-rouge">max_count</code> и <code class="highlighter-rouge">init_count</code> с 20 на большие. В моём случае пока хватает 60 и 40.</p>
 </div>
 </div>
 
 
+
+    
+    
+        
+            
+        
+    
 
     
     

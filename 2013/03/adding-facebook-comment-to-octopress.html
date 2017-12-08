@@ -89,12 +89,7 @@
   <p>_config.yml</p>
 </blockquote>
 
-<figure class="highlight"><pre><code class="language-yml" data-lang="yml"><span class="c1"># Facebook comments</span>
-<span class="s">facebook</span><span class="pi">:</span>
-  <span class="s">appid</span><span class="pi">:</span> <span class="s">222612811167194</span>
-  <span class="s">num_post</span><span class="pi">:</span> <span class="s">5</span>
-  <span class="s">width</span><span class="pi">:</span> <span class="s">789</span>
-  <span class="s">colorscheme</span><span class="pi">:</span> <span class="s">light</span></code></pre></figure>
+<figure class="highlight"><pre><code class="language-yml" data-lang="yml"><span class="c1"># Facebook comments</span><br data-jekyll-commonmark-ghpages="" /><span class="na">facebook</span><span class="pi">:</span><br data-jekyll-commonmark-ghpages="" />  <span class="na">appid</span><span class="pi">:</span> <span class="s">222612811167194</span><br data-jekyll-commonmark-ghpages="" />  <span class="na">num_post</span><span class="pi">:</span> <span class="s">5</span><br data-jekyll-commonmark-ghpages="" />  <span class="na">width</span><span class="pi">:</span> <span class="s">789</span><br data-jekyll-commonmark-ghpages="" />  <span class="na">colorscheme</span><span class="pi">:</span> <span class="s">light</span></code></pre></figure>
 
 <p>Следующим шагом добавим facebook javascript API на нашу страницу. Для этого можно воспользоваться уже имеющимся в octopress функционалом facebook like. И так, открываем <code class="highlighter-rouge">siurce/_includes/facebook_like.html</code> и меняем строчку содержащую <code class="highlighter-rouge">js.src=</code> заменив в ней цифры на app id полученный от facebook.
 <!--more--></p>
@@ -107,36 +102,28 @@
   <p>facebook_comments.html</p>
 </blockquote>
 
-<figure class="highlight"><pre><code class="language-html" data-lang="html"><span class="nt">&lt;noscript&gt;</span>Please enable JavaScript to view the comments powered by facebook<span class="nt">&lt;/a&gt;&lt;/noscript&gt;</span>
-<span class="nt">&lt;div</span>
-  <span class="na">class=</span><span class="s">"fb-comments"</span>
-  <span class="na">data-href=</span><span class="s">"{{ site.url }}{{ page.url }}"</span>
-  <span class="na">data-num-posts=</span><span class="s">"{{ site.facebook.num_post }}"</span>
-  <span class="na">data-width=</span><span class="s">"{{ site.facebook.width }}"</span>
-  <span class="na">data-colorscheme=</span><span class="s">"{{ site.facebook.colorscheme }}"</span> <span class="nt">&gt;&lt;/div&gt;</span></code></pre></figure>
+<figure class="highlight"><pre><code class="language-html" data-lang="html"><span class="nt">&lt;noscript&gt;</span>Please enable JavaScript to view the comments powered by facebook<span class="nt">&lt;/a&gt;&lt;/noscript&gt;</span><br data-jekyll-commonmark-ghpages="" /><span class="nt">&lt;div</span><br data-jekyll-commonmark-ghpages="" />  <span class="na">class=</span><span class="s">"fb-comments"</span><br data-jekyll-commonmark-ghpages="" />  <span class="na">data-href=</span><span class="s">"{{ site.url }}{{ page.url }}"</span><br data-jekyll-commonmark-ghpages="" />  <span class="na">data-num-posts=</span><span class="s">"{{ site.facebook.num_post }}"</span><br data-jekyll-commonmark-ghpages="" />  <span class="na">data-width=</span><span class="s">"{{ site.facebook.width }}"</span><br data-jekyll-commonmark-ghpages="" />  <span class="na">data-colorscheme=</span><span class="s">"{{ site.facebook.colorscheme }}"</span> <span class="nt">&gt;&lt;/div&gt;</span></code></pre></figure>
 
 <p>Этот шаблон теперь можно вставлять в любое место блога, где вам хочется добавить комментарии. Осталось добавить их в посты и страницы блога. Страницы и посты строятся на основе <code class="highlighter-rouge">post.html</code> и <code class="highlighter-rouge">page.html</code> файлов из директории <code class="highlighter-rouge">source/.layouts</code>. ДОбавляем в них следующий код до или после блока кода, отвечающего за комментарии disqus:</p>
 
-<figure class="highlight"><pre><code class="language-html" data-lang="html">{% if site.facebook.appid and page.comments == true %} 
-  <span class="nt">&lt;section&gt;</span>
-    <span class="nt">&lt;h1&gt;</span>Comments<span class="nt">&lt;/h1&gt;</span>
-    <span class="nt">&lt;div</span> <span class="na">id=</span><span class="s">"facebook_comments"</span> <span class="na">aria-live=</span><span class="s">"polite"</span><span class="nt">&gt;</span>
-      {% include post/facebook_comments.html %}
-    <span class="nt">&lt;/div&gt;</span>
-  <span class="nt">&lt;/section&gt;</span>
-{% endif %}</code></pre></figure>
+<figure class="highlight"><pre><code class="language-html" data-lang="html">{% if site.facebook.appid and page.comments == true %} <br data-jekyll-commonmark-ghpages="" />  <span class="nt">&lt;section&gt;</span><br data-jekyll-commonmark-ghpages="" />    <span class="nt">&lt;h1&gt;</span>Comments<span class="nt">&lt;/h1&gt;</span><br data-jekyll-commonmark-ghpages="" />    <span class="nt">&lt;div</span> <span class="na">id=</span><span class="s">"facebook_comments"</span> <span class="na">aria-live=</span><span class="s">"polite"</span><span class="nt">&gt;</span><br data-jekyll-commonmark-ghpages="" />      {% include post/facebook_comments.html %}<br data-jekyll-commonmark-ghpages="" />    <span class="nt">&lt;/div&gt;</span><br data-jekyll-commonmark-ghpages="" />  <span class="nt">&lt;/section&gt;</span><br data-jekyll-commonmark-ghpages="" />{% endif %}</code></pre></figure>
 
 <p>В целом это всё, что необходимо для добавления комментариев. Однако есть ещ&gt; одна полезная вещь - добавление модерации. Для этого можно добавить следующую строку в файл <code class="highlighter-rouge">source/includes/custom/head.html</code>:</p>
 
-<figure class="highlight"><pre><code class="language-html" data-lang="html">{% if site.facebook.appid %}
-<span class="nt">&lt;meta</span> <span class="na">property=</span><span class="s">"fb:app_id"</span> <span class="na">content=</span><span class="s">"{{ site.facebook.appid }}"</span> <span class="nt">/&gt;</span>
-{% endif %}</code></pre></figure>
+<figure class="highlight"><pre><code class="language-html" data-lang="html">{% if site.facebook.appid %}<br data-jekyll-commonmark-ghpages="" /><span class="nt">&lt;meta</span> <span class="na">property=</span><span class="s">"fb:app_id"</span> <span class="na">content=</span><span class="s">"{{ site.facebook.appid }}"</span> <span class="nt">/&gt;</span><br data-jekyll-commonmark-ghpages="" />{% endif %}</code></pre></figure>
 
 <p>Это должно разрешить модерацию всем админ пользователям вашего преложения в facebook.</p>
 </div>
 </div>
 
 
+
+    
+    
+        
+            
+        
+    
 
     
     

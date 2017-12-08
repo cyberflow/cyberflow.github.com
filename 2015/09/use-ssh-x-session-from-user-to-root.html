@@ -87,28 +87,34 @@
 
 <p>Заходим на сервер под пользователем прокинув X сессию через ssh:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="gp">~$ </span>ssh -X user@hostname
-</code></pre>
-</div>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>~<span class="nv">$ </span>ssh <span class="nt">-X</span> user@hostname
+</code></pre></div></div>
 
 <p>Находим X сессию, потом свитчемся в root:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="gp">~$ </span>xauth list
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>~<span class="nv">$ </span>xauth list
 hostname/unix:10  MIT-MAGIC-COOKIE-1  f714ef310193878cae851635b871d840
-<span class="gp">~$ </span>sudo -s
-</code></pre>
-</div>
+~<span class="nv">$ </span><span class="nb">sudo</span> <span class="nt">-s</span>
+</code></pre></div></div>
 
 <p>Добавляем имеющуюся сессию пользователю root</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="gp">~# </span>xauth add hostname/unix:10  MIT-MAGIC-COOKIE-1 f714ef310193878cae851635b871d840
-</code></pre>
-</div>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>~# xauth add hostname/unix:10  MIT-MAGIC-COOKIE-1 f714ef310193878cae851635b871d840
+</code></pre></div></div>
 <p>Все! Можно запускать X приложение под root-ом.</p>
 </div>
 </div>
 
 
+
+    
+    
+        
+            
+        
+            
+        
+    
 
     
     

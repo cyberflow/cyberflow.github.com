@@ -5,9 +5,74 @@
     <description>My Personal Blog</description>
     <link>https://cyberflow.net/</link>
     <atom:link href="https://cyberflow.net/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Wed, 27 Jul 2016 08:22:45 +0000</pubDate>
-    <lastBuildDate>Wed, 27 Jul 2016 08:22:45 +0000</lastBuildDate>
-    <generator>Jekyll v3.0.3</generator>
+    <pubDate>Fri, 08 Dec 2017 15:41:27 +0000</pubDate>
+    <lastBuildDate>Fri, 08 Dec 2017 15:41:27 +0000</lastBuildDate>
+    <generator>Jekyll v3.6.2</generator>
+    
+      <item>
+        <title>send kapacitor alert to Icinga 2</title>
+        <description>&lt;p&gt;Сталкнулся с необходимостью мониторить метрики собираймые с хостов при помощи &lt;a href=&quot;&quot;&gt;telegraf&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h1 id=&quot;Описание-задачи&quot;&gt;Описание задачи&lt;/h1&gt;
+&lt;p&gt;Есть хост с &lt;a href=&quot;https://www.icinga.com&quot; title=&quot;Icinga2&quot;&gt;icinga2&lt;/a&gt; занимающийся мониторингом разного и рассылающий алерты соответствующим людям. Так же есть метрики с хостов, собираемые &lt;a href=&quot;https://www.influxdata.com&quot; title=&quot;influxdata&quot;&gt;telegraf&lt;/a&gt;, хранящиеся в &lt;a href=&quot;https://www.influxdata.com&quot; title=&quot;influxdata&quot;&gt;influxdb&lt;/a&gt;. Нужно реагировать на метрики и присылать алерты с &lt;a href=&quot;https://www.icinga.com&quot; title=&quot;Icinga2&quot;&gt;incinga2&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h1 id=&quot;Реагирование-на-метрики&quot;&gt;Реагирование на метрики&lt;/h1&gt;
+&lt;p&gt;Можно насти разные подходы для процуссинга метрик с хоста, но разработчики &lt;a href=&quot;https://www.influxdata.com&quot; title=&quot;influxdata&quot;&gt;influxdb&lt;/a&gt; имеют специализированный engine для этой задачи. Дополнительно он решает вопрос реагирования на пики между активными проверками. А этот вопрос обязательно возникнет, если выбрать подход опроса &lt;a href=&quot;https://www.influxdata.com&quot; title=&quot;influxdata&quot;&gt;influxdb&lt;/a&gt; активными проверками со стороны &lt;a href=&quot;https://www.icinga.com&quot; title=&quot;Icinga2&quot;&gt;icinga2&lt;/a&gt;. Таким образом мы вибираем подход в котором данные с хостов процессятся в &lt;a href=&quot;https://www.influxdata.com/time-series-platform/kapacitor/&quot;&gt;kapacitor&lt;/a&gt;.&lt;/p&gt;
+
+&lt;!--more--&gt;
+
+&lt;h1 id=&quot;Настройка-kapacitor-а&quot;&gt;Настройка kapacitor-а&lt;/h1&gt;
+&lt;p&gt;Kapacitor имеет таски, в которых описывается что и как должно мониторится. Кроме стандартных &amp;lt;&amp;gt;= можно настроить собственную систему Anomaly Detection. Тут я не буду вдаваться во все подробности. Нас интересует только тот момент, что каждая таска имеет в конфигурации блок &lt;code class=&quot;highlighter-rouge&quot;&gt;alert&lt;/code&gt;. Там можно настроить передачу события в обработчик алертов. В &lt;a href=&quot;https://www.influxdata.com&quot; title=&quot;influxdata&quot;&gt;kapacitor&lt;/a&gt; представленно много уже готовых обработчиков, таких как email, HipChat, Slack, Telegram, PagerDuty, etc. но, к сожалению, нет ни одного, способного нативно отправить событие в &lt;a href=&quot;https://www.icinga.com&quot; title=&quot;Icinga2&quot;&gt;icinga2&lt;/a&gt;. Но разработчики предусмотрели обработчик exec, который может выполнить программу на локальной машине. Его мы и будем использовать.&lt;/p&gt;
+
+&lt;p&gt;Так же отмечу, что для моих нужд оказалось проще и практичнее использовать topic. &lt;code class=&quot;highlighter-rouge&quot;&gt;Topic&lt;/code&gt; - это объект &lt;a href=&quot;https://www.influxdata.com&quot; title=&quot;influxdata&quot;&gt;kapacitor&lt;/a&gt; в который разные таски могут присылать свои события и на этот топик подписывается обработчик этого топика, который одинакого опрабатывает все события в этом топике. Другими словами - если у нас есть несколько метрик для мониторинга, скажем Disk, CPU, Memory. Нам достаточно описать таски для всех и отправлять все события в один топик &lt;code class=&quot;highlighter-rouge&quot;&gt;metric_events&lt;/code&gt; и подключив всего один обработчик пересылать все события в &lt;a href=&quot;https://www.influxdata.com&quot; title=&quot;influxdata&quot;&gt;icinga2&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Пример описания таски с использованием топика:&lt;/p&gt;
+&lt;div class=&quot;language-yml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;s&quot;&gt;stream&lt;/span&gt;
+    &lt;span class=&quot;s&quot;&gt;|from()&lt;/span&gt;
+        &lt;span class=&quot;s&quot;&gt;.measurement('cpu')&lt;/span&gt;
+        &lt;span class=&quot;s&quot;&gt;.groupBy(*)&lt;/span&gt;
+    &lt;span class=&quot;s&quot;&gt;|alert()&lt;/span&gt;
+        &lt;span class=&quot;s&quot;&gt;.warn(lambda&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;usage_idle&quot;&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;lt; 20)&lt;/span&gt;
+        &lt;span class=&quot;s&quot;&gt;.crit(lambda&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;usage_idle&quot;&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;lt; 10)&lt;/span&gt;
+        &lt;span class=&quot;s&quot;&gt;.topic('metric_events')&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Пример описания топика:&lt;/p&gt;
+&lt;div class=&quot;language-yml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;na&quot;&gt;kind&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;exec&lt;/span&gt;
+&lt;span class=&quot;na&quot;&gt;options&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;prog&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;/path/to/plugin/alert_to_icinga2.py&quot;&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;args&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;-u&quot;&lt;/span&gt;
+    &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;user&quot;&lt;/span&gt;
+    &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;-P&quot;&lt;/span&gt;
+    &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;password&quot;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Сам же плагин для отправки событий в [icinga2] можно найти по ссылке &lt;a href=&quot;https://github.com/cyberflow/kapacitor_alert_to_icinga2.git&quot;&gt;https://github.com/cyberflow/kapacitor_alert_to_icinga2.git&lt;/a&gt;&lt;/p&gt;
+
+</description>
+        <pubDate>Fri, 08 Dec 2017 15:28:00 +0000</pubDate>
+        <link>https://cyberflow.net/2017/12/kapacitor-alert-to-icinga2.html</link>
+        <guid isPermaLink="true">https://cyberflow.net/2017/12/kapacitor-alert-to-icinga2.html</guid>
+        
+        <category>monitoring</category>
+        
+        <category>icinga2</category>
+        
+        <category>kapacitor</category>
+        
+        <category>influxdb</category>
+        
+        <category>metrics</category>
+        
+        <category>python</category>
+        
+        <category>telegraf</category>
+        
+        
+        <category>monitoring</category>
+        
+      </item>
     
       <item>
         <title>Тестирование сайта на jekyll и авто-deploy на github pages</title>
@@ -17,23 +82,21 @@
 &lt;p&gt;Первым инструментом тестирования я выбрал &lt;a href=&quot;https://github.com/gjtorikian/html-proofer&quot;&gt;html-proofer&lt;/a&gt;. Он позволяет проверять ссылки сайта, правильность оформления изображений а так же работоспособность внутренних и внешних скриптов.
 Для работы нужно установить gem или добавить строчку в Gemfile:&lt;/p&gt;
 
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;gem &#39;html-proofer&#39;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;gem 'html-proofer'
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;!--more--&gt;
 
 &lt;p&gt;Для быстрой ручной проверки можно выполнить следующие команды:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code class=&quot;language-console&quot;&gt;# bundle exec jekyll build
-# bundle exec htmlproofer ./_site
-&lt;/code&gt;&lt;/pre&gt;
+&lt;div class=&quot;language-console highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;gp&quot;&gt;#&lt;/span&gt; bundle &lt;span class=&quot;nb&quot;&gt;exec &lt;/span&gt;jekyll build
+&lt;span class=&quot;gp&quot;&gt;#&lt;/span&gt; bundle &lt;span class=&quot;nb&quot;&gt;exec &lt;/span&gt;htmlproofer ./_site
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;p&gt;Чтобы не проверять генерируемые jekyll кросслинки (например список категорий), можно добавить в шаблоны тэг &lt;code class=&quot;highlighter-rouge&quot;&gt;data-proofer-ignore&lt;/code&gt;. ТАким образом можно уменьшить количество проверяемых ссылок:&lt;/p&gt;
 
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nt&quot;&gt;&amp;lt;a&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;href=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;http://notareallink&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;data-proofer-ignore&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;Not checked.&lt;span class=&quot;nt&quot;&gt;&amp;lt;/a&amp;gt;&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
+&lt;div class=&quot;language-html highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nt&quot;&gt;&amp;lt;a&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;href=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;http://notareallink&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;data-proofer-ignore&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;Not checked.&lt;span class=&quot;nt&quot;&gt;&amp;lt;/a&amp;gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;p&gt;Добавляем конфиг для travis-ci:&lt;/p&gt;
 
@@ -41,22 +104,21 @@
   &lt;p&gt;.travis.yml&lt;/p&gt;
 &lt;/blockquote&gt;
 
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;s&quot;&gt;language&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;ruby&lt;/span&gt;
-&lt;span class=&quot;s&quot;&gt;rvm&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+&lt;div class=&quot;language-yml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;na&quot;&gt;language&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;ruby&lt;/span&gt;
+&lt;span class=&quot;na&quot;&gt;rvm&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
   &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;2.1&lt;/span&gt;
-&lt;span class=&quot;s&quot;&gt;branches&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
-  &lt;span class=&quot;s&quot;&gt;only&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+&lt;span class=&quot;na&quot;&gt;branches&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;only&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
   &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;source&lt;/span&gt;
-&lt;span class=&quot;s&quot;&gt;env&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
-  &lt;span class=&quot;s&quot;&gt;global&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+&lt;span class=&quot;na&quot;&gt;env&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;global&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
   &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;NOKOGIRI_USE_SYSTEM_LIBRARIES=true&lt;/span&gt;
-&lt;span class=&quot;s&quot;&gt;gemfile&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+&lt;span class=&quot;na&quot;&gt;gemfile&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
   &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;Gemfile&lt;/span&gt;
-&lt;span class=&quot;s&quot;&gt;script&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+&lt;span class=&quot;na&quot;&gt;script&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
   &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;bundle exec jekyll build&lt;/span&gt;
   &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;bundle exec htmlproofer ./_site/&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;p&gt;Так же надо добавить строчку в конфиг jekyll:&lt;/p&gt;
 
@@ -64,15 +126,14 @@
   &lt;p&gt;_config.yml&lt;/p&gt;
 &lt;/blockquote&gt;
 
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;s&quot;&gt;exclude&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;pi&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;vendor&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;]&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
+&lt;div class=&quot;language-yml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;na&quot;&gt;exclude&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;pi&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;vendor&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;]&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;exclude: [vendor]&lt;/code&gt; - крайне важная строчка, т.к. travis ставит gem в корень проекта в директорию vendor. Если не добавить ее в исключения, jekyll будет пытаться обработать фалы gem-ов.&lt;/p&gt;
 
 &lt;p&gt;Тесты можно обернуть в &lt;code class=&quot;highlighter-rouge&quot;&gt;rake&lt;/code&gt; таски для удобства.&lt;/p&gt;
 
-&lt;h3 id=&quot;github-pages&quot;&gt;Автодеплой на github pages&lt;/h3&gt;
+&lt;h3 id=&quot;Автодеплой-на-github-pages&quot;&gt;Автодеплой на github pages&lt;/h3&gt;
 &lt;p&gt;После удачного тестирования можно и залить изменения на сайт. Я использую две ветки в репозитории: &lt;code class=&quot;highlighter-rouge&quot;&gt;source&lt;/code&gt; - для хранения исходников постов и потрошков &lt;code class=&quot;highlighter-rouge&quot;&gt;jekyll&lt;/code&gt; и, соответственно, &lt;code class=&quot;highlighter-rouge&quot;&gt;master&lt;/code&gt; - для самого блога. В итоге задача сводится к генерации сайта средствами &lt;code class=&quot;highlighter-rouge&quot;&gt;jekyll&lt;/code&gt; на стороне CI и push в определенную ветку репозитория.
 Для этого можно использовать &lt;code class=&quot;highlighter-rouge&quot;&gt;rake&lt;/code&gt; таски ruby. Вот пример:&lt;/p&gt;
 
@@ -80,45 +141,45 @@
   &lt;p&gt;Rakefile&lt;/p&gt;
 &lt;/blockquote&gt;
 
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;#############################################################################&lt;/span&gt;
+&lt;div class=&quot;language-ruby highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;#############################################################################&lt;/span&gt;
 &lt;span class=&quot;c1&quot;&gt;#&lt;/span&gt;
 &lt;span class=&quot;c1&quot;&gt;# Modified version of jekyllrb Rakefile&lt;/span&gt;
 &lt;span class=&quot;c1&quot;&gt;# https://github.com/jekyll/jekyll/blob/master/Rakefile&lt;/span&gt;
 &lt;span class=&quot;c1&quot;&gt;#&lt;/span&gt;
 &lt;span class=&quot;c1&quot;&gt;#############################################################################&lt;/span&gt;
 
-&lt;span class=&quot;nb&quot;&gt;require&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&#39;rake&#39;&lt;/span&gt;
-&lt;span class=&quot;nb&quot;&gt;require&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&#39;yaml&#39;&lt;/span&gt;
+&lt;span class=&quot;nb&quot;&gt;require&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'rake'&lt;/span&gt;
+&lt;span class=&quot;nb&quot;&gt;require&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'yaml'&lt;/span&gt;
 
-&lt;span class=&quot;no&quot;&gt;CONFIG&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;YAML&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;load&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;File&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;read&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#39;_config.yml&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
-&lt;span class=&quot;no&quot;&gt;USERNAME&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;CONFIG&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#39;username&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;||&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;ENV&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#39;GIT_NAME&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
-&lt;span class=&quot;no&quot;&gt;REPO&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;CONFIG&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#39;repo&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;||&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;cyberflow.github.com&quot;&lt;/span&gt;
-&lt;span class=&quot;no&quot;&gt;DEST&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;CONFIG&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#39;destination&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;||&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&#39;_deploy&#39;&lt;/span&gt;
+&lt;span class=&quot;no&quot;&gt;CONFIG&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;YAML&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;load&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;File&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;read&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'_config.yml'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+&lt;span class=&quot;no&quot;&gt;USERNAME&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;CONFIG&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'username'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;||&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;ENV&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'GIT_NAME'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+&lt;span class=&quot;no&quot;&gt;REPO&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;CONFIG&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'repo'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;||&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;cyberflow.github.com&quot;&lt;/span&gt;
+&lt;span class=&quot;no&quot;&gt;DEST&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;CONFIG&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'destination'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;||&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'_deploy'&lt;/span&gt;
 
-&lt;span class=&quot;no&quot;&gt;SOURCE_BRANCH&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&#39;source&#39;&lt;/span&gt;
-&lt;span class=&quot;no&quot;&gt;DESTINATION_BRANCH&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&#39;master&#39;&lt;/span&gt;
+&lt;span class=&quot;no&quot;&gt;SOURCE_BRANCH&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'source'&lt;/span&gt;
+&lt;span class=&quot;no&quot;&gt;DESTINATION_BRANCH&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'master'&lt;/span&gt;
 
 &lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;check_destination&lt;/span&gt;
   &lt;span class=&quot;k&quot;&gt;unless&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;Dir&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;exist?&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;DEST&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;sh&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;git clone https://&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;#{&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;ENV&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#39;GIT_NAME&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;#{&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;ENV&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#39;GH_TOKEN&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;@github.com/&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;#{&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;USERNAME&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;#{&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;REPO&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;.git &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;#{&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;DEST&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;sh&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;git clone https://&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;#{&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;ENV&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'GIT_NAME'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;#{&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;ENV&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'GH_TOKEN'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;@github.com/&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;#{&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;USERNAME&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;#{&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;REPO&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;.git &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;#{&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;DEST&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;
   &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
 &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
 
 &lt;span class=&quot;n&quot;&gt;namespace&lt;/span&gt; &lt;span class=&quot;ss&quot;&gt;:site&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;do&lt;/span&gt;
-  &lt;span class=&quot;n&quot;&gt;desc&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&#39;Generate the site and push changes to remote origin&#39;&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;desc&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'Generate the site and push changes to remote origin'&lt;/span&gt;
   &lt;span class=&quot;n&quot;&gt;task&lt;/span&gt; &lt;span class=&quot;ss&quot;&gt;:deploy&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;do&lt;/span&gt;
     &lt;span class=&quot;c1&quot;&gt;# Detect pull request&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;ENV&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#39;TRAVIS_PULL_REQUEST&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;].&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;to_s&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;to_i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;
-      &lt;span class=&quot;nb&quot;&gt;puts&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&#39;Pull request detected. Not proceeding with deploy.&#39;&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;ENV&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'TRAVIS_PULL_REQUEST'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;].&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;to_s&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;to_i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;
+      &lt;span class=&quot;nb&quot;&gt;puts&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'Pull request detected. Not proceeding with deploy.'&lt;/span&gt;
       &lt;span class=&quot;nb&quot;&gt;exit&lt;/span&gt;
     &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
 
     &lt;span class=&quot;c1&quot;&gt;# Configure git if this is run in Travis CI&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;ENV&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#39;TRAVIS&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
-      &lt;span class=&quot;nb&quot;&gt;puts&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&#39;Configure git&#39;&lt;/span&gt;
-      &lt;span class=&quot;n&quot;&gt;sh&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;git config --global user.name &#39;&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;#{&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;USERNAME&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&#39;&quot;&lt;/span&gt;
-      &lt;span class=&quot;n&quot;&gt;sh&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;git config --global user.email &#39;&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;#{&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;CONFIG&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#39;email&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&#39;&quot;&lt;/span&gt;
-      &lt;span class=&quot;n&quot;&gt;sh&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&#39;git config --global push.default simple&#39;&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;ENV&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'TRAVIS'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+      &lt;span class=&quot;nb&quot;&gt;puts&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'Configure git'&lt;/span&gt;
+      &lt;span class=&quot;n&quot;&gt;sh&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;git config --global user.name '&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;#{&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;USERNAME&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;'&quot;&lt;/span&gt;
+      &lt;span class=&quot;n&quot;&gt;sh&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;git config --global user.email '&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;#{&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;CONFIG&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'email'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;'&quot;&lt;/span&gt;
+      &lt;span class=&quot;n&quot;&gt;sh&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'git config --global push.default simple'&lt;/span&gt;
     &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
 
     &lt;span class=&quot;c1&quot;&gt;# Make sure destination folder exists as git repo&lt;/span&gt;
@@ -127,7 +188,7 @@
     &lt;span class=&quot;c1&quot;&gt;# sh &quot;git checkout #{SOURCE_BRANCH}&quot;&lt;/span&gt;
     &lt;span class=&quot;no&quot;&gt;Dir&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;chdir&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;DEST&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;do&lt;/span&gt;
       &lt;span class=&quot;n&quot;&gt;sh&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;git checkout &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;#{&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;DESTINATION_BRANCH&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;
-      &lt;span class=&quot;n&quot;&gt;sh&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&#39;rm -rf *&#39;&lt;/span&gt;
+      &lt;span class=&quot;n&quot;&gt;sh&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'rm -rf *'&lt;/span&gt;
     &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
 
     &lt;span class=&quot;c1&quot;&gt;# Generate the site&lt;/span&gt;
@@ -138,14 +199,13 @@
     &lt;span class=&quot;no&quot;&gt;Dir&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;chdir&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;DEST&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;do&lt;/span&gt;
       &lt;span class=&quot;n&quot;&gt;sh&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;git status -s&quot;&lt;/span&gt;
       &lt;span class=&quot;n&quot;&gt;sh&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;git add --all .&quot;&lt;/span&gt;
-      &lt;span class=&quot;n&quot;&gt;sh&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;git commit -m &#39;Updating to &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;#{&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;USERNAME&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;#{&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;REPO&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;@&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;#{&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sha&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;.&#39;&quot;&lt;/span&gt;
+      &lt;span class=&quot;n&quot;&gt;sh&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;git commit -m 'Updating to &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;#{&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;USERNAME&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;#{&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;REPO&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;@&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;#{&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sha&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;.'&quot;&lt;/span&gt;
       &lt;span class=&quot;n&quot;&gt;sh&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;git push --quiet origin &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;#{&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;DESTINATION_BRANCH&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt; --force&quot;&lt;/span&gt;
       &lt;span class=&quot;nb&quot;&gt;puts&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;Pushed updated branch &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;#{&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;DESTINATION_BRANCH&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt; to GitHub Pages&quot;&lt;/span&gt;
     &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
   &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
 &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;p&gt;и теперь можно добавить деплой после удачного тестирования:&lt;/p&gt;
 
@@ -153,7 +213,7 @@
   &lt;p&gt;.travis.yml&lt;/p&gt;
 &lt;/blockquote&gt;
 
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;...
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;...
 before_install:
   - openssl aes-256-cbc -K $encrypted_d1eeda8dc2f5_key -iv $encrypted_d1eeda8dc2f5_iv -in travis_rsa.enc -out .travis/travis_rsa -d
 script:
@@ -164,36 +224,35 @@ after_success:
   - chmod 600 .travis/travis_rsa # this key should have push access
   - ssh-add .travis/travis_rsa
   - bundle exec rake site:deploy
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;p&gt;Ниже пояснения к блокам &lt;code class=&quot;highlighter-rouge&quot;&gt;before_install&lt;/code&gt; и &lt;code class=&quot;highlighter-rouge&quot;&gt;after_success&lt;/code&gt;. Необходимо добавить ключ для travis, чтобы иметь возможность деплоить в репозиторий.&lt;/p&gt;
 
-&lt;h3 id=&quot;travis&quot;&gt;Добавление ключа для деплоя из travis&lt;/h3&gt;
+&lt;h3 id=&quot;Добавление-ключа-для-деплоя-из-travis&quot;&gt;Добавление ключа для деплоя из travis&lt;/h3&gt;
 &lt;p&gt;Для того, чтобы travis смог деплоить наш сайт необходимо проделать еще один шаг. Надо добавить ключ в репозиторий.
 Для начала сгенерим новый ключ (я не советую использовать уже созданные ключи). Посмотреть как это нужно делать можно &lt;a href=&quot;https://help.github.com/articles/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent/&quot;&gt;тут&lt;/a&gt;&lt;/p&gt;
 
-&lt;pre&gt;&lt;code class=&quot;language-console&quot;&gt;# ssh-keygen -t rsa -b 4096 -C &quot;travis&quot;
-&lt;/code&gt;&lt;/pre&gt;
+&lt;div class=&quot;language-console highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;gp&quot;&gt;#&lt;/span&gt; ssh-keygen &lt;span class=&quot;nt&quot;&gt;-t&lt;/span&gt; rsa &lt;span class=&quot;nt&quot;&gt;-b&lt;/span&gt; 4096 &lt;span class=&quot;nt&quot;&gt;-C&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;travis&quot;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;p&gt;После этого добавьте сгенеренный ключ в ваш репозиторий в настройках репозитория на github.
 Теперь надо закриптовать ключ для travis:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code class=&quot;language-console&quot;&gt;$ travis encrypt-file deploy_key
-encrypting deploy_key for domenic/travis-encrypt-file-example
+&lt;div class=&quot;language-console highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;gp&quot;&gt;$&lt;/span&gt; travis encrypt-file deploy_key
+&lt;span class=&quot;go&quot;&gt;encrypting deploy_key for domenic/travis-encrypt-file-example
 storing result as deploy_key.enc
 storing secure env variables for decryption
 
 Please add the following to your build script (before_install stage in your .travis.yml, for instance):
 
-    openssl aes-256-cbc -K $encrypted_0a6446eb3ae3_key -iv $encrypted_0a6446eb3ae3_key -in super_secret.txt.enc -out super_secret.txt -d
-
+&lt;/span&gt;&lt;span class=&quot;gp&quot;&gt;    openssl aes-256-cbc -K $&lt;/span&gt;encrypted_0a6446eb3ae3_key &lt;span class=&quot;nt&quot;&gt;-iv&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$encrypted_0a6446eb3ae3_key&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-in&lt;/span&gt; super_secret.txt.enc &lt;span class=&quot;nt&quot;&gt;-out&lt;/span&gt; super_secret.txt &lt;span class=&quot;nt&quot;&gt;-d&lt;/span&gt;
+&lt;span class=&quot;go&quot;&gt;
 Pro Tip: You can add it automatically by running with --add.
 
 Make sure to add deploy_key.enc to the git repository.
 Make sure not to add deploy_key to the git repository.
 Commit all changes to your .travis.yml.
-&lt;/code&gt;&lt;/pre&gt;
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 </description>
         <pubDate>Sun, 19 Jun 2016 12:46:00 +0000</pubDate>
         <link>https://cyberflow.net/2016/06/jekyll-auto-deploy-and-tests.html</link>
@@ -217,80 +276,77 @@ Commit all changes to your .travis.yml.
 
 &lt;!--more--&gt;
 
-&lt;h2 id=&quot;section&quot;&gt;Настройка кластера&lt;/h2&gt;
+&lt;h2 id=&quot;Настройка-кластера&quot;&gt;Настройка кластера&lt;/h2&gt;
 
-&lt;h3 id=&quot;section-1&quot;&gt;Настройка мастер ноды&lt;/h3&gt;
+&lt;h3 id=&quot;Настройка-мастер-ноды&quot;&gt;Настройка мастер ноды&lt;/h3&gt;
 &lt;p&gt;Пропуская процесс установки &lt;code class=&quot;highlighter-rouge&quot;&gt;elasticsearch&lt;/code&gt; укажу лишь необходимые настройки:&lt;/p&gt;
 
 &lt;blockquote class=&quot;filename&quot;&gt;
   &lt;p&gt;elasticsearch.yml&lt;/p&gt;
 &lt;/blockquote&gt;
 
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;s&quot;&gt;node.master&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;true&lt;/span&gt;
-&lt;span class=&quot;s&quot;&gt;node.data&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;true&lt;/span&gt;
+&lt;div class=&quot;language-yml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;s&quot;&gt;node.master&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;true&lt;/span&gt;
+&lt;span class=&quot;s&quot;&gt;node.data&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;true&lt;/span&gt;
 &lt;span class=&quot;s&quot;&gt;node.node_type&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;hot&lt;/span&gt;
 &lt;span class=&quot;nn&quot;&gt;...&lt;/span&gt;
-&lt;span class=&quot;s&quot;&gt;discovery.zen.ping.multicast.enabled&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;false&lt;/span&gt;
+&lt;span class=&quot;s&quot;&gt;discovery.zen.ping.multicast.enabled&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;false&lt;/span&gt;
 &lt;span class=&quot;s&quot;&gt;discovery.zen.ping.unicast.hosts&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;pi&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;10.0.0.2&quot;&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;]&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;p&gt;Нода будет иметь тэг &lt;code class=&quot;highlighter-rouge&quot;&gt;hot&lt;/code&gt; и хранит индексы для быстрого доступа.&lt;/p&gt;
 
-&lt;h3 id=&quot;section-2&quot;&gt;Настройка ноды дынных&lt;/h3&gt;
+&lt;h3 id=&quot;Настройка-ноды-дынных&quot;&gt;Настройка ноды дынных&lt;/h3&gt;
 
 &lt;blockquote class=&quot;filename&quot;&gt;
   &lt;p&gt;elasticsearch.yml&lt;/p&gt;
 &lt;/blockquote&gt;
 
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;s&quot;&gt;node.master&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;false&lt;/span&gt;
-&lt;span class=&quot;s&quot;&gt;node.data&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;true&lt;/span&gt;
+&lt;div class=&quot;language-yml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;s&quot;&gt;node.master&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;false&lt;/span&gt;
+&lt;span class=&quot;s&quot;&gt;node.data&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;true&lt;/span&gt;
 &lt;span class=&quot;s&quot;&gt;node.node_type&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;warm&lt;/span&gt;
 &lt;span class=&quot;nn&quot;&gt;...&lt;/span&gt;
-&lt;span class=&quot;s&quot;&gt;discovery.zen.ping.multicast.enabled&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;false&lt;/span&gt;
+&lt;span class=&quot;s&quot;&gt;discovery.zen.ping.multicast.enabled&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;false&lt;/span&gt;
 &lt;span class=&quot;s&quot;&gt;discovery.zen.ping.unicast.hosts&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;pi&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;10.0.0.1&quot;&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;]&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;p&gt;Нода будет иметь тэг &lt;code class=&quot;highlighter-rouge&quot;&gt;warm&lt;/code&gt; и мы будем перемещать на нее устаревшие indices.&lt;/p&gt;
 
-&lt;h3 id=&quot;section-3&quot;&gt;Перемещение&lt;/h3&gt;
+&lt;h3 id=&quot;Перемещение&quot;&gt;Перемещение&lt;/h3&gt;
 &lt;p&gt;После подготовки нод надо перезапустить &lt;code class=&quot;highlighter-rouge&quot;&gt;elasticsearch&lt;/code&gt;.&lt;/p&gt;
 
 &lt;p&gt;Убедиться, что ноды теперь в кластере можно командой:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code class=&quot;language-console&quot;&gt;$ curl http://localhost:9200/_cat/nodes
-&lt;/code&gt;&lt;/pre&gt;
+&lt;div class=&quot;language-console highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;gp&quot;&gt;$&lt;/span&gt; curl http://localhost:9200/_cat/nodes
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;p&gt;Следующая команда (для elasticsearch-curator &amp;lt; 4.X) поставит аттрибут аллокации для всех индексов старше 7 дней:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code class=&quot;language-console&quot;&gt;$ curator --logfile /var/log/curator.log --loglevel INFO --logformat default --master-only --host localhost --port 9200 allocation --rule node_type=warm indices --time-unit days --older-than 7 --timestring &#39;%Y.%m.%d&#39;
-&lt;/code&gt;&lt;/pre&gt;
+&lt;div class=&quot;language-console highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;gp&quot;&gt;$&lt;/span&gt; curator &lt;span class=&quot;nt&quot;&gt;--logfile&lt;/span&gt; /var/log/curator.log &lt;span class=&quot;nt&quot;&gt;--loglevel&lt;/span&gt; INFO &lt;span class=&quot;nt&quot;&gt;--logformat&lt;/span&gt; default &lt;span class=&quot;nt&quot;&gt;--master-only&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;--host&lt;/span&gt; localhost &lt;span class=&quot;nt&quot;&gt;--port&lt;/span&gt; 9200 allocation &lt;span class=&quot;nt&quot;&gt;--rule&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;node_type&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;warm indices &lt;span class=&quot;nt&quot;&gt;--time-unit&lt;/span&gt; days &lt;span class=&quot;nt&quot;&gt;--older-than&lt;/span&gt; 7 &lt;span class=&quot;nt&quot;&gt;--timestring&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'%Y.%m.%d'&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;p&gt;ниже конфиг &lt;code class=&quot;highlighter-rouge&quot;&gt;action.yml&lt;/code&gt; для elasticsearch-curator &amp;gt;= 4.X:&lt;/p&gt;
 
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nn&quot;&gt;---&lt;/span&gt;
-&lt;span class=&quot;s&quot;&gt;actions&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
-  &lt;span class=&quot;s1&quot;&gt;&#39;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;1&#39;&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
-    &lt;span class=&quot;s&quot;&gt;action&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;allocation&lt;/span&gt;
-    &lt;span class=&quot;s&quot;&gt;description&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;Apply shard allocation routing to &#39;node_type=warm&#39; node&lt;/span&gt;
-    &lt;span class=&quot;s&quot;&gt;options&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
-      &lt;span class=&quot;s&quot;&gt;key&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;node_type&lt;/span&gt;
-      &lt;span class=&quot;s&quot;&gt;value&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;warm&lt;/span&gt;
-      &lt;span class=&quot;s&quot;&gt;allocation_type&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;require&lt;/span&gt;
-      &lt;span class=&quot;s&quot;&gt;wait_for_completion&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;False&lt;/span&gt;
-      &lt;span class=&quot;s&quot;&gt;continue_if_exception&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;False&lt;/span&gt;
-    &lt;span class=&quot;s&quot;&gt;filters&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
-    &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;filtertype&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;pattern&lt;/span&gt;
-      &lt;span class=&quot;s&quot;&gt;kind&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;prefix&lt;/span&gt;
-      &lt;span class=&quot;s&quot;&gt;value&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;logstash-&lt;/span&gt;
-    &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;filtertype&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;age&lt;/span&gt;
-      &lt;span class=&quot;s&quot;&gt;source&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;creation_date&lt;/span&gt;
-      &lt;span class=&quot;s&quot;&gt;direction&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;older&lt;/span&gt;
-      &lt;span class=&quot;s&quot;&gt;unit&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;days&lt;/span&gt;
-      &lt;span class=&quot;s&quot;&gt;unit_count&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;7&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
+&lt;div class=&quot;language-yaml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nn&quot;&gt;---&lt;/span&gt;
+&lt;span class=&quot;na&quot;&gt;actions&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;s1&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;1'&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;action&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;allocation&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;description&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;Apply shard allocation routing to 'node_type=warm' node&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;options&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;na&quot;&gt;key&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;node_type&lt;/span&gt;
+      &lt;span class=&quot;na&quot;&gt;value&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;warm&lt;/span&gt;
+      &lt;span class=&quot;na&quot;&gt;allocation_type&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;require&lt;/span&gt;
+      &lt;span class=&quot;na&quot;&gt;wait_for_completion&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;False&lt;/span&gt;
+      &lt;span class=&quot;na&quot;&gt;continue_if_exception&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;False&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;filters&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;filtertype&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;pattern&lt;/span&gt;
+      &lt;span class=&quot;na&quot;&gt;kind&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;prefix&lt;/span&gt;
+      &lt;span class=&quot;na&quot;&gt;value&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;logstash-&lt;/span&gt;
+    &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;filtertype&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;age&lt;/span&gt;
+      &lt;span class=&quot;na&quot;&gt;source&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;creation_date&lt;/span&gt;
+      &lt;span class=&quot;na&quot;&gt;direction&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;older&lt;/span&gt;
+      &lt;span class=&quot;na&quot;&gt;unit&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;days&lt;/span&gt;
+      &lt;span class=&quot;na&quot;&gt;unit_count&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;7&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;p&gt;Теперь можно добавить команду curator-а, описанную выше, в cron сервера и перемещение будет происходить автоматически.&lt;/p&gt;
 </description>
@@ -321,7 +377,7 @@ Commit all changes to your .travis.yml.
 
 &lt;p&gt;Однако что делать, если сервер уже работает какое-то время с дефолтными настройками? Можно заметить, что API &lt;code class=&quot;highlighter-rouge&quot;&gt;elasticsearch&lt;/code&gt; возвращает следующее:&lt;/p&gt;
 
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;gp&quot;&gt;$ &lt;/span&gt;curl -XGET http://localhost:9200/_cat/shards
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;curl &lt;span class=&quot;nt&quot;&gt;-XGET&lt;/span&gt; http://localhost:9200/_cat/shards
 logstash-2016.05.09 1 p STARTED    1520055  985.3mb 127.0.0.1 logstash1
 logstash-2016.05.09 1 r UNASSIGNED
 logstash-2016.05.09 3 p STARTED    1520640  985.9mb 127.0.0.1 logstash1
@@ -329,24 +385,21 @@ logstash-2016.05.09 3 r UNASSIGNED
 logstash-2016.05.09 4 p STARTED    1520955  981.4mb 127.0.0.1 logstash1
 logstash-2016.05.09 4 r UNASSIGNED
 logstash-2016.05.09 2 p STARTED    1520377    966mb 127.0.0.1 logstash1
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;p&gt;где &lt;code class=&quot;highlighter-rouge&quot;&gt;UNASSIGNED&lt;/code&gt; - это шарды-реплики, которые ожидают репликации.&lt;/p&gt;
 
 &lt;p&gt;Исправить это можно следующим обращением к api:&lt;/p&gt;
 
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;curl -XPUT &quot;localhost:9200/logstash-2016.05.09/_settings&quot; -d &#39;{
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;curl -XPUT &quot;localhost:9200/logstash-2016.05.09/_settings&quot; -d '{
     &quot;index&quot; : {
         &quot;number_of_replicas&quot; : 0
     }
-}&#39;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
+}'
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;p&gt;если количество индексов с шардами, ожидающими репликации большое, то можно воспользоваться следующим однострочником:&lt;/p&gt;
 
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;gp&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;k&quot;&gt;for &lt;/span&gt;ind &lt;span class=&quot;k&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;sb&quot;&gt;`&lt;/span&gt;curl -XGET http://localhost:9200/_cat/shards | grep UNASSIGNED | awk &lt;span class=&quot;s1&quot;&gt;&#39;{print $1}&#39;&lt;/span&gt; | uniq&lt;span class=&quot;sb&quot;&gt;`&lt;/span&gt;; &lt;span class=&quot;k&quot;&gt;do &lt;/span&gt;curl -XPUT &lt;span class=&quot;s2&quot;&gt;&quot;localhost:9200/&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$ind&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;/_settings&quot;&lt;/span&gt; -d &lt;span class=&quot;s1&quot;&gt;&#39;{ &quot;index&quot; : { &quot;number_of_replicas&quot; : 0 } }&#39;&lt;/span&gt;; &lt;span class=&quot;k&quot;&gt;done&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;k&quot;&gt;for &lt;/span&gt;ind &lt;span class=&quot;k&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;sb&quot;&gt;`&lt;/span&gt;curl &lt;span class=&quot;nt&quot;&gt;-XGET&lt;/span&gt; http://localhost:9200/_cat/shards | &lt;span class=&quot;nb&quot;&gt;grep &lt;/span&gt;UNASSIGNED | awk &lt;span class=&quot;s1&quot;&gt;'{print $1}'&lt;/span&gt; | uniq&lt;span class=&quot;sb&quot;&gt;`&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;do &lt;/span&gt;curl &lt;span class=&quot;nt&quot;&gt;-XPUT&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;localhost:9200/&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$ind&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;/_settings&quot;&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-d&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'{ &quot;index&quot; : { &quot;number_of_replicas&quot; : 0 } }'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;done&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 </description>
         <pubDate>Thu, 12 May 2016 12:12:00 +0000</pubDate>
         <link>https://cyberflow.net/2016/05/optimization-standalone-elasticsearch-in-elk-stack.html</link>
@@ -373,7 +426,7 @@ logstash-2016.05.09 2 p STARTED    1520377    966mb 127.0.0.1 logstash1
 
 &lt;p&gt;Необходимые настройки конфига Grafana:&lt;/p&gt;
 
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;[server]
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;[server]
 protocol = http
 http_port = 3000
 domain = localhost
@@ -389,26 +442,24 @@ auto_assign_org_role = Editor
 enabled = true
 header_name = X-WEBAUTH-USER
 auto_sign_up = true
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;!--more--&gt;
 &lt;p&gt;Настройка nginx:&lt;/p&gt;
 
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;server {
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;server {
   listen                &amp;lt;server_ip&amp;gt;:80;
 
   server_name           &amp;lt;server_hostname&amp;gt;;
   access_log            /var/log/nginx/grafana.access.log;
 
   location / {
-    auth_basic            &#39;Restricted&#39;;
+    auth_basic            'Restricted';
     auth_basic_user_file  &amp;lt;path/to/htpasswd_file&amp;gt;;
     proxy_set_header X-WEBAUTH-USER $remote_user;
     proxy_pass http://grafana;
   }
 }
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;p&gt;После сделать рестарт сервера Grafana и nginx.&lt;/p&gt;
 </description>
@@ -441,23 +492,20 @@ auto_sign_up = true
 
 &lt;p&gt;Заходим на сервер под пользователем прокинув X сессию через ssh:&lt;/p&gt;
 
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;gp&quot;&gt;~$ &lt;/span&gt;ssh -X user@hostname
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;~&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;ssh &lt;span class=&quot;nt&quot;&gt;-X&lt;/span&gt; user@hostname
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;p&gt;Находим X сессию, потом свитчемся в root:&lt;/p&gt;
 
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;gp&quot;&gt;~$ &lt;/span&gt;xauth list
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;~&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;xauth list
 hostname/unix:10  MIT-MAGIC-COOKIE-1  f714ef310193878cae851635b871d840
-&lt;span class=&quot;gp&quot;&gt;~$ &lt;/span&gt;sudo -s
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
+~&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;sudo&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-s&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;p&gt;Добавляем имеющуюся сессию пользователю root&lt;/p&gt;
 
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;gp&quot;&gt;~# &lt;/span&gt;xauth add hostname/unix:10  MIT-MAGIC-COOKIE-1 f714ef310193878cae851635b871d840
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;~# xauth add hostname/unix:10  MIT-MAGIC-COOKIE-1 f714ef310193878cae851635b871d840
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;p&gt;Все! Можно запускать X приложение под root-ом.&lt;/p&gt;
 </description>
         <pubDate>Wed, 09 Sep 2015 15:24:00 +0000</pubDate>
@@ -479,19 +527,18 @@ hostname/unix:10  MIT-MAGIC-COOKIE-1  f714ef310193878cae851635b871d840
     
       <item>
         <title>Мониторинг dmesg</title>
-        <description>&lt;h3 id=&quot;section&quot;&gt;Задача&lt;/h3&gt;
+        <description>&lt;h3 id=&quot;Задача&quot;&gt;Задача&lt;/h3&gt;
 &lt;p&gt;Необходимо организовать централизованный сбор логов, в частности сообщений ядра &lt;code class=&quot;highlighter-rouge&quot;&gt;dmesg&lt;/code&gt; и реакции на них со стороны событийного мониторинга (например &lt;em&gt;nagios&lt;/em&gt;).&lt;/p&gt;
 
-&lt;h3 id=&quot;section-1&quot;&gt;Передача сообщений ядра на сервер логов&lt;/h3&gt;
+&lt;h3 id=&quot;Передача-сообщений-ядра-на-сервер-логов&quot;&gt;Передача сообщений ядра на сервер логов&lt;/h3&gt;
 &lt;p&gt;Для передачи сообщения ядра можно использовать модуль &lt;code class=&quot;highlighter-rouge&quot;&gt;netconsole&lt;/code&gt;. Он позволяет передавать сообщения журнала ядра (dmesg) на удаленный компьютер по сети, без участия пространства пользователя (например, syslogd).
 Для сбора данных можно использовать, например &lt;a href=&quot;http://logstash.net/&quot;&gt;logstash&lt;/a&gt;.&lt;/p&gt;
 
 &lt;p&gt;Netconsole может быть встроен в ядро, так и загружен как модуль. Я использую загрузка модуля после загрузки системы, чтобы гарантировать, что сеть уже работает  настроена.&lt;/p&gt;
 
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;# dmesg -n 7
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;# dmesg -n 7
 # modprobe netconsole netconsole=&quot;6665@10.13.77.99/eth1,6666@10.13.77.1/d4:ae:52:cf:33:96&quot;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;p&gt;Первая команда устанавливает уровень логирования для &lt;code class=&quot;highlighter-rouge&quot;&gt;dmesg&lt;/code&gt;.
 Вторая загружает модуль &lt;code class=&quot;highlighter-rouge&quot;&gt;netconsole&lt;/code&gt; с параметрами, где:
 &lt;!--more--&gt;&lt;/p&gt;
@@ -507,27 +554,26 @@ hostname/unix:10  MIT-MAGIC-COOKIE-1  f714ef310193878cae851635b871d840
 
 &lt;p&gt;Установка &lt;code class=&quot;highlighter-rouge&quot;&gt;logstash&lt;/code&gt; не является темой этой статьи, поэтому я буду показывать лишь части конфига необходимые для реализации задачи. Для получения сообщений от &lt;code class=&quot;highlighter-rouge&quot;&gt;netconsole&lt;/code&gt; надо указать следующий кусок конфига в блоке &lt;code class=&quot;highlighter-rouge&quot;&gt;input&lt;/code&gt;:&lt;/p&gt;
 
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;err&quot;&gt;input&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;{&lt;/span&gt;
+&lt;div class=&quot;language-properties highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;err&quot;&gt;input&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;{&lt;/span&gt;
     &lt;span class=&quot;err&quot;&gt;udp&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;{&lt;/span&gt;
         &lt;span class=&quot;py&quot;&gt;type&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;gt; &quot;netconsole&quot;&lt;/span&gt;
         &lt;span class=&quot;py&quot;&gt;port&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;gt; &quot;6666&quot;&lt;/span&gt;
         &lt;span class=&quot;py&quot;&gt;host&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;gt; &quot;10.13.77.1&quot; }&lt;/span&gt;
     &lt;span class=&quot;err&quot;&gt;}&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;p&gt;где &lt;code class=&quot;highlighter-rouge&quot;&gt;host&lt;/code&gt; - это ip адрес интерфейса на который будут присылаться сообщения ядра.&lt;/p&gt;
 
 &lt;p&gt;Теперь все сообщения ядра отправляются в &lt;code class=&quot;highlighter-rouge&quot;&gt;logstash&lt;/code&gt;.&lt;/p&gt;
 
-&lt;h3 id=&quot;section-2&quot;&gt;Оповещения при критических сообщениях ядра&lt;/h3&gt;
+&lt;h3 id=&quot;Оповещения-при-критических-сообщениях-ядра&quot;&gt;Оповещения при критических сообщениях ядра&lt;/h3&gt;
 &lt;p&gt;В моём случае я хочу отслеживать наличие OOM сообщений и рассылать оповещения об этом. &lt;code class=&quot;highlighter-rouge&quot;&gt;Logstash&lt;/code&gt; может отправлять письма с оповещениями сам, но мне интересно делать это событийным мониторингом.&lt;/p&gt;
 
-&lt;p&gt;В качестве событийного мониторинга я использую &lt;a href=&quot;http://www.shinken-monitoring.org&quot;&gt;shinken&lt;/a&gt;. Для реализации оповещения админов, по моему, лучше использовать сервисные чеки &lt;code class=&quot;highlighter-rouge&quot;&gt;is_volatile&lt;/code&gt;. Эта опция позволяет отправлять оповещения на каждый статус non-OK даже если он не менялся. Подробнее об этой опции можно почитать &lt;a href=&quot;https://shinken.readthedocs.org/en/latest/07_advanced/volatileservices.html&quot;&gt;тут&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;В качестве событийного мониторинга я использую &lt;a href=&quot;http://www.shinken-monitoring.org&quot;&gt;shinken&lt;/a&gt;. Для реализации оповещения админов, по моему, лучше использовать сервисные чеки &lt;code class=&quot;highlighter-rouge&quot;&gt;is_volatile&lt;/code&gt;. Эта опция позволяет отправлять оповещения на каждый статус non-OK даже если он не менялся. Подробнее об этой опции можно почитать на странице документации https://shinken.readthedocs.io.&lt;/p&gt;
 
 &lt;p&gt;Чтобы не повторяться в описании каждого сервиса напишем template для volatile сервисов:&lt;/p&gt;
 
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;define service {
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;define service {
   name                          volatile-service
   check_command                 dummy_ok
   max_check_attempts            1
@@ -546,13 +592,12 @@ hostname/unix:10  MIT-MAGIC-COOKIE-1  f714ef310193878cae851635b871d840
   contact_groups                sysadmin
   register                      0
 }
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;p&gt;В данном описании мы определяем пассивные сервисы, которые будут автоматически сбрасываться в статус ОК через 5 минут после изменения статуса. Так же важно в опции &lt;code class=&quot;highlighter-rouge&quot;&gt;max_check_attempts&lt;/code&gt; указать 1, чтобы сервис сразу после первого сообщения переходил в &lt;code class=&quot;highlighter-rouge&quot;&gt;hard-state&lt;/code&gt;.&lt;/p&gt;
 
 &lt;p&gt;Теперь можно описать сам сервис используя вышеописанный template:&lt;/p&gt;
 
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;define service {
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;define service {
   hostgroup_name                linux
   service_description           log_event
   servicegroups                 logs
@@ -560,71 +605,66 @@ hostname/unix:10  MIT-MAGIC-COOKIE-1  f714ef310193878cae851635b871d840
   register                      1
   use                           volatile-service
 }
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;p&gt;С настройкой событийного мониторинга закончили. Переходим к настройке &lt;code class=&quot;highlighter-rouge&quot;&gt;logstash&lt;/code&gt;.&lt;/p&gt;
 
 &lt;p&gt;Т.к. все сообщения ядра приходят от IP адреса сервера, который его сгенерил, то первое что я рекомендую сделать это настроить для серверов обратную зону, что позволит упростить и дальнейшую работу с логами и передачу сообщений в &lt;em&gt;shinken&lt;/em&gt;. Если обратная зона есть, то можно добавить в блок &lt;em&gt;filter&lt;/em&gt; следующий кусок конфига:&lt;/p&gt;
 
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;err&quot;&gt;filter&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;{&lt;/span&gt;
+&lt;div class=&quot;language-properties highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;err&quot;&gt;filter&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;{&lt;/span&gt;
     &lt;span class=&quot;err&quot;&gt;...&lt;/span&gt;
     &lt;span class=&quot;err&quot;&gt;dns&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;{&lt;/span&gt;
-            &lt;span class=&quot;err&quot;&gt;&#39;action&#39;&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;&quot;replace&quot;&lt;/span&gt;
-            &lt;span class=&quot;err&quot;&gt;&#39;reverse&#39;&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;[&quot;host&quot;]&lt;/span&gt;
-            &lt;span class=&quot;err&quot;&gt;&#39;type&#39;&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;&quot;netconsole&quot;&lt;/span&gt;
+            &lt;span class=&quot;err&quot;&gt;'action'&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;&quot;replace&quot;&lt;/span&gt;
+            &lt;span class=&quot;err&quot;&gt;'reverse'&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;[&quot;host&quot;]&lt;/span&gt;
+            &lt;span class=&quot;err&quot;&gt;'type'&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;&quot;netconsole&quot;&lt;/span&gt;
         &lt;span class=&quot;err&quot;&gt;}&lt;/span&gt;
     &lt;span class=&quot;err&quot;&gt;...&lt;/span&gt;
 &lt;span class=&quot;err&quot;&gt;}&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;p&gt;Теперь в поле &lt;code class=&quot;highlighter-rouge&quot;&gt;host&lt;/code&gt; вместо IP адреса сервера будет подставляться последний уровень домена хоста (т.е. если полный домен myserver.my.domain.example.com, то в поле попадёт только myserver). Это упростит жизнь в будущем.&lt;/p&gt;
 
 &lt;p&gt;Далее добавим фильтрацию сообщений, на появления которых хотим получать оповещения. Для примера возьмём строку сообщающую о приходи &lt;em&gt;oom&lt;/em&gt; киллера и будем тагать записи такого типа:&lt;/p&gt;
 
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;    &lt;span class=&quot;err&quot;&gt;filter&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;{&lt;/span&gt;
+&lt;div class=&quot;language-properties highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;    &lt;span class=&quot;err&quot;&gt;filter&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;{&lt;/span&gt;
         &lt;span class=&quot;err&quot;&gt;...&lt;/span&gt;
         &lt;span class=&quot;err&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;[message]&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;=~&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;/.+Out.of.memory.+Kill.process.+/&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;{&lt;/span&gt;
            &lt;span class=&quot;err&quot;&gt;noop&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;{&lt;/span&gt;
-                  &lt;span class=&quot;err&quot;&gt;&#39;add_tag&#39;&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;[&quot;notify&quot;]&lt;/span&gt;
+                  &lt;span class=&quot;err&quot;&gt;'add_tag'&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;[&quot;notify&quot;]&lt;/span&gt;
               &lt;span class=&quot;err&quot;&gt;}&lt;/span&gt;
         &lt;span class=&quot;err&quot;&gt;}&lt;/span&gt;
         &lt;span class=&quot;err&quot;&gt;...&lt;/span&gt;
     &lt;span class=&quot;err&quot;&gt;}&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;p&gt;Осталось научить &lt;em&gt;logstash&lt;/em&gt; отправлять сообщения с тэгом &lt;code class=&quot;highlighter-rouge&quot;&gt;notify&lt;/code&gt;. Для отправки на сервер &lt;em&gt;Nagios&lt;/em&gt; можно использовать уже готовые плагины logstash &lt;code class=&quot;highlighter-rouge&quot;&gt;nagios&lt;/code&gt; или &lt;code class=&quot;highlighter-rouge&quot;&gt;nagios_nsca&lt;/code&gt;. Я использую &lt;em&gt;shinken&lt;/em&gt; и хоть он и совместим с &lt;em&gt;Nagios&lt;/em&gt; в большинстве случаев, в этом я предпочёл использовать API &lt;em&gt;shinken&lt;/em&gt;. Для отправки сообщений я написал простенький скрипт на &lt;code class=&quot;highlighter-rouge&quot;&gt;bash&lt;/code&gt;:&lt;/p&gt;
 
 &lt;blockquote class=&quot;filename&quot;&gt;
   &lt;p&gt;log_event_sender.sh&lt;/p&gt;
 &lt;/blockquote&gt;
 
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c&quot;&gt;#!/bin/bash&lt;/span&gt;
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c&quot;&gt;#!/bin/bash&lt;/span&gt;
 &lt;span class=&quot;c&quot;&gt;# WS_Arbiter config&lt;/span&gt;
-&lt;span class=&quot;nv&quot;&gt;USER&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;username;
-&lt;span class=&quot;nv&quot;&gt;PASS&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;password;
-&lt;span class=&quot;nv&quot;&gt;WS_IP&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;192.168.0.55;
-&lt;span class=&quot;nv&quot;&gt;WS_PORT&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;7760;
+&lt;span class=&quot;nv&quot;&gt;USER&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;username&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;PASS&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;password&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;WS_IP&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;192.168.0.55&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;WS_PORT&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;7760&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
 
-&lt;span class=&quot;nv&quot;&gt;HOST_NAME&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$1&lt;/span&gt;;
-&lt;span class=&quot;nv&quot;&gt;SERVICE&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;sb&quot;&gt;`&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;echo&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$2&lt;/span&gt; | sed -r -e &lt;span class=&quot;s1&quot;&gt;&#39;s/[[:space:]]/%20/g&#39;&lt;/span&gt;&lt;span class=&quot;sb&quot;&gt;`&lt;/span&gt;;
-&lt;span class=&quot;nv&quot;&gt;RCODE&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;2;
-&lt;span class=&quot;nv&quot;&gt;MESSAGE&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;sb&quot;&gt;`&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;echo&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$3&lt;/span&gt; | sed -r -e &lt;span class=&quot;s1&quot;&gt;&#39;s/[[:space:]]/%20/g&#39;&lt;/span&gt;&lt;span class=&quot;sb&quot;&gt;`&lt;/span&gt;;
+&lt;span class=&quot;nv&quot;&gt;HOST_NAME&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;SERVICE&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;sb&quot;&gt;`&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;echo&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$2&lt;/span&gt; | sed &lt;span class=&quot;nt&quot;&gt;-r&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-e&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'s/[[:space:]]/%20/g'&lt;/span&gt;&lt;span class=&quot;sb&quot;&gt;`&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;RCODE&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;2&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;MESSAGE&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;sb&quot;&gt;`&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;echo&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$3&lt;/span&gt; | sed &lt;span class=&quot;nt&quot;&gt;-r&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-e&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'s/[[:space:]]/%20/g'&lt;/span&gt;&lt;span class=&quot;sb&quot;&gt;`&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
 
-&lt;span class=&quot;nv&quot;&gt;DATA&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;time_stamp=&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;$(&lt;/span&gt;date +%s&lt;span class=&quot;k&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;amp;host_name=&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$HOST_NAME&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;amp;service_description=&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$SERVICE&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;amp;return_code=&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$RCODE&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;amp;output=&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$MESSAGE&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;;
-&lt;span class=&quot;nv&quot;&gt;SEND&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;$(&lt;/span&gt;curl -s -u &lt;span class=&quot;k&quot;&gt;${&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;USER&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;}&lt;/span&gt;:&lt;span class=&quot;k&quot;&gt;${&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;PASS&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;}&lt;/span&gt; -d &lt;span class=&quot;nv&quot;&gt;$DATA&lt;/span&gt; http://&lt;span class=&quot;k&quot;&gt;${&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;WS_IP&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;}&lt;/span&gt;:&lt;span class=&quot;k&quot;&gt;${&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;WS_PORT&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;}&lt;/span&gt;/push_check_result&lt;span class=&quot;k&quot;&gt;)&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
+&lt;span class=&quot;nv&quot;&gt;DATA&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;time_stamp=&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;$(&lt;/span&gt;date +%s&lt;span class=&quot;k&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;amp;host_name=&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$HOST_NAME&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;amp;service_description=&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$SERVICE&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;amp;return_code=&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$RCODE&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;amp;output=&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$MESSAGE&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;SEND&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;$(&lt;/span&gt;curl &lt;span class=&quot;nt&quot;&gt;-s&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-u&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;${&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;USER&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;}&lt;/span&gt;:&lt;span class=&quot;k&quot;&gt;${&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;PASS&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-d&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$DATA&lt;/span&gt; http://&lt;span class=&quot;k&quot;&gt;${&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;WS_IP&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;}&lt;/span&gt;:&lt;span class=&quot;k&quot;&gt;${&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;WS_PORT&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;}&lt;/span&gt;/push_check_result&lt;span class=&quot;k&quot;&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;p&gt;Добавляем отправку сообщений с тэгом &lt;code class=&quot;highlighter-rouge&quot;&gt;notify&lt;/code&gt; в конфиг &lt;em&gt;logstash&lt;/em&gt;:&lt;/p&gt;
 
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;err&quot;&gt;output&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;{&lt;/span&gt;
+&lt;div class=&quot;language-properties highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;err&quot;&gt;output&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;{&lt;/span&gt;
     &lt;span class=&quot;err&quot;&gt;exec&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;{&lt;/span&gt;
-       &lt;span class=&quot;err&quot;&gt;&#39;tags&#39;&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;[&quot;notify&quot;]&lt;/span&gt;
-       &lt;span class=&quot;err&quot;&gt;&#39;command&#39;&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;&quot;/usr/local/log_event_sender.sh&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;%{host}&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;log_event&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;&#39;%{message}&#39;&quot;&lt;/span&gt;
+       &lt;span class=&quot;err&quot;&gt;'tags'&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;[&quot;notify&quot;]&lt;/span&gt;
+       &lt;span class=&quot;err&quot;&gt;'command'&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;&quot;/usr/local/log_event_sender.sh&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;%{host}&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;log_event&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;'%{message}'&quot;&lt;/span&gt;
   &lt;span class=&quot;err&quot;&gt;}&lt;/span&gt;
 &lt;span class=&quot;err&quot;&gt;}&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;p&gt;Дальнейшее расширение очевидно. Если нужно добавить оповещение о сообщениях другого типа, то нужно просто отлавливать их в &lt;em&gt;logstash&lt;/em&gt; и навешивать тэг &lt;code class=&quot;highlighter-rouge&quot;&gt;notify&lt;/code&gt;.&lt;/p&gt;
 </description>
         <pubDate>Wed, 02 Jul 2014 09:58:00 +0000</pubDate>
@@ -656,21 +696,20 @@ hostname/unix:10  MIT-MAGIC-COOKIE-1  f714ef310193878cae851635b871d840
     
       <item>
         <title>Erchef no_connect Error</title>
-        <description>&lt;h3 id=&quot;section&quot;&gt;Предпосылки&lt;/h3&gt;
+        <description>&lt;h3 id=&quot;Предпосылки&quot;&gt;Предпосылки&lt;/h3&gt;
 &lt;p&gt;Столкнулся с тем, что при большом количестве нод в &lt;a href=&quot;http://opscode.com&quot;&gt;chef-server&lt;/a&gt; версий &lt;em&gt;11.0.4&lt;/em&gt; и &lt;em&gt;11.0.8&lt;/em&gt; поставленных из omnibus пакетов для Ubuntu, он с большой периодичностью стал отдавать &lt;code class=&quot;highlighter-rouge&quot;&gt;500 Internal server error&lt;/code&gt; нодам при выполнении куска рецепта, который делает поиск по data_bag’ам. При изучении логов выяснилось следующее:
 В логах nginx’a видно, что запросы на поиск отправляются на бэкэнд erchef’а (ядро chef-server написанное на эрланге) и в ответ получаем &lt;code class=&quot;highlighter-rouge&quot;&gt;500&lt;/code&gt;:&lt;/p&gt;
 
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;192.168.1.111 - - [27/May/2014:11:45:28 +0000] &quot;GET /search/databag1?q=id:node1&amp;amp;sort=X_CHEF_id_CHEF_X%20asc&amp;amp;start=0&amp;amp;rows=1000 HTTP/1.1&quot; 500 &quot;0.051&quot; 36 &quot;-&quot; &quot;Chef Client/11.6.0 (ruby-1.9.3-p429; ohai-6.18.0; x86_64-linux; +http://opscode.com)&quot; &quot;127.0.0.1:8000&quot; &quot;500&quot; &quot;0.046&quot; &quot;11.6.0&quot; &quot;algorithm=sha1;version=1.0;&quot; &quot;auth1&quot; &quot;2014-05-27T11:45:28Z&quot; &quot;2jmj7l5rSw0yVb/vlWAYkK/YBwk=&quot; 1011
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;192.168.1.111 - - [27/May/2014:11:45:28 +0000] &quot;GET /search/databag1?q=id:node1&amp;amp;sort=X_CHEF_id_CHEF_X%20asc&amp;amp;start=0&amp;amp;rows=1000 HTTP/1.1&quot; 500 &quot;0.051&quot; 36 &quot;-&quot; &quot;Chef Client/11.6.0 (ruby-1.9.3-p429; ohai-6.18.0; x86_64-linux; +http://opscode.com)&quot; &quot;127.0.0.1:8000&quot; &quot;500&quot; &quot;0.046&quot; &quot;11.6.0&quot; &quot;algorithm=sha1;version=1.0;&quot; &quot;auth1&quot; &quot;2014-05-27T11:45:28Z&quot; &quot;2jmj7l5rSw0yVb/vlWAYkK/YBwk=&quot; 1011
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;p&gt;Смотрим далее в логи &lt;code class=&quot;highlighter-rouge&quot;&gt;erchef&lt;/code&gt;:&lt;/p&gt;
 
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;ERROR&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;REPORT&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;====&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;27&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;May&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2014&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;11&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;45&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;28&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;===&lt;/span&gt;
+&lt;div class=&quot;language-erlang highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;ERROR&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;REPORT&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;====&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;27&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;May&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2014&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;11&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;45&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;28&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;===&lt;/span&gt;
 &lt;span class=&quot;n&quot;&gt;webmachine&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;error&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;path&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;/search/databag1&quot;&lt;/span&gt;
 &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;error&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
     &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;error&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;function_clause&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
-        &lt;span class=&quot;p&quot;&gt;[{&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;chef_wm_search&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;&#39;-make_bulk_get_fun/5-lc$^1/1-2-&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;[{&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;chef_wm_search&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;'-make_bulk_get_fun/5-lc$^1/1-2-'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
              &lt;span class=&quot;p&quot;&gt;[{&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;error&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;no_connections&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;
              &lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;databag1&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;],&lt;/span&gt;
              &lt;span class=&quot;p&quot;&gt;[{&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;file&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;src/chef_wm_search.erl&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;},{&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;line&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;233&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}]},&lt;/span&gt;
@@ -688,13 +727,12 @@ hostname/unix:10  MIT-MAGIC-COOKIE-1  f714ef310193878cae851635b871d840
              &lt;span class=&quot;p&quot;&gt;[{&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;file&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;src/webmachine_decision_core.erl&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;},{&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;line&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;48&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}]},&lt;/span&gt;
          &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;webmachine_decision_core&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;decision&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
              &lt;span class=&quot;p&quot;&gt;[{&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;file&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;src/webmachine_decision_core.erl&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;},{&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;line&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;532&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}]}]}}&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;p&gt;К сожалению то, что erchef пишет в свой лог не информативно. Однако путём длительного перебора удалось понять, что проблема в соединении к базе.&lt;/p&gt;
 
 &lt;!--more--&gt;
 
-&lt;h3 id=&quot;section-1&quot;&gt;Решение&lt;/h3&gt;
+&lt;h3 id=&quot;Решение&quot;&gt;Решение&lt;/h3&gt;
 &lt;p&gt;Суть проблемы в том, что erchef открывает &lt;em&gt;N&lt;/em&gt; соединений к базе &lt;em&gt;postgresql&lt;/em&gt; (по умолчанию 20) и вываливается с выше указанной ошибкой, если этих 20-и соединений ему не хватает.
 Чтобы увеличить количество соединений нужно поправить конфиг erchef’a.&lt;/p&gt;
 
@@ -702,7 +740,7 @@ hostname/unix:10  MIT-MAGIC-COOKIE-1  f714ef310193878cae851635b871d840
   &lt;p&gt;/var/opt/chef-server/erchef/etc/app.config&lt;/p&gt;
 &lt;/blockquote&gt;
 
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;p&quot;&gt;...&lt;/span&gt;
+&lt;div class=&quot;language-erlang highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;p&quot;&gt;...&lt;/span&gt;
 &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pooler&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;
            &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pools&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[[{&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;sqerl&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;
                      &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;max_count&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;60&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;
@@ -711,8 +749,7 @@ hostname/unix:10  MIT-MAGIC-COOKIE-1  f714ef310193878cae851635b871d840
            &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;metrics_module&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;folsom_metrics&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
           &lt;span class=&quot;p&quot;&gt;]},&lt;/span&gt;
 &lt;span class=&quot;p&quot;&gt;...&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;p&gt;Правим значения для &lt;code class=&quot;highlighter-rouge&quot;&gt;max_count&lt;/code&gt; и &lt;code class=&quot;highlighter-rouge&quot;&gt;init_count&lt;/code&gt; с 20 на большие. В моём случае пока хватает 60 и 40.&lt;/p&gt;
 </description>
         <pubDate>Wed, 28 May 2014 09:42:00 +0000</pubDate>
@@ -738,54 +775,50 @@ hostname/unix:10  MIT-MAGIC-COOKIE-1  f714ef310193878cae851635b871d840
         <title>Трюки с ssh config</title>
         <description>&lt;p&gt;Конфиг ssh очень полезная и удобная штука. Пользуюсь им давно, но недавно открыл ещё несколько замечательных возможностей. Решил поделиться парой полезных фич и рассказать об одном маленьком лайфхаке.&lt;/p&gt;
 
-&lt;h3 id=&quot;section&quot;&gt;Шаринг соединений&lt;/h3&gt;
+&lt;h3 id=&quot;Шаринг-соединений&quot;&gt;Шаринг соединений&lt;/h3&gt;
 &lt;p&gt;Часто бывает необходимо по работе держать много консолей с ssh на один сервер. Для упрощения такой работы (с точки зрения компьютера) в OpenSSH есть возможность шарить соединения. Т.е. если вы зашли на сервер, то в системе создается &lt;em&gt;ControlSocket&lt;/em&gt; и все последующие соединения на этот сервер будут использовать уже созданный сокет, а не создавать новое подключение. И если при первом соединении сервер спрашивает у вас пароль, то при повторном использовании уже сокета авторизация не потребуется.&lt;/p&gt;
 
 &lt;p&gt;Для настройки &lt;em&gt;Connection sharing&lt;/em&gt; необходимо добавить следующие строчки в начало конфига ssh:&lt;/p&gt;
 
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;ControlMaster auto
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;ControlMaster auto
 ControlPath /tmp/ssh_%h_%p_%r
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
-&lt;h3 id=&quot;section-1&quot;&gt;Проброс соединений через сервер&lt;/h3&gt;
+&lt;h3 id=&quot;Проброс-соединений-через-сервер&quot;&gt;Проброс соединений через сервер&lt;/h3&gt;
 &lt;p&gt;Другая не менее полезная штука - это возможность настроить соединение через сервер. Т.е. вместо двух команд: &lt;code class=&quot;highlighter-rouge&quot;&gt;ssh server1&lt;/code&gt; и потом уже оттуда &lt;code class=&quot;highlighter-rouge&quot;&gt;ssh server2&lt;/code&gt;, можно сразу в конфиге всё прописать и ходить одной командой.&lt;/p&gt;
 
 &lt;!--more--&gt;
 
 &lt;p&gt;Выглядеть такой конфиг будет примерно так:&lt;/p&gt;
 
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Host server2
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Host server2
     HostName server2.domain.org
     ProxyCommand ssh -W %h:%p -C server1
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;p&gt;Тут стоит пояснить, что ssh подставит вместо &lt;code class=&quot;highlighter-rouge&quot;&gt;%h&lt;/code&gt; хост, а вместо &lt;code class=&quot;highlighter-rouge&quot;&gt;%p&lt;/code&gt; порт.&lt;/p&gt;
 
 &lt;p&gt;Но и это ещё не всё. Помимо это ssh понимает паттерны внутри своего конфига.
 Приведу пример:&lt;/p&gt;
 
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Host db*
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Host db*
    ProxyCommand ssh -W %h:%p -C gateway
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;p&gt;Теперь мы можем одной командой, скажем &lt;code class=&quot;highlighter-rouge&quot;&gt;ssh db2.domain.org&lt;/code&gt; попасть на сервер пробросив соединение через другой.&lt;/p&gt;
 
 &lt;p&gt;Этот метод в сочетании с шарингом соединений даёт мощный инструмент.&lt;/p&gt;
 
-&lt;h3 id=&quot;section-2&quot;&gt;Проброс соединений для серверов с похожими именами&lt;/h3&gt;
+&lt;h3 id=&quot;Проброс-соединений-для-серверов-с-похожими-именами&quot;&gt;Проброс соединений для серверов с похожими именами&lt;/h3&gt;
 &lt;p&gt;А теперь о проблеме с которой я столкнулся и “героически” решил.
 ПРоблема была в том, что есть два набора серверов с одинаковыми именами, пусть для примера это будут &lt;em&gt;db1&lt;/em&gt; &lt;em&gt;db2&lt;/em&gt; &lt;em&gt;dbN&lt;/em&gt;, находящихся за разными серверами, через которые на них надо ходить, пусть это будет &lt;em&gt;gate1&lt;/em&gt; и &lt;em&gt;gate2&lt;/em&gt;. Предыдущий пример с использованием паттернов покрывает задачу лишь частично. Можно, конечно, выкрутиться используя паттерны с доменным именем, но в таком случае надо набирать полное доменное имя сервера, хотя с гейта на него можно попасть по короткому имени без домена.
 Решить эту проблему удалось с помощью использования факта, что &lt;code class=&quot;highlighter-rouge&quot;&gt;ProxyCommand&lt;/code&gt; интерпретируется bash’ем =)
 В итоге конфиг выглядит приблизительно так:&lt;/p&gt;
 
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Host db*.dc1
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Host db*.dc1
     ProxyCommand ssh -W $(echo %h| cut -d. -f1):%p -C gate1
 
 Host db*.dc2
     ProxyCommand ssh -W $(echo %h| cut -d. -f1):%p -C gate2
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;p&gt;Т.е. в консоле мы вводим &lt;code class=&quot;highlighter-rouge&quot;&gt;ssh db5.dc2&lt;/code&gt;, данный сервер матчится со вторым паттерном, но пре передачи имени хоста в прокси-команду ненужная часть домена отбрасывается.&lt;/p&gt;
 
@@ -816,26 +849,23 @@ Host db*.dc2
 
 &lt;p&gt;Теперь надо сделать dump баз данных, при этом будем использовать атрибуты &lt;code class=&quot;highlighter-rouge&quot;&gt;add-drop-database&lt;/code&gt; для добавление в dump строчки удаляющей базу перед её созданием и &lt;code class=&quot;highlighter-rouge&quot;&gt;master-data&lt;/code&gt; для добавления информации о бин-логах и их позиции на момент создания dump’a. Так же, чтобы избежать переноса служебных баз, формируем список баз для переноса исключив из них все служебные базы mysql (в список можно добавить и другие базы по аналогии). После создания dump’a переносим его на slave сервер.&lt;/p&gt;
 
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;# DATABASE_LIST=$(mysql -NBe &#39;show schemas&#39; | grep -wv &#39;mysql\|performance_schema\|information_schema&#39;)
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;# DATABASE_LIST=$(mysql -NBe 'show schemas' | grep -wv 'mysql\|performance_schema\|information_schema')
 # mysqldump  --databases $DATABASE_LIST --add-drop-database --master-data -u root -p &amp;gt; dbdump.db
 # scp dbdump.db mysql-slave-host:~/
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;p&gt;На slave сервере добавляем необходиму информацию для репликации. Это можно сделать и после развертывания dump’a. Так же я пропущу описание настройки репликации в конфигурации mysql.&lt;/p&gt;
 
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;# mysql
-mysql&amp;gt; CHANGE MASTER TO MASTER_HOST=&#39;mysql-master-host&#39;, MASTER_USER=&#39;$replica_user&#39;, MASTER_PASSWORD=&#39;$slavepass&#39;;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;# mysql
+mysql&amp;gt; CHANGE MASTER TO MASTER_HOST='mysql-master-host', MASTER_USER='$replica_user', MASTER_PASSWORD='$slavepass';
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;p&gt;Теперь можно залить сделанный dump и после этого включить репликацию.&lt;/p&gt;
 
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;# mysql -p &amp;lt; ~/dbdump.db
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;# mysql -p &amp;lt; ~/dbdump.db
 # mysql
 mysql&amp;gt; slave start;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 </description>
         <pubDate>Wed, 14 May 2014 18:03:00 +0000</pubDate>
@@ -856,174 +886,6 @@ mysql&amp;gt; slave start;
         <category>linux</category>
         
         <category>databases</category>
-        
-      </item>
-    
-      <item>
-        <title>Репликация таблиц базы chef-server </title>
-        <description>&lt;h3 id=&quot;intro&quot;&gt;Intro&lt;/h3&gt;
-&lt;p&gt;В данной статье я расскажу как настроить два сервера &lt;a href=&quot;http://www.opscode.com&quot; title=&quot;Opscode&quot;&gt;chef-server&lt;/a&gt; версии 11 с репликацией части таблиц базы postgresql для обеспечения отказоустойчивости. Основная цель репликации это хранения данных о клиентах и нодах для прозрачного доступа нод к любому из &lt;a href=&quot;http://www.opscode.com&quot; title=&quot;Opscode&quot;&gt;chef&lt;/a&gt; серверов и возможности работы без перерегистрации. Предлагаемое &lt;a href=&quot;http://www.opscode.com&quot; title=&quot;Opscode&quot;&gt;opscode&lt;/a&gt; решение репликации данных через DRBD показалось мне не самым удобным и, главное, надёжным. По сему было принято решение искать альтернативные пути. Так как реплицировать все данные из всех таблиц нет необходимости, то было решено посмотреть в сторону &lt;a href=&quot;http://wiki.postgresql.org/wiki/Skytools&quot;&gt;skytools&lt;/a&gt; и &lt;a href=&quot;http://wiki.postgresql.org/wiki/Skytools#Londiste&quot;&gt;londiste&lt;/a&gt;, которые позволяют реплицировать только определенные таблицы БД.&lt;/p&gt;
-
-&lt;p&gt;Однако не обошлось без сюрпризов. &lt;a href=&quot;http://www.opscode.com&quot; title=&quot;Opscode&quot;&gt;Opscode&lt;/a&gt; распространяет shef-server 11 по средствам уже собранных omnibus пакетов, в котором свой postgres 9.2. Этот постгрес собран урезанным и не работает с skytools. В итоге в этой статье будет описано как поставить chef-server из omnibus пакета на дистрибутивный postgres 9.2 и прикрутить репликацию через londiste.&lt;/p&gt;
-
-&lt;!--more--&gt;
-
-&lt;p&gt;Мы будем устанавливать всё на &lt;a href=&quot;http://debian.org&quot;&gt;debian 7&lt;/a&gt;. Будет 2 сервера: &lt;code class=&quot;highlighter-rouge&quot;&gt;chef-master&lt;/code&gt; и &lt;code class=&quot;highlighter-rouge&quot;&gt;chef-slave&lt;/code&gt; соответственно.&lt;/p&gt;
-
-&lt;h3 id=&quot;postgresql-92&quot;&gt;Добавление репозитория; Установка postgresql 9.2&lt;/h3&gt;
-&lt;p&gt;К сожалению в дистрибутивном репозитории debian нет postgresql 9.2. По этому будем использовать не родной.
-Добавляем репозиторий для установки postgres-a и skytools и устанавливаем на обоих серверах:&lt;/p&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-console&quot; data-lang=&quot;console&quot;&gt;root@chef-master:~# wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
-root@chef-master:~# echo &quot;deb http://apt.postgresql.org/pub/repos/apt/ wheezy-pgdg main&quot; &amp;gt; /etc/apt/sources.list.d/postgresql.list
-root@chef-master:~# aptitude update
-root@chef-master:~# aptitude install skytools-modules-9.2 skytools3 skytools3-ticker skytools3-walmgr&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;!-- more --&gt;
-
-&lt;h3 id=&quot;chef-server--&quot;&gt;Установка chef-server на мастер&lt;/h3&gt;
-&lt;p&gt;Теперь можно начинать устанавливать chef-server:&lt;/p&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-console&quot; data-lang=&quot;console&quot;&gt;root@chef-master:~# wget https://opscode-omnibus-packages.s3.amazonaws.com/ubuntu/11.04/x86_64/chef-server_11.0.4-1.ubuntu.11.04_amd64.deb
-root@chef-master:~# dpkg -i chef-server_11.0.4-1.ubuntu.11.04_amd64.deb&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;p&gt;Перед запуском &lt;code class=&quot;highlighter-rouge&quot;&gt;chef-server-ctl reconfigure&lt;/code&gt; нужно немного поправить chef-solo рецепт для postgresql из omnibus пакета. Надо заменить исходный рецепт &lt;code class=&quot;highlighter-rouge&quot;&gt;/opt/chef-server/embedded/cookbooks/chef-server/recipes/postgresql.rb&lt;/code&gt; на не исходный - &lt;a href=&quot;/static/files/postgresql.rb&quot;&gt;postgresql.rb&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;Запускаем &lt;code class=&quot;highlighter-rouge&quot;&gt;sudo chef-server-ctl reconfigure&lt;/code&gt;&lt;/p&gt;
-
-&lt;p&gt;Собственно после этих действий получаем chef-server на дистрибутивном postgresql 9.2, что уже не плохо. Далее надо повторить эту же операцию на втором сервере(chef-slave).&lt;/p&gt;
-
-&lt;h3 id=&quot;chef-server---&quot;&gt;Установка chef-server; Подготовка к репликации&lt;/h3&gt;
-&lt;p&gt;Процедура идентична за исключение нескольких дополнительных шагов.
-Необходимо настроить postgres на IP адресе, который позволит мастеру производить репликацию и добавить в &lt;code class=&quot;highlighter-rouge&quot;&gt;pg_hba.conf&lt;/code&gt; разрешение для мастера.&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;root@chef-slave:~# sed -i &quot;s/#listen_addresses = &#39;localhost&#39;/listen_addresses = &#39;*&#39;/&quot; /etc/postgresql/9.2/mainpostgresql.conf
-root@chef-slave:~# echo &quot;host all all &amp;lt;chef-master-ip&amp;gt;/32 trust&quot; &amp;gt;&amp;gt; /etc/postgresql/9.2/main/pg_hba.conf
-root@chef-slave:~# service postgresql restart
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;p&gt;Далее надо почистить текущую базу от данных:&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;root@chef-slave:~# su postgres -c &quot;psql -d &#39;opscode_chef&#39; -c \&quot;delete from clients; \&quot;&quot;
-root@chef-slave:~# su postgres -c &quot;psql -d &#39;opscode_chef&#39; -c \&quot;delete from osc_users; \&quot;&quot;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;p&gt;Ещё надо подменить содержимое директории &lt;code class=&quot;highlighter-rouge&quot;&gt;/etc/chef-server&lt;/code&gt; на сервер &lt;code class=&quot;highlighter-rouge&quot;&gt;chef-slave&lt;/code&gt; на содержимое той же директории с сервер &lt;code class=&quot;highlighter-rouge&quot;&gt;chef-master&lt;/code&gt;. Там хранятся приватные ключи от системных пользователей chef-server-a.&lt;/p&gt;
-
-&lt;p&gt;Теперь всё готово к запуску репликации.&lt;/p&gt;
-
-&lt;h3 id=&quot;section&quot;&gt;Настройка репликации&lt;/h3&gt;
-&lt;p&gt;Для начала нужно добавить londiste и pgq в нашу базу. Для этого воспользуемся утилитой qadmin, которая была добавлена в skytools3:&lt;/p&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-console&quot; data-lang=&quot;console&quot;&gt;root@chef-master:~# su postgres -c &quot;qadmin -h localhost -U postgres -d opscode_chef -c &#39;install londiste&#39;&quot;
-INSTALL&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;p&gt;Пишем конфиги для мастера и слейва(оба конфига лежат на chef-master):&lt;/p&gt;
-
-&lt;blockquote class=&quot;filename&quot;&gt;
-  &lt;p&gt;/etc/skytools/replication_master.ini&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-cfg&quot; data-lang=&quot;cfg&quot;&gt;[londiste3]
-job_name = replication_src
-db = host=master-db dbname=opscode_chef user=postgres
-queue_name = replica
-logfile = /var/log/skytools/replica_src.log
-pidfile = /var/run/skytools/replica_src.pid&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;p&gt;Добавляем мастер:&lt;/p&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-console&quot; data-lang=&quot;console&quot;&gt;root@chef-master:~# londiste3 /etc/skytools/replication_master.ini create-root master-server &#39;dbname=opscode_chef user=postgres&#39;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;p&gt;Конфиг для слейва:&lt;/p&gt;
-
-&lt;blockquote class=&quot;filename&quot;&gt;
-  &lt;p&gt;/etc/skytools/replication_slave.ini&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-cfg&quot; data-lang=&quot;cfg&quot;&gt;[londiste3]
-job_name = replication_dst
-db = host=master-db dbname=opscode_chef user=postgres
-queue_name = replica
-logfile = /var/log/skytools/replica_dst.log
-pidfile = /var/run/skytools/replica_dst.pid&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;p&gt;Добавление слейва:&lt;/p&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-console&quot; data-lang=&quot;console&quot;&gt;root@chef-master:~# londiste3 /etc/skytools/replication_slave.ini create-leaf slave-server &#39;dbname=opscode_chef host=chef-slave user=postgres&#39; --provider=&#39;host=localhost dbname=opscode_chef user=postgres&#39;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;p&gt;Добавляем конфиг для pgq демона:&lt;/p&gt;
-
-&lt;blockquote class=&quot;filename&quot;&gt;
-  &lt;p&gt;/etc/skytools/pgqd.ini&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-cgf&quot; data-lang=&quot;cgf&quot;&gt;[pgqd]
-logfile = /var/log/skytools/pgqd.log
-pidfile = /var/run/skytools/pgqd.pid
-base_connstr = host=localhost user=postgres
-initial_database = opscode_chef&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;p&gt;Теперь запускаем skytools и проверяем, что всё настроено верно:&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;root@chef-master:~# service skytools start
-root@chef-master:~# londiste3 /etc/skytools/replication_master.ini status
-Queue: replica   Local node: master-server
-
-master-server (root)
-  |                           Tables: 0/0/0
-  |                           Lag: 12s, Tick: 32
-  +--slave-server (leaf)
-                              Tables: 0/0/0
-                              Lag: 12s, Tick: 32
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;p&gt;Видим, что у нас есть 2 сервера но пока ничего не реплицируется.
-Добавляем необходимые таблицы:&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;root@chef-master:~# londiste3 /etc/skytools/replication_master.ini add-table clients
-root@chef-master:~# londiste3 /etc/skytools/replication_master.ini add-table nodes
-root@chef-master:~# londiste3 /etc/skytools/replication_master.ini add-table osc_users
-root@chef-master:~# londiste3 /etc/skytools/replication_slave.ini add-table nodes
-root@chef-master:~# londiste3 /etc/skytools/replication_slave.ini add-table clients
-root@chef-master:~# londiste3 /etc/skytools/replication_slave.ini add-table osc_users
-root@chef-master:~# londiste3 /etc/skytools/replication_master.ini status
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;p&gt;Спустя несколько минут мы можем увидеть, что репликация завершилась:&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Queue: replica   Local node: master-server
-
-master-server (root)
-  |                           Tables: 3/0/0
-  |                           Lag: 14s, Tick: 52
-  +--slave-server (leaf)
-                              Tables: 3/0/0
-                              Lag: 14s, Tick: 52
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-
-</description>
-        <pubDate>Fri, 09 Aug 2013 11:16:00 +0000</pubDate>
-        <link>https://cyberflow.net/2013/08/replication-chef-database.html</link>
-        <guid isPermaLink="true">https://cyberflow.net/2013/08/replication-chef-database.html</guid>
-        
-        <category>debian</category>
-        
-        <category>postgresql</category>
-        
-        <category>skytools</category>
-        
-        <category>replication</category>
-        
-        <category>chef</category>
-        
-        
-        <category>chef</category>
-        
-        <category>ha</category>
-        
-        <category>linux</category>
         
       </item>
     

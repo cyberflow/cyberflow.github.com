@@ -85,7 +85,7 @@
 
 <p>Устанавливаем пакеты, необходимые для сборки и удовлетворения зависимостей:</p>
 
-<figure class="highlight"><pre><code class="language-bash" data-lang="bash">sudo aptitude install g++ curl python libssl-dev apache2-utils git-core checkinstall</code></pre></figure>
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nb">sudo </span>aptitude install g++ curl python libssl-dev apache2-utils git-core checkinstall</code></pre></figure>
 
 <p>Клонируем репозиторий с <a href="http://github.com">github</a>:</p>
 
@@ -97,11 +97,11 @@
 
 <p>Теперь можно собрать пакет для нашей системы:</p>
 
-<figure class="highlight"><pre><code class="language-bash" data-lang="bash">checkinstall --fstrans<span class="o">=</span>no --install<span class="o">=</span>no --pkgname<span class="o">=</span>node.js --pkgversion <span class="s2">"0.5.9"</span> --default</code></pre></figure>
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">checkinstall <span class="nt">--fstrans</span><span class="o">=</span>no <span class="nt">--install</span><span class="o">=</span>no <span class="nt">--pkgname</span><span class="o">=</span>node.js <span class="nt">--pkgversion</span> <span class="s2">"0.5.9"</span> <span class="nt">--default</span></code></pre></figure>
 
 <p>После сборки пакета его можно поставить:</p>
 
-<figure class="highlight"><pre><code class="language-bash" data-lang="bash">dpkg -i node.js_0.5.9-1_amd64.deb</code></pre></figure>
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">dpkg <span class="nt">-i</span> node.js_0.5.9-1_amd64.deb</code></pre></figure>
 
 <p>В статье использовались материалы со следующих сайтов:</p>
 
@@ -111,6 +111,15 @@
 </div>
 
 
+
+    
+    
+        
+            
+        
+            
+        
+    
 
     
     

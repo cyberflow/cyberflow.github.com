@@ -88,86 +88,90 @@
 
 <!--more-->
 
-<h2 id="section">Настройка кластера</h2>
+<h2 id="Настройка-кластера">Настройка кластера</h2>
 
-<h3 id="section-1">Настройка мастер ноды</h3>
+<h3 id="Настройка-мастер-ноды">Настройка мастер ноды</h3>
 <p>Пропуская процесс установки <code class="highlighter-rouge">elasticsearch</code> укажу лишь необходимые настройки:</p>
 
 <blockquote class="filename">
   <p>elasticsearch.yml</p>
 </blockquote>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="s">node.master</span><span class="pi">:</span> <span class="s">true</span>
-<span class="s">node.data</span><span class="pi">:</span> <span class="s">true</span>
+<div class="language-yml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="s">node.master</span><span class="pi">:</span> <span class="no">true</span>
+<span class="s">node.data</span><span class="pi">:</span> <span class="no">true</span>
 <span class="s">node.node_type</span><span class="pi">:</span> <span class="s">hot</span>
 <span class="nn">...</span>
-<span class="s">discovery.zen.ping.multicast.enabled</span><span class="pi">:</span> <span class="s">false</span>
+<span class="s">discovery.zen.ping.multicast.enabled</span><span class="pi">:</span> <span class="no">false</span>
 <span class="s">discovery.zen.ping.unicast.hosts</span><span class="pi">:</span> <span class="pi">[</span><span class="s2">"</span><span class="s">10.0.0.2"</span><span class="pi">]</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>Нода будет иметь тэг <code class="highlighter-rouge">hot</code> и хранит индексы для быстрого доступа.</p>
 
-<h3 id="section-2">Настройка ноды дынных</h3>
+<h3 id="Настройка-ноды-дынных">Настройка ноды дынных</h3>
 
 <blockquote class="filename">
   <p>elasticsearch.yml</p>
 </blockquote>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="s">node.master</span><span class="pi">:</span> <span class="s">false</span>
-<span class="s">node.data</span><span class="pi">:</span> <span class="s">true</span>
+<div class="language-yml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="s">node.master</span><span class="pi">:</span> <span class="no">false</span>
+<span class="s">node.data</span><span class="pi">:</span> <span class="no">true</span>
 <span class="s">node.node_type</span><span class="pi">:</span> <span class="s">warm</span>
 <span class="nn">...</span>
-<span class="s">discovery.zen.ping.multicast.enabled</span><span class="pi">:</span> <span class="s">false</span>
+<span class="s">discovery.zen.ping.multicast.enabled</span><span class="pi">:</span> <span class="no">false</span>
 <span class="s">discovery.zen.ping.unicast.hosts</span><span class="pi">:</span> <span class="pi">[</span><span class="s2">"</span><span class="s">10.0.0.1"</span><span class="pi">]</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>Нода будет иметь тэг <code class="highlighter-rouge">warm</code> и мы будем перемещать на нее устаревшие indices.</p>
 
-<h3 id="section-3">Перемещение</h3>
+<h3 id="Перемещение">Перемещение</h3>
 <p>После подготовки нод надо перезапустить <code class="highlighter-rouge">elasticsearch</code>.</p>
 
 <p>Убедиться, что ноды теперь в кластере можно командой:</p>
 
-<pre><code class="language-console">$ curl http://localhost:9200/_cat/nodes
-</code></pre>
+<div class="language-console highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gp">$</span> curl http://localhost:9200/_cat/nodes
+</code></pre></div></div>
 
 <p>Следующая команда (для elasticsearch-curator &lt; 4.X) поставит аттрибут аллокации для всех индексов старше 7 дней:</p>
 
-<pre><code class="language-console">$ curator --logfile /var/log/curator.log --loglevel INFO --logformat default --master-only --host localhost --port 9200 allocation --rule node_type=warm indices --time-unit days --older-than 7 --timestring '%Y.%m.%d'
-</code></pre>
+<div class="language-console highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gp">$</span> curator <span class="nt">--logfile</span> /var/log/curator.log <span class="nt">--loglevel</span> INFO <span class="nt">--logformat</span> default <span class="nt">--master-only</span> <span class="nt">--host</span> localhost <span class="nt">--port</span> 9200 allocation <span class="nt">--rule</span> <span class="nv">node_type</span><span class="o">=</span>warm indices <span class="nt">--time-unit</span> days <span class="nt">--older-than</span> 7 <span class="nt">--timestring</span> <span class="s1">'%Y.%m.%d'</span>
+</code></pre></div></div>
 
 <p>ниже конфиг <code class="highlighter-rouge">action.yml</code> для elasticsearch-curator &gt;= 4.X:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="nn">---</span>
-<span class="s">actions</span><span class="pi">:</span>
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">---</span>
+<span class="na">actions</span><span class="pi">:</span>
   <span class="s1">'</span><span class="s">1'</span><span class="pi">:</span>
-    <span class="s">action</span><span class="pi">:</span> <span class="s">allocation</span>
-    <span class="s">description</span><span class="pi">:</span> <span class="s">Apply shard allocation routing to 'node_type=warm' node</span>
-    <span class="s">options</span><span class="pi">:</span>
-      <span class="s">key</span><span class="pi">:</span> <span class="s">node_type</span>
-      <span class="s">value</span><span class="pi">:</span> <span class="s">warm</span>
-      <span class="s">allocation_type</span><span class="pi">:</span> <span class="s">require</span>
-      <span class="s">wait_for_completion</span><span class="pi">:</span> <span class="s">False</span>
-      <span class="s">continue_if_exception</span><span class="pi">:</span> <span class="s">False</span>
-    <span class="s">filters</span><span class="pi">:</span>
-    <span class="pi">-</span> <span class="s">filtertype</span><span class="pi">:</span> <span class="s">pattern</span>
-      <span class="s">kind</span><span class="pi">:</span> <span class="s">prefix</span>
-      <span class="s">value</span><span class="pi">:</span> <span class="s">logstash-</span>
-    <span class="pi">-</span> <span class="s">filtertype</span><span class="pi">:</span> <span class="s">age</span>
-      <span class="s">source</span><span class="pi">:</span> <span class="s">creation_date</span>
-      <span class="s">direction</span><span class="pi">:</span> <span class="s">older</span>
-      <span class="s">unit</span><span class="pi">:</span> <span class="s">days</span>
-      <span class="s">unit_count</span><span class="pi">:</span> <span class="s">7</span>
-</code></pre>
-</div>
+    <span class="na">action</span><span class="pi">:</span> <span class="s">allocation</span>
+    <span class="na">description</span><span class="pi">:</span> <span class="s">Apply shard allocation routing to 'node_type=warm' node</span>
+    <span class="na">options</span><span class="pi">:</span>
+      <span class="na">key</span><span class="pi">:</span> <span class="s">node_type</span>
+      <span class="na">value</span><span class="pi">:</span> <span class="s">warm</span>
+      <span class="na">allocation_type</span><span class="pi">:</span> <span class="s">require</span>
+      <span class="na">wait_for_completion</span><span class="pi">:</span> <span class="s">False</span>
+      <span class="na">continue_if_exception</span><span class="pi">:</span> <span class="s">False</span>
+    <span class="na">filters</span><span class="pi">:</span>
+    <span class="pi">-</span> <span class="na">filtertype</span><span class="pi">:</span> <span class="s">pattern</span>
+      <span class="na">kind</span><span class="pi">:</span> <span class="s">prefix</span>
+      <span class="na">value</span><span class="pi">:</span> <span class="s">logstash-</span>
+    <span class="pi">-</span> <span class="na">filtertype</span><span class="pi">:</span> <span class="s">age</span>
+      <span class="na">source</span><span class="pi">:</span> <span class="s">creation_date</span>
+      <span class="na">direction</span><span class="pi">:</span> <span class="s">older</span>
+      <span class="na">unit</span><span class="pi">:</span> <span class="s">days</span>
+      <span class="na">unit_count</span><span class="pi">:</span> <span class="s">7</span>
+</code></pre></div></div>
 
 <p>Теперь можно добавить команду curator-а, описанную выше, в cron сервера и перемещение будет происходить автоматически.</p>
 </div>
 </div>
 
 
+
+    
+    
+        
+            
+        
+    
 
     
     

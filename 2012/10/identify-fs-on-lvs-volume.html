@@ -85,44 +85,24 @@
 
 <p>Для начала нужно посотреть смещение на томе, чтобы определить откуда начинаются необходимые нам данные. Для этого можно выполнить команду:</p>
 
-<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="gp">$ </span>mdadm -E /dev/sas00/51501_24
-/dev/sas00/51501_24:
-          Magic : a92b4efc
-        Version : 1.2
-    Feature Map : 0x1
-     Array UUID : a11a9dae:fa6f187e:fdce9334:ec1fe46b
-           Name : xen10:md51501_24
-  Creation Time : Wed Sep 26 12:01:52 2012
-     Raid Level : raid1
-   Raid Devices : 2
-
- Avail Dev Size : 10491904 <span class="o">(</span>5.00 GiB 5.37 GB<span class="o">)</span>
-     Array Size : 10491880 <span class="o">(</span>5.00 GiB 5.37 GB<span class="o">)</span>
-  Used Dev Size : 10491880 <span class="o">(</span>5.00 GiB 5.37 GB<span class="o">)</span>
-    <span class="k">**</span>Data Offset : 2048 sectors<span class="k">**</span>
-   Super Offset : 8 sectors
-          State : clean
-    Device UUID : 58297892:37844649:cb27316e:2e2f8c0e
-
-Internal Bitmap : 8 sectors from superblock
-    Update Time : Fri Oct 12 10:30:43 2012
-       Checksum : 6b31c0a0 - correct
-         Events : 6786
-
-
-   Device Role : Active device 0
-   Array State : AA <span class="o">(</span><span class="s1">'A'</span> <span class="o">==</span> active, <span class="s1">'.'</span> <span class="o">==</span> missing<span class="o">)</span></code></pre></figure>
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">$ </span>mdadm <span class="nt">-E</span> /dev/sas00/51501_24<br data-jekyll-commonmark-ghpages="" />/dev/sas00/51501_24:<br data-jekyll-commonmark-ghpages="" />          Magic : a92b4efc<br data-jekyll-commonmark-ghpages="" />        Version : 1.2<br data-jekyll-commonmark-ghpages="" />    Feature Map : 0x1<br data-jekyll-commonmark-ghpages="" />     Array UUID : a11a9dae:fa6f187e:fdce9334:ec1fe46b<br data-jekyll-commonmark-ghpages="" />           Name : xen10:md51501_24<br data-jekyll-commonmark-ghpages="" />  Creation Time : Wed Sep 26 12:01:52 2012<br data-jekyll-commonmark-ghpages="" />     Raid Level : raid1<br data-jekyll-commonmark-ghpages="" />   Raid Devices : 2<br data-jekyll-commonmark-ghpages="" /><br data-jekyll-commonmark-ghpages="" /> Avail Dev Size : 10491904 <span class="o">(</span>5.00 GiB 5.37 GB<span class="o">)</span><br data-jekyll-commonmark-ghpages="" />     Array Size : 10491880 <span class="o">(</span>5.00 GiB 5.37 GB<span class="o">)</span><br data-jekyll-commonmark-ghpages="" />  Used Dev Size : 10491880 <span class="o">(</span>5.00 GiB 5.37 GB<span class="o">)</span><br data-jekyll-commonmark-ghpages="" />    <span class="k">**</span>Data Offset : 2048 sectors<span class="k">**</span><br data-jekyll-commonmark-ghpages="" />   Super Offset : 8 sectors<br data-jekyll-commonmark-ghpages="" />          State : clean<br data-jekyll-commonmark-ghpages="" />    Device UUID : 58297892:37844649:cb27316e:2e2f8c0e<br data-jekyll-commonmark-ghpages="" /><br data-jekyll-commonmark-ghpages="" />Internal Bitmap : 8 sectors from superblock<br data-jekyll-commonmark-ghpages="" />    Update Time : Fri Oct 12 10:30:43 2012<br data-jekyll-commonmark-ghpages="" />       Checksum : 6b31c0a0 - correct<br data-jekyll-commonmark-ghpages="" />         Events : 6786<br data-jekyll-commonmark-ghpages="" /><br data-jekyll-commonmark-ghpages="" /><br data-jekyll-commonmark-ghpages="" />   Device Role : Active device 0<br data-jekyll-commonmark-ghpages="" />   Array State : AA <span class="o">(</span><span class="s1">'A'</span> <span class="o">==</span> active, <span class="s1">'.'</span> <span class="o">==</span> missing<span class="o">)</span></code></pre></figure>
 
 <p>Далее мы можем получить суберблок и определить тип файловой системы:</p>
 
-<figure class="highlight"><pre><code class="language-bash" data-lang="bash">dd <span class="k">if</span><span class="o">=</span>/dev/sas00/51501_24 <span class="nv">skip</span><span class="o">=</span>2048 <span class="nv">bs</span><span class="o">=</span>1k <span class="nv">count</span><span class="o">=</span>1024 | file -
-/dev/stdin: Linux rev 1.0 ext4 filesystem data, <span class="nv">UUID</span><span class="o">=</span>afb28ffa-9663-4f2e-94cb-9d05abfd1b76 <span class="o">(</span>needs journal recovery<span class="o">)</span> <span class="o">(</span>extents<span class="o">)</span> <span class="o">(</span>large files<span class="o">)</span> <span class="o">(</span>huge files<span class="o">)</span></code></pre></figure>
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">dd <span class="k">if</span><span class="o">=</span>/dev/sas00/51501_24 <span class="nv">skip</span><span class="o">=</span>2048 <span class="nv">bs</span><span class="o">=</span>1k <span class="nv">count</span><span class="o">=</span>1024 | file -<br data-jekyll-commonmark-ghpages="" />/dev/stdin: Linux rev 1.0 ext4 filesystem data, <span class="nv">UUID</span><span class="o">=</span>afb28ffa-9663-4f2e-94cb-9d05abfd1b76 <span class="o">(</span>needs journal recovery<span class="o">)</span> <span class="o">(</span>extents<span class="o">)</span> <span class="o">(</span>large files<span class="o">)</span> <span class="o">(</span>huge files<span class="o">)</span></code></pre></figure>
 
 <p>Том, который использовался для примера содержит FS ext4</p>
 </div>
 </div>
 
 
+
+    
+    
+        
+            
+        
+    
 
     
     

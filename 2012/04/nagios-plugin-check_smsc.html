@@ -85,13 +85,13 @@
 
 <p><a href="https://github.com/cyberflow/nagios_plugin/tree/master/check_smsc">check_smsc</a></p>
 
-<h3 id="section">Документация</h3>
+<h3 id="Документация">Документация</h3>
 
 <p>Данный плагин позволяет получить данные о состоянии счёт <a href="http://smsc.ru">smsc.ru</a> и устанавливать значения для предупреждений. В качестве параметров плагину передаются логин и пароль в md5hash (пароль можно передать и в явном виде, но делать этого не рекомендуется).</p>
 
 <p><em>Опции:</em></p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>-l/--login
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>-l/--login
 	Логин от аккаунта smsc.ru
 -p/--pass
 	Пароль от аккаунта в md5hash
@@ -101,19 +101,18 @@
 -c/--critical
 	Определяется значение баланса, меньше которого будет выдаваться критическое предупреждение.
 	По умолчанию выключено.
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p><br />
 <em>Пример использования:</em></p>
 
-<figure class="highlight"><pre><code class="language-bash" data-lang="bash">check_smsc.sh -l login -p 50207fa2814e81a067bd2662ba10b0f1 -w 200 -c 100</code></pre></figure>
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">check_smsc.sh <span class="nt">-l</span> login <span class="nt">-p</span> 50207fa2814e81a067bd2662ba10b0f1 <span class="nt">-w</span> 200 <span class="nt">-c</span> 100</code></pre></figure>
 
-<h3 id="section-1">Дополнительная информация</h3>
+<h3 id="Дополнительная-информация">Дополнительная информация</h3>
 
 <p>Для перевода пароля в md5hash можно воспользоваться командой:</p>
 
-<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nb">echo</span> -n <span class="s2">"password"</span> | md5sum -</code></pre></figure>
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nb">echo</span> <span class="nt">-n</span> <span class="s2">"password"</span> | md5sum -</code></pre></figure>
 
 </div>
 </div>
@@ -121,30 +120,6 @@
 
 
     
-    
-        
-            
-        
-            
-        
-    
-
-    
-    
-        
-            
-        
-            
-        
-    
-
-    
-    
-        
-            
-        
-            
-        
     
         
             
@@ -154,6 +129,49 @@
                 <div class="panel-body">
                 <h4>Related Posts</h4>
                 <ul>
+                
+                <li class="relatedPost">
+                    <a href="https://cyberflow.net/2017/12/kapacitor-alert-to-icinga2.html" data-proofer-ignore>send kapacitor alert to Icinga 2</a>
+                    
+                        (Categories: <a href="/category/monitoring">monitoring</a>)
+                    
+                </li>
+                
+                
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+        
+    
+        
+            
+        
+            
                 
                 <li class="relatedPost">
                     <a href="https://cyberflow.net/2016/05/optimization-standalone-elasticsearch-in-elk-stack.html" data-proofer-ignore>Оптимизация standalone сервера elasticsearch</a>
