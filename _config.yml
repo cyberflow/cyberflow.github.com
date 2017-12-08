@@ -34,6 +34,7 @@ exclude:
   - vendor
   - .travis
   - travis_rsa.enc
+  - source_readme.md
 
 excerpt_separator: <!--more-->
 excerpt_link: "Read on &rarr;"
