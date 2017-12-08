@@ -12,8 +12,7 @@ require 'html-proofer'
 CONFIG = YAML.load(File.read('_config.yml'))
 USERNAME = CONFIG['username'] || ENV['GIT_NAME']
 REPO = CONFIG['repo'] || 'cyberflow.github.com'
-# DEST = CONFIG['destination'] || '_deploy'
-DEST = '_site'
+DEST = CONFIG['destination'] || '_deploy'
 
 SOURCE_BRANCH = 'source'
 DESTINATION_BRANCH = 'master'
