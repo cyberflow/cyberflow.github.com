@@ -7,7 +7,7 @@ tags: [chef, clodo.ru, knife]
 published: true
 ---
 
-Данная статья описывает возможность автоматической настройки виртуальных серверов (на примере хостинга [clodo][]) с помощью [chef](http://www.opscode.com).
+Данная статья описывает возможность автоматической настройки виртуальных серверов (на примере хостинга clodo.ru) с помощью [chef](http://www.opscode.com).
 
 Заводим аккаунт в [opscode][]
 
@@ -32,7 +32,7 @@ cookbook_path            ["#{current_dir}/../cookbooks"]
 <!--more-->
 >  При создании пользователя помните, что его имя не должно совпадать с именем аккаунта в [opscode][]. Это приведёт к коллизии и ошибке в доступе к функциям API и панели управления chef сервером.
 
-Теперь можно установить [knife][] и плагин к нему от [clodo][]:
+Теперь можно установить [knife][] и плагин к нему от clodo.ru:
 {% highlight bash %}
 $ curl -L https://www.opscode.com/chef/install.sh | sudo bash
 $ sudo aptitude install libxml2-dev libxslt1-dev
@@ -51,7 +51,7 @@ $ git clone git://github.com/opscode-cookbooks/build-essential.git
 $ knife cookbook upload openssl wordpress php mysql apache2 build-essential xml
 {% endhighlight %}
 
-После установки можно приступать к магии. Для начала добавим в конфиг [knife][] данные аккаунта [clodo][]:
+После установки можно приступать к магии. Для начала добавим в конфиг [knife][] данные аккаунта clodo.ru:
 {% highlight bash %}
 $ cat >> ~/.chef/knife.rb << EOF
 knife[:clodo_username] =         'clodo@user.name'
@@ -71,5 +71,4 @@ knife clodo server create -r "recipe[apt]" -c ~/.chef/knife-clodo-test.rb \
 
 [opscode]:	http://www.opscode.com/	      	     	    "Opscode"
 [knife]:	https://docs.chef.io/knife.html             "Knife"
-[clodo]:	https://clodo.ru/			                "Clodo.ru"
 [wordpress]:    http://wordpress.org/ 			        "WordPress"
