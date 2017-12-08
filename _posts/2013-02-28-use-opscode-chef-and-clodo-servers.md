@@ -54,7 +54,7 @@ $ knife cookbook upload openssl wordpress php mysql apache2 build-essential xml
 После установки можно приступать к магии. Для начала добавим в конфиг [knife][] данные аккаунта [clodo][]:
 {% highlight bash %}
 $ cat >> ~/.chef/knife.rb << EOF
-knife[:clodo_username] =         'clodo@user.name' 
+knife[:clodo_username] =         'clodo@user.name'
 knife[:clodo_api_key]   =        '12345678890qwertyasdfgh'
 knife[:clodo_api_auth_url]      = 'api.clodo.ru'
 EOF
@@ -71,5 +71,5 @@ knife clodo server create -r "recipe[apt]" -c ~/.chef/knife-clodo-test.rb \
 
 [opscode]:	http://www.opscode.com/	      	     	    "Opscode"
 [knife]:	https://docs.chef.io/knife.html             "Knife"
-[clodo]:	http://clodo.ru/			                "Clodo.ru"
+[clodo]:	https://clodo.ru/			                "Clodo.ru"
 [wordpress]:    http://wordpress.org/ 			        "WordPress"
