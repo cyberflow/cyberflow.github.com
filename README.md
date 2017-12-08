@@ -1,8 +1,6 @@
-## My workflow
+## My Stack Problems
 
-* in `source` branch create _draft post `bundle exec jekyll draft "My new draft"`
-* write post
-* if finish `bundle exec jekyll publish _drafts/my-new-draft.md --date 2014-01-24`
+> This project forked and has been modified from [Stack Problems](https://github.com/agusmakmun/agusmakmun.github.io), and the search posts using [Super Search](https://github.com/chinchang/super-search)
 
 ### Demo
 * [https://cyberflow.net](https://cyberflow.net)
