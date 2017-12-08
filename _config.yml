@@ -24,7 +24,7 @@ kramdown:
 
 disqus_short_name: cyberflowblog
 
-gems:
+plugins:
   - jekyll-gravatar
   - jekyll-categories
 
