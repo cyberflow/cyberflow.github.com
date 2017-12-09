@@ -41,7 +41,7 @@ h1 {
     font-weight: normal;
     color: #696969;
     margin-bottom: 10px;
-    font-size: 25px;
+    font-size: 20px;
 }
 
 h2 {
@@ -49,21 +49,29 @@ h2 {
     margin-bottom: 5px;
     color: #666666;
 }
-        
+
 h3 {
     font-weight: normal;
     margin-bottom: 5px;
     color: #666666;
 }
 
+header > h1 {
+  font-size: 25px;
+}
+
 a, a:link, a:active {
     text-decoration: none;
-    color: #8C8C8C;
+    color: #222;
 }
 
 a:hover {
     color: #B3B3B3;
     text-decoration: underline;
+}
+
+div.content > p > a {
+    color: #1982d1;
 }
 
 /**
@@ -85,7 +93,7 @@ div.right {
     width: 500px;
     float: left;
 }
-           
+
 div.content {
     border-top: 1px solid #E6E6E6;
     margin-top: 5px;
@@ -204,5 +212,5 @@ div.col-sm-3 img#about {
   margin-bottom: 0px;
   padding-left: 1em;
   font-family: Menlo,Monaco,Consolas,"Courier New",monospace;
-  border-left: 0px;    
+  border-left: 0px;
 }
