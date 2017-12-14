@@ -7,6 +7,7 @@ group :jekyll_plugins do
   gem 'jekyll-gravatar'
   gem 'jekyll-categories'
   gem 'jekyll-compose'
+  gem 'jekyll-multiple-languages-plugin'
 end
 
 group :tests do

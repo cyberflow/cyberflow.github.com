@@ -1,15 +1,23 @@
 ---
 layout: default
 ---
+
+<header class="post-header">
+  <h1 class="post-title">{{ page.title }}</h1>
+  {% if site.lang == "ru" %}
+    {% capture link1 %}{{ site.baseurl_root }}en{{ page.url}}{% endcapture %}
+    <div class="language_switch">
+      <a href="/{{ link1 }}" >{% t global.english %}</a>
+    </div>
+  {% elsif site.lang == "en" %}
+    {% capture link2 %}{{ site.baseurl_root }}{{ page.url  }}{% endcapture %}
+    <div class="language_switch">
+      <a href="{{ link2 }}" >{% t global.russian %}</a>
+    </div>
+  {% endif %}
+</header>
 <article class="post">
-
-  <header class="post-header">
-    <h1 class="post-title">{{ page.title }}</h1>
-    <hr />
-  </header>
-
-  <div class="post-content">
+  <div class="content">
     {{ content }}
   </div>
-
 </article>

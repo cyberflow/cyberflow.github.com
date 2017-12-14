@@ -8,8 +8,8 @@ email: dmitry.r@cyberflow.net
 urls:
     - text: Categories
       url: /category/
-    - text: Github
-      url: https://github.com/cyberflow
+    - text: Code
+      url: /code/
     - text: XML Feed
       url: /feed.xml
 url: "https://cyberflow.net"
@@ -27,6 +27,7 @@ disqus_short_name: cyberflowblog
 plugins:
   - jekyll-gravatar
   - jekyll-categories
+  - jekyll-multiple-languages-plugin
 
 exclude:
   - Gemfile
@@ -43,3 +44,15 @@ category_dir: 'category'
 
 # Google Analytics
 google_analytics_tracking_id: 'UA-31213444-1'
+
+# multiple language plugin config
+languages: ['ru', 'en']
+exclude_from_localizations: ['static', '_posts']
+
+# atom jekyll plugin config
+atom:
+  buildCommand:
+    - bundle
+    - exec
+    - jekyll
+    - build

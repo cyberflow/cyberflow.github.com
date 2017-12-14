@@ -70,7 +70,23 @@ a:hover {
     text-decoration: underline;
 }
 
+div.language_switch {
+  position: relative;
+  left: 0;
+  top: -30px;
+}
+
+div.language_switch > a {
+  position: absolute;
+  right: 0px;
+  font-size: 12px;
+}
+
 div.content > p > a {
+    color: #1982d1;
+}
+
+div.post > p > a {
     color: #1982d1;
 }
 
