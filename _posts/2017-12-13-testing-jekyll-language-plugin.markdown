@@ -7,7 +7,7 @@ categories: [jekyll]
 date: "2017-12-13 16:14"
 ---
 
-Решил потестировать мультиязычный плагин для [jekyll][].
+Решил потестировать мультиязычный плагин для [jekyll](https://jekyllrb.com).
 На просторах сети нашел приличное количество оных, но для первой пробы решил выбрать [jekyll-language-plugin](https://github.com/vwochnik/jekyll-language-plugin).
 
 Установка плагина подробно описана на [wiki](https://github.com/vwochnik/jekyll-language-plugin/wiki/Getting-Started) проекта.
