@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html  lang="en" >
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link rel="shortcut icon" href="/static/img/favicon.ico" />
+        <title>Cyberflow</title>
+        <meta name="author" content="Cyberflow" />
+        <meta name="description" content="My Personal Blog" />
+        <meta name="keywords" content="Cyberflow, monitoring, perl, ruby, debian, linux, chef, notice, jekyll, clusters, ha, elasticsearch, databases" />
+        <link rel="alternate" type="application/rss+xml" title="RSS" href="/feed.xml">
+
+        <!-- syntax highlighting CSS -->
+        <link rel="stylesheet" href="/static/css/syntax.css">
+
+        <!-- Bootstrap core CSS -->
+        <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+
+        <!-- Fonts -->
+        <link href="//fonts.googleapis.com/css?family=Roboto+Condensed:400,300italic,300,400italic,700&amp;subset=latin,latin-ext" rel="stylesheet" type="text/css">
+
+        <!-- Custom CSS -->
+        <link rel="stylesheet" href="/static/css/super-search.css">
+        <link rel="stylesheet" href="/static/css/main.css">
+
+        <!-- Google Analytics -->
+        
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-31213444-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+    </head>
+
+    <body>
+        <div class="container">
+            <div class="col-sm-3">
+                <a href="/"><img id="about" src="https://www.gravatar.com/avatar/7ca36522be02d33e7d2f4ea209012ac3?s=68" alt="cyberflow_gravatar" height="75px" width="75px" /></a>
+                <h1 class="author-name">Cyberflow</h1>
+                
+                <div id="about">
+                    I am linux system administrator.
+                </div>
+                
+
+                <hr />
+                <div class="search" id="js-search">
+                  <input type="text" placeholder="(sitemap)~$ type to search" class="search__input form-control" id="js-search__input">
+                  <ul class="search__results" id="js-search__results"></ul>
+                </div>
+                <hr />
+
+                <strong>Navigation</strong><br />
+                    &raquo; <a href="/">Home</a> <br />
+                
+                    &raquo; <a class="about" href="/category/">Categories</a><br />
+                
+                    &raquo; <a class="about" href="/code/">Code</a><br />
+                
+                    &raquo; <a class="about" href="/feed.xml">XML Feed</a><br />
+                
+            </div>
+
+            <div class="col-sm-8 col-offset-1">
+                <div id="home">
+    <h1>Cyberflow</h1>
+    <hr />
+    <ol class="posts">
+    
+      
+      
+<header>
+  <h1 class="entry-title"><a href="/2012/10/identify-fs-on-lvs-volume.html">Определение ФС на LVS томе</a></h1>
+  
+    <p class="meta">
+      12 Oct 2012
+      
+       | <a href="/2012/10/identify-fs-on-lvs-volume.html#disqus_thread">Comments</a>
+      
+    </p>
+  
+</header>
+<div class="content"><p>Для определения FS на LVS томе нам необходимо получить метаданные данные с тома, определяющие тип FS.</p>
+
+<p>Для начала нужно посотреть смещение на томе, чтобы определить откуда начинаются необходимые нам данные. Для этого можно выполнить команду:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">$ </span>mdadm <span class="nt">-E</span> /dev/sas00/51501_24<br data-jekyll-commonmark-ghpages="" />/dev/sas00/51501_24:<br data-jekyll-commonmark-ghpages="" />          Magic : a92b4efc<br data-jekyll-commonmark-ghpages="" />        Version : 1.2<br data-jekyll-commonmark-ghpages="" />    Feature Map : 0x1<br data-jekyll-commonmark-ghpages="" />     Array UUID : a11a9dae:fa6f187e:fdce9334:ec1fe46b<br data-jekyll-commonmark-ghpages="" />           Name : xen10:md51501_24<br data-jekyll-commonmark-ghpages="" />  Creation Time : Wed Sep 26 12:01:52 2012<br data-jekyll-commonmark-ghpages="" />     Raid Level : raid1<br data-jekyll-commonmark-ghpages="" />   Raid Devices : 2<br data-jekyll-commonmark-ghpages="" /><br data-jekyll-commonmark-ghpages="" /> Avail Dev Size : 10491904 <span class="o">(</span>5.00 GiB 5.37 GB<span class="o">)</span><br data-jekyll-commonmark-ghpages="" />     Array Size : 10491880 <span class="o">(</span>5.00 GiB 5.37 GB<span class="o">)</span><br data-jekyll-commonmark-ghpages="" />  Used Dev Size : 10491880 <span class="o">(</span>5.00 GiB 5.37 GB<span class="o">)</span><br data-jekyll-commonmark-ghpages="" />    <span class="k">**</span>Data Offset : 2048 sectors<span class="k">**</span><br data-jekyll-commonmark-ghpages="" />   Super Offset : 8 sectors<br data-jekyll-commonmark-ghpages="" />          State : clean<br data-jekyll-commonmark-ghpages="" />    Device UUID : 58297892:37844649:cb27316e:2e2f8c0e<br data-jekyll-commonmark-ghpages="" /><br data-jekyll-commonmark-ghpages="" />Internal Bitmap : 8 sectors from superblock<br data-jekyll-commonmark-ghpages="" />    Update Time : Fri Oct 12 10:30:43 2012<br data-jekyll-commonmark-ghpages="" />       Checksum : 6b31c0a0 - correct<br data-jekyll-commonmark-ghpages="" />         Events : 6786<br data-jekyll-commonmark-ghpages="" /><br data-jekyll-commonmark-ghpages="" /><br data-jekyll-commonmark-ghpages="" />   Device Role : Active device 0<br data-jekyll-commonmark-ghpages="" />   Array State : AA <span class="o">(</span><span class="s1">'A'</span> <span class="o">==</span> active, <span class="s1">'.'</span> <span class="o">==</span> missing<span class="o">)</span></code></pre></figure>
+
+<p>Далее мы можем получить суберблок и определить тип файловой системы:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">dd <span class="k">if</span><span class="o">=</span>/dev/sas00/51501_24 <span class="nv">skip</span><span class="o">=</span>2048 <span class="nv">bs</span><span class="o">=</span>1k <span class="nv">count</span><span class="o">=</span>1024 | file -<br data-jekyll-commonmark-ghpages="" />/dev/stdin: Linux rev 1.0 ext4 filesystem data, <span class="nv">UUID</span><span class="o">=</span>afb28ffa-9663-4f2e-94cb-9d05abfd1b76 <span class="o">(</span>needs journal recovery<span class="o">)</span> <span class="o">(</span>extents<span class="o">)</span> <span class="o">(</span>large files<span class="o">)</span> <span class="o">(</span>huge files<span class="o">)</span></code></pre></figure>
+
+<p>Том, который использовался для примера содержит FS ext4</p>
+</div>
+
+
+    
+      
+      
+<header>
+  <h1 class="entry-title"><a href="/2012/08/install-debian-to-hp-proliant-with-bnx2.html">Install debian to HP ProLiant with bnx2</a></h1>
+  
+    <p class="meta">
+      27 Aug 2012
+      
+       | <a href="/2012/08/install-debian-to-hp-proliant-with-bnx2.html#disqus_thread">Comments</a>
+      
+    </p>
+  
+</header>
+<div class="content"><h3 id="Введение">Введение</h3>
+<p>При установки Debian 6 на HP ProLiant DL360 сталкнулся с тем, что в образе netinstall нет fireware для сетевой карточки Broadcom Corporation NetXtreme II. Собственно инсталлятор в курсе этого и предлагает поискать соответствующий fireware на внешнем носителе. В этой заметке я опишу как быстро создать *.img файл с нужными fireware, который в последствии можно смонтировать через ipmi-kvm и скормить инсталлятору.</p>
+
+<h3 id="Поиск-fireware">Поиск fireware</h3>
+<p>Собственно для debian 6 есть <a href="http://packages.debian.org/squeeze/firmware-bnx2">пакет</a> со всем необходимым, и всё бы ничего, но вот без настроенной сетевой карты поставить этот пакет в систему не простая задача. Но т.к. в пакете есть всё необходимое, то качаем сырцы пакета, распаковываем и приступаем к созданию образа.</p>
+
+<h3 id="Создание-img-файла">Создание IMG файла</h3>
+<p>Создайм бланковый файл, который будет у нас образом флоппи-диска, и создаём в нём файловую систему:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">$ </span>dd <span class="nv">bs</span><span class="o">=</span>512 <span class="nv">count</span><span class="o">=</span>2880 <span class="k">if</span><span class="o">=</span>/dev/zero <span class="nv">of</span><span class="o">=</span>imagefile.img<br data-jekyll-commonmark-ghpages="" /><span class="nv">$ </span>mkfs.msdos imagefile.img</code></pre></figure>
+
+<p>Далее монтируем наш флоппи-образ:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">$ </span><span class="nb">sudo </span>mkdir /media/floppy1/<br data-jekyll-commonmark-ghpages="" /><span class="nv">$ </span><span class="nb">sudo </span>mount <span class="nt">-o</span> loop imagefile.img /media/floppy1/</code></pre></figure>
+
+<p>Теперь кладём файлы, который просит инстолятор в /media/floppy1/, отмонтируем образ и скармливаем файл с образом инсталятору.</p>
+
+</div>
+
+
+    
+      
+      
+<header>
+  <h1 class="entry-title"><a href="/2012/05/fix-invalid-date-format-in-specification-ruby.html">Fix invalid date format in specification Ruby</a></h1>
+  
+    <p class="meta">
+      05 May 2012
+      
+       | <a href="/2012/05/fix-invalid-date-format-in-specification-ruby.html#disqus_thread">Comments</a>
+      
+    </p>
+  
+</header>
+<div class="content"><p>После обновления Ubuntu с 11.04 до версии 11.10 столкнулся с постоянной ошибкой при работе с ruby вида:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">Invalid gemspec <span class="k">in</span> <span class="o">[</span>/var/lib/gems/1.8/specifications/directory_watcher-1.4.1.gemspec]: invalid date format <span class="k">in </span>specification: <span class="s2">"2011-08-30 00:00:00.000000000Z"</span></code></pre></figure>
+
+<p>Версия ruby 1.8.7</p>
+
+<p>Для лечения этой проблемы необходимо поправить строчку в проблемной спеке, заменив строчку:</p>
+
+<p><em>s.date = %q{2011-05-21 00:00:00.000000000Z}</em></p>
+
+<p>на</p>
+
+<p><em>s.date = %q{2011-05-21}</em></p>
+
+<p>Для конкретно моего случая надо править <em>/var/lib/gems/1.8/specifications/directory_watcher-1.4.1.gemspec</em></p>
+
+<p>WIN!</p>
+</div>
+
+
+    
+      
+      
+<header>
+  <h1 class="entry-title"><a href="/2012/04/nagios-plugin-check_smsc.html">Nagios plugin check_smsc</a></h1>
+  
+    <p class="meta">
+      26 Apr 2012
+      
+       | <a href="/2012/04/nagios-plugin-check_smsc.html#disqus_thread">Comments</a>
+      
+    </p>
+  
+</header>
+<div class="content"><p>В процессе настройки и работы с мониторинг-сервером icinga был использован ресурс <a href="http://smsc.ru">smsc.ru</a> для нотификации смс. В итоге это вылилось в задачу мониторинга баланса на этом ресурсе. Собственно после чего и был написан небольшой плагин для мониторинга баланса.</p>
+
+<p><a href="https://github.com/cyberflow/nagios_plugin/tree/master/check_smsc">check_smsc</a></p>
+
+<h3 id="Документация">Документация</h3>
+
+<p>Данный плагин позволяет получить данные о состоянии счёт <a href="http://smsc.ru">smsc.ru</a> и устанавливать значения для предупреждений. В качестве параметров плагину передаются логин и пароль в md5hash (пароль можно передать и в явном виде, но делать этого не рекомендуется).</p>
+
+<p><em>Опции:</em></p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>-l/--login
+	Логин от аккаунта smsc.ru
+-p/--pass
+	Пароль от аккаунта в md5hash
+-w/--warning
+	Определяется значение баланса, меньше которого будет выдаваться предупреждение.
+	По умолчанию выключено.
+-c/--critical
+	Определяется значение баланса, меньше которого будет выдаваться критическое предупреждение.
+	По умолчанию выключено.
+</code></pre></div></div>
+
+<p><br />
+<em>Пример использования:</em></p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">check_smsc.sh <span class="nt">-l</span> login <span class="nt">-p</span> 50207fa2814e81a067bd2662ba10b0f1 <span class="nt">-w</span> 200 <span class="nt">-c</span> 100</code></pre></figure>
+
+<h3 id="Дополнительная-информация">Дополнительная информация</h3>
+
+<p>Для перевода пароля в md5hash можно воспользоваться командой:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nb">echo</span> <span class="nt">-n</span> <span class="s2">"password"</span> | md5sum -</code></pre></figure>
+
+</div>
+
+
+    
+      
+      
+<header>
+  <h1 class="entry-title"><a href="/2011/11/idoutils-icinga-web-1-dot-5-2.html">Установка idoutils и icinga-web 1.5.2</a></h1>
+  
+    <p class="meta">
+      03 Nov 2011
+      
+       | <a href="/2011/11/idoutils-icinga-web-1-dot-5-2.html#disqus_thread">Comments</a>
+      
+    </p>
+  
+</header>
+<div class="content"><h3 id="Для-чего-это-нужно">Для чего это нужно?</h3>
+<p>В дефолтной инсталляции <a href="http://www.icinga.org">icinga</a> пишет все данные в файлики. Но есть возможность перенаправлять эти данные в базу при помощи idoutils. В целом в базе будут храниться все события, perf-data и другие данные.</p>
+
+<h3 id="Перед-тем-как-начать">Перед тем как начать</h3>
+<p>Подразумевается, что icinga 1.5.1 уже установлена и дальше будет только описание необходимых действия для установки idoutils и icinga-web 1.5.2. И то и другое требует базу данных. По этому убедитесь, что в вашем debian установлен соответствующий пакет. Если это не так, то установите его. Также необходимо наличии libdbi:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code># apt-get install mysql-server mysql-client libdbi0 libdbi0-dev libdbd-mysql
+</code></pre></div></div>
+<p>Для установки icinga-web 1.5.2 необходимы следующие пакеты:</p>
+
+</div>
+
+  <footer>
+    <a rel="full-article" href="/2011/11/idoutils-icinga-web-1-dot-5-2.html">Read on &rarr;</a>
+  </footer>
+
+
+    
+    </ol>
+
+    <!-- Pagination links -->
+    
+    <ul class="pagination">
+      
+        <li>
+          <a href="/en/page4/">&laquo;</a>
+        </li>
+      
+
+      <li><a href="/">First</a></li>
+
+      
+        
+          <li><a href="/">1</a></li>
+        
+      
+        
+          <li>
+            <a href="/en/page2/">2</a>
+          </li>
+        
+      
+        
+          <li>
+            <a href="/en/page3/">3</a>
+          </li>
+        
+      
+        
+          <li>
+            <a href="/en/page4/">4</a>
+          </li>
+        
+      
+        
+          <li class="active">
+             <a>5<span class="sr-only">(current)</span></a>
+          </li>
+        
+      
+
+      <li><a href="/page5/">Last</a></li>
+
+      
+        <li class="disabled"><span>&raquo;</span></li>
+      
+    </ul>
+    
+</div><!-- end #home -->
+
+
+                <footer>
+                    &copy; Cyberflow
+                    
+                    - <a href="https://github.com/cyberflow">https://github.com/cyberflow</a> - Powered by Jekyll.
+                    
+                </footer>
+            </div><!-- end /.col-sm-8 -->
+        </div><!-- end /.container -->
+
+        <!-- Bootstrap core JavaScript
+        ================================================== -->
+        <!-- Placed at the end of the document so the pages load faster -->
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+        <script src="/static/js/bootstrap.min.js"></script>
+        <script src="/static/js/super-search.js"></script>
+    </body>
+</html>

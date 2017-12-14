@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html  lang="en" >
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link rel="shortcut icon" href="/static/img/favicon.ico" />
+        <title>send kapacitor alert to Icinga 2 - Cyberflow</title>
+        <meta name="author" content="Cyberflow" />
+        <meta name="description" content="send kapacitor alert to Icinga 2" />
+        <meta name="keywords" content="send kapacitor alert to Icinga 2, Cyberflow, monitoring" />
+        <link rel="alternate" type="application/rss+xml" title="RSS" href="/feed.xml">
+
+        <!-- syntax highlighting CSS -->
+        <link rel="stylesheet" href="/static/css/syntax.css">
+
+        <!-- Bootstrap core CSS -->
+        <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+
+        <!-- Fonts -->
+        <link href="//fonts.googleapis.com/css?family=Roboto+Condensed:400,300italic,300,400italic,700&amp;subset=latin,latin-ext" rel="stylesheet" type="text/css">
+
+        <!-- Custom CSS -->
+        <link rel="stylesheet" href="/static/css/super-search.css">
+        <link rel="stylesheet" href="/static/css/main.css">
+
+        <!-- Google Analytics -->
+        
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-31213444-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+    </head>
+
+    <body>
+        <div class="container">
+            <div class="col-sm-3">
+                <a href="/"><img id="about" src="https://www.gravatar.com/avatar/7ca36522be02d33e7d2f4ea209012ac3?s=68" alt="cyberflow_gravatar" height="75px" width="75px" /></a>
+                <h1 class="author-name">Cyberflow</h1>
+                
+                <div id="about">
+                    I am linux system administrator.
+                </div>
+                
+
+                <hr />
+                <div class="search" id="js-search">
+                  <input type="text" placeholder="(sitemap)~$ type to search" class="search__input form-control" id="js-search__input">
+                  <ul class="search__results" id="js-search__results"></ul>
+                </div>
+                <hr />
+
+                <strong>Navigation</strong><br />
+                    &raquo; <a href="/">Home</a> <br />
+                
+                    &raquo; <a class="about" href="/category/">Categories</a><br />
+                
+                    &raquo; <a class="about" href="/code/">Code</a><br />
+                
+                    &raquo; <a class="about" href="/feed.xml">XML Feed</a><br />
+                
+            </div>
+
+            <div class="col-sm-8 col-offset-1">
+                <h1>send kapacitor alert to Icinga 2</h1>
+<span class="time">08 Dec 2017</span>
+
+<span class="categories">
+    &raquo; <a href="/category/monitoring">monitoring</a>
+</span>
+
+
+<div class="content">
+    <div class="post"><p>Сталкнулся с необходимостью мониторить метрики собираймые с хостов при помощи <a href="">telegraf</a>.</p>
+
+<h1 id="Описание-задачи">Описание задачи</h1>
+<p>Есть хост с <a href="https://www.icinga.com" title="Icinga2">icinga2</a> занимающийся мониторингом разного и рассылающий алерты соответствующим людям. Так же есть метрики с хостов, собираемые <a href="https://www.influxdata.com" title="influxdata">telegraf</a>, хранящиеся в <a href="https://www.influxdata.com" title="influxdata">influxdb</a>. Нужно реагировать на метрики и присылать алерты с <a href="https://www.icinga.com" title="Icinga2">incinga2</a>.</p>
+
+<h1 id="Реагирование-на-метрики">Реагирование на метрики</h1>
+<p>Можно насти разные подходы для процуссинга метрик с хоста, но разработчики <a href="https://www.influxdata.com" title="influxdata">influxdb</a> имеют специализированный engine для этой задачи. Дополнительно он решает вопрос реагирования на пики между активными проверками. А этот вопрос обязательно возникнет, если выбрать подход опроса <a href="https://www.influxdata.com" title="influxdata">influxdb</a> активными проверками со стороны <a href="https://www.icinga.com" title="Icinga2">icinga2</a>. Таким образом мы вибираем подход в котором данные с хостов процессятся в <a href="https://www.influxdata.com/time-series-platform/kapacitor/">kapacitor</a>.</p>
+
+<!--more-->
+
+<h1 id="Настройка-kapacitor-а">Настройка kapacitor-а</h1>
+<p>Kapacitor имеет таски, в которых описывается что и как должно мониторится. Кроме стандартных &lt;&gt;= можно настроить собственную систему Anomaly Detection. Тут я не буду вдаваться во все подробности. Нас интересует только тот момент, что каждая таска имеет в конфигурации блок <code class="highlighter-rouge">alert</code>. Там можно настроить передачу события в обработчик алертов. В <a href="https://www.influxdata.com" title="influxdata">kapacitor</a> представленно много уже готовых обработчиков, таких как email, HipChat, Slack, Telegram, PagerDuty, etc. но, к сожалению, нет ни одного, способного нативно отправить событие в <a href="https://www.icinga.com" title="Icinga2">icinga2</a>. Но разработчики предусмотрели обработчик exec, который может выполнить программу на локальной машине. Его мы и будем использовать.</p>
+
+<p>Так же отмечу, что для моих нужд оказалось проще и практичнее использовать topic. <code class="highlighter-rouge">Topic</code> - это объект <a href="https://www.influxdata.com" title="influxdata">kapacitor</a> в который разные таски могут присылать свои события и на этот топик подписывается обработчик этого топика, который одинакого опрабатывает все события в этом топике. Другими словами - если у нас есть несколько метрик для мониторинга, скажем Disk, CPU, Memory. Нам достаточно описать таски для всех и отправлять все события в один топик <code class="highlighter-rouge">metric_events</code> и подключив всего один обработчик пересылать все события в <a href="https://www.influxdata.com" title="influxdata">icinga2</a>.</p>
+
+<p>Пример описания таски с использованием топика:</p>
+<div class="language-yml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="s">stream</span>
+    <span class="s">|from()</span>
+        <span class="s">.measurement('cpu')</span>
+        <span class="s">.groupBy(*)</span>
+    <span class="s">|alert()</span>
+        <span class="s">.warn(lambda</span><span class="pi">:</span> <span class="s2">"</span><span class="s">usage_idle"</span> <span class="s">&lt; 20)</span>
+        <span class="s">.crit(lambda</span><span class="pi">:</span> <span class="s2">"</span><span class="s">usage_idle"</span> <span class="s">&lt; 10)</span>
+        <span class="s">.topic('metric_events')</span>
+</code></pre></div></div>
+
+<p>Пример описания топика:</p>
+<div class="language-yml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">kind</span><span class="pi">:</span> <span class="s">exec</span>
+<span class="na">options</span><span class="pi">:</span>
+  <span class="na">prog</span><span class="pi">:</span> <span class="s2">"</span><span class="s">/path/to/plugin/alert_to_icinga2.py"</span>
+  <span class="na">args</span><span class="pi">:</span>
+    <span class="pi">-</span> <span class="s2">"</span><span class="s">-u"</span>
+    <span class="pi">-</span> <span class="s2">"</span><span class="s">user"</span>
+    <span class="pi">-</span> <span class="s2">"</span><span class="s">-P"</span>
+    <span class="pi">-</span> <span class="s2">"</span><span class="s">password"</span>
+</code></pre></div></div>
+
+<p>Сам же плагин для отправки событий в [icinga2] можно найти по ссылке <a href="https://github.com/cyberflow/kapacitor_alert_to_icinga2.git">https://github.com/cyberflow/kapacitor_alert_to_icinga2.git</a></p>
+
+</div>
+</div>
+
+
+
+    
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+        
+            
+                
+                <div class="panel-body">
+                <h4>Related Posts</h4>
+                <ul>
+                
+                <li class="relatedPost">
+                    <a href="https://cyberflow.net/2016/05/optimization-standalone-elasticsearch-in-elk-stack.html" data-proofer-ignore>Оптимизация standalone сервера elasticsearch</a>
+                    
+                        (Categories: <a href="/category/elasticsearch">elasticsearch</a>, <a href="/category/monitoring">monitoring</a>, <a href="/category/linux">linux</a>)
+                    
+                </li>
+                
+                
+            
+        
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+        
+            
+                
+                <li class="relatedPost">
+                    <a href="https://cyberflow.net/2016/03/grafana-slash-nginx-auth-proxy-httpaswd.html" data-proofer-ignore>Grafana/nginx auth proxy httpaswd</a>
+                    
+                        (Categories: <a href="/category/linux">linux</a>, <a href="/category/monitoring">monitoring</a>)
+                    
+                </li>
+                
+                
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+                
+                <li class="relatedPost">
+                    <a href="https://cyberflow.net/2014/07/monitoring-dmesg.html" data-proofer-ignore>Мониторинг dmesg</a>
+                    
+                        (Categories: <a href="/category/monitoring">monitoring</a>, <a href="/category/linux">linux</a>)
+                    
+                </li>
+                
+                
+            
+        
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+        
+            
+        
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+        
+            
+        
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+        
+            
+        
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+        
+            
+        
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+        
+            
+                
+                <li class="relatedPost">
+                    <a href="https://cyberflow.net/2012/04/nagios-plugin-check_smsc.html" data-proofer-ignore>Nagios plugin check_smsc</a>
+                    
+                        (Categories: <a href="/category/perl">perl</a>, <a href="/category/monitoring">monitoring</a>)
+                    
+                </li>
+                
+                
+            
+        
+    
+
+    
+    
+        
+            
+                
+                <li class="relatedPost">
+                    <a href="https://cyberflow.net/2011/11/idoutils-icinga-web-1-dot-5-2.html" data-proofer-ignore>Установка idoutils и icinga-web 1.5.2</a>
+                    
+                        (Categories: <a href="/category/monitoring">monitoring</a>)
+                    
+                </li>
+                
+                
+            
+        
+    
+
+
+    </ul>
+    </div>
+
+
+<div class="PageNavigation">
+  
+    <a class="prev" href="/2016/06/jekyll-auto-deploy-and-tests.html">&laquo; Тестирование сайта на jekyll и авто-deploy на github pages</a>
+  
+  
+    <a class="next" href="/2017/12/testing-jekyll-language-plugin.html">testing jekyll language plugins &raquo;</a>
+  
+</div>
+
+
+
+
+<div class="disqus-comments">
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* <![CDATA[ */
+
+        var disqus_shortname = "cyberflowblog";
+        var disqus_identifier = "https://cyberflow.net_send kapacitor alert to Icinga 2";
+        var disqus_title = "send kapacitor alert to Icinga 2";
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    /* ]]> */
+    </script>
+</div>
+
+
+
+                <footer>
+                    &copy; Cyberflow
+                    
+                    - <a href="https://github.com/cyberflow">https://github.com/cyberflow</a> - Powered by Jekyll.
+                    
+                </footer>
+            </div><!-- end /.col-sm-8 -->
+        </div><!-- end /.container -->
+
+        <!-- Bootstrap core JavaScript
+        ================================================== -->
+        <!-- Placed at the end of the document so the pages load faster -->
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+        <script src="/static/js/bootstrap.min.js"></script>
+        <script src="/static/js/super-search.js"></script>
+    </body>
+</html>

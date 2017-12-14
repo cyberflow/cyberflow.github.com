@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html  lang="en" >
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link rel="shortcut icon" href="/static/img/favicon.ico" />
+        <title>Cyberflow</title>
+        <meta name="author" content="Cyberflow" />
+        <meta name="description" content="My Personal Blog" />
+        <meta name="keywords" content="Cyberflow, monitoring, perl, ruby, debian, linux, chef, notice, jekyll, clusters, ha, elasticsearch, databases" />
+        <link rel="alternate" type="application/rss+xml" title="RSS" href="/feed.xml">
+
+        <!-- syntax highlighting CSS -->
+        <link rel="stylesheet" href="/static/css/syntax.css">
+
+        <!-- Bootstrap core CSS -->
+        <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+
+        <!-- Fonts -->
+        <link href="//fonts.googleapis.com/css?family=Roboto+Condensed:400,300italic,300,400italic,700&amp;subset=latin,latin-ext" rel="stylesheet" type="text/css">
+
+        <!-- Custom CSS -->
+        <link rel="stylesheet" href="/static/css/super-search.css">
+        <link rel="stylesheet" href="/static/css/main.css">
+
+        <!-- Google Analytics -->
+        
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-31213444-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+    </head>
+
+    <body>
+        <div class="container">
+            <div class="col-sm-3">
+                <a href="/"><img id="about" src="https://www.gravatar.com/avatar/7ca36522be02d33e7d2f4ea209012ac3?s=68" alt="cyberflow_gravatar" height="75px" width="75px" /></a>
+                <h1 class="author-name">Cyberflow</h1>
+                
+                <div id="about">
+                    I am linux system administrator.
+                </div>
+                
+
+                <hr />
+                <div class="search" id="js-search">
+                  <input type="text" placeholder="(sitemap)~$ type to search" class="search__input form-control" id="js-search__input">
+                  <ul class="search__results" id="js-search__results"></ul>
+                </div>
+                <hr />
+
+                <strong>Navigation</strong><br />
+                    &raquo; <a href="/">Home</a> <br />
+                
+                    &raquo; <a class="about" href="/category/">Categories</a><br />
+                
+                    &raquo; <a class="about" href="/code/">Code</a><br />
+                
+                    &raquo; <a class="about" href="/feed.xml">XML Feed</a><br />
+                
+            </div>
+
+            <div class="col-sm-8 col-offset-1">
+                <div id="home">
+    <h1>Cyberflow</h1>
+    <hr />
+    <ol class="posts">
+    
+      
+      
+<header>
+  <h1 class="entry-title"><a href="/2017/12/testing-jekyll-language-plugin.html">testing jekyll language plugins</a></h1>
+  
+    <p class="meta">
+      13 Dec 2017
+      
+       | <a href="/2017/12/testing-jekyll-language-plugin.html#disqus_thread">Comments</a>
+      
+    </p>
+  
+</header>
+<div class="content"><p>Решил потестировать мультиязычный плагин для [jekyll][].
+На просторах сети нашел приличное количество оных, но для первой пробы решил выбрать <a href="https://github.com/vwochnik/jekyll-language-plugin">jekyll-language-plugin</a>.</p>
+
+<p>Установка плагина подробно описана на <a href="https://github.com/vwochnik/jekyll-language-plugin/wiki/Getting-Started">wiki</a> проекта.</p>
+
+<p>Однако беглый обзор показал, что реализация данного плагина требует файл с переводами для всего. Если я правильно понял, то пост надо забивать в такой файл, а потом вызывать весь пост как переменную. Возможно я что-то понял не так, но в итоге этот плагин мне не понравился.</p>
+
+<p>Дальнейшее исследование привело меня к <a href="https://github.com/Anthony-Gaudino/jekyll-multiple-languages-plugin">jekyll-multiple-languages-plugin</a>. Тут уже в документации описано, что статьи или страницы можно хранить в <code class="highlighter-rouge">.md</code> файлах в специпльных “языковых” директориях и импортировать их при помощи <code class="highlighter-rouge">% include file %</code>.</p>
+
+<p>Этот вариант понравился мне больше.</p>
+
+<p>Правда радость была не долгой. Плагин отказался работать “из коробки”. Ошибка в коде, отвечающем за определение статики сайта. В итоге при попытке сбилдить сайт получал <code class="highlighter-rouge">jekyll 3.6.2 | Error:  can't dup NilClass</code>. Добрае люди уже поправили ошибку и сделали <a href="https://github.com/Anthony-Gaudino/jekyll-multiple-languages-plugin/pull/102/files">PR</a> в github, но разработчики не торопяться его принимать. Печалька, но можно поправить руками.</p>
+
+<p>После патчинга модуля сборка заработала. Создать переводимую страницу (page в терминах jekyll) получилось без особых проблем. Однако для моего блога перевод статей, а точнее его текущее отсутсвие, привело к тому, что после сборки все статьи не сгенерились. После исключения из обработки директории с постами, при помощью директивы <code class="highlighter-rouge">exclude_from_localizations</code> в <code class="highlighter-rouge">_config.yml</code> удалось собрать сайт с переведенной страницей и не переведенными постами.</p>
+
+<p>Пример двухязычной страницы можно посмотреть <a href="/code/">тут</a>.</p>
+</div>
+
+
+    
+      
+      
+<header>
+  <h1 class="entry-title"><a href="/2017/12/kapacitor-alert-to-icinga2.html">send kapacitor alert to Icinga 2</a></h1>
+  
+    <p class="meta">
+      08 Dec 2017
+      
+       | <a href="/2017/12/kapacitor-alert-to-icinga2.html#disqus_thread">Comments</a>
+      
+    </p>
+  
+</header>
+<div class="content"><p>Сталкнулся с необходимостью мониторить метрики собираймые с хостов при помощи <a href="">telegraf</a>.</p>
+
+<h1 id="Описание-задачи">Описание задачи</h1>
+<p>Есть хост с <a href="https://www.icinga.com" title="Icinga2">icinga2</a> занимающийся мониторингом разного и рассылающий алерты соответствующим людям. Так же есть метрики с хостов, собираемые <a href="https://www.influxdata.com" title="influxdata">telegraf</a>, хранящиеся в <a href="https://www.influxdata.com" title="influxdata">influxdb</a>. Нужно реагировать на метрики и присылать алерты с <a href="https://www.icinga.com" title="Icinga2">incinga2</a>.</p>
+
+<h1 id="Реагирование-на-метрики">Реагирование на метрики</h1>
+<p>Можно насти разные подходы для процуссинга метрик с хоста, но разработчики <a href="https://www.influxdata.com" title="influxdata">influxdb</a> имеют специализированный engine для этой задачи. Дополнительно он решает вопрос реагирования на пики между активными проверками. А этот вопрос обязательно возникнет, если выбрать подход опроса <a href="https://www.influxdata.com" title="influxdata">influxdb</a> активными проверками со стороны <a href="https://www.icinga.com" title="Icinga2">icinga2</a>. Таким образом мы вибираем подход в котором данные с хостов процессятся в <a href="https://www.influxdata.com/time-series-platform/kapacitor/">kapacitor</a>.</p>
+
+</div>
+
+  <footer>
+    <a rel="full-article" href="/2017/12/kapacitor-alert-to-icinga2.html">Read on &rarr;</a>
+  </footer>
+
+
+    
+      
+      
+<header>
+  <h1 class="entry-title"><a href="/2016/06/jekyll-auto-deploy-and-tests.html">Тестирование сайта на jekyll и авто-deploy на github pages</a></h1>
+  
+    <p class="meta">
+      19 Jun 2016
+      
+       | <a href="/2016/06/jekyll-auto-deploy-and-tests.html#disqus_thread">Comments</a>
+      
+    </p>
+  
+</header>
+<div class="content"><p>Как и все в IT сайт нуждается в тестировании. Качество и количество тестов зависит от функциональности и значения сайта. Для своего блога я то же решил использовать тесты. Ну а так как все системные администраторы жутко ленивы, то и настроить автоматическую выкладку новых статей на <a href="https://pages.github.com">github pages</a> (в моем случае через <a href="http://travis-ci.org">travis-ci</a>)</p>
+
+<h3 id="html-proofer">html-proofer</h3>
+<p>Первым инструментом тестирования я выбрал <a href="https://github.com/gjtorikian/html-proofer">html-proofer</a>. Он позволяет проверять ссылки сайта, правильность оформления изображений а так же работоспособность внутренних и внешних скриптов.
+Для работы нужно установить gem или добавить строчку в Gemfile:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>gem 'html-proofer'
+</code></pre></div></div>
+
+</div>
+
+  <footer>
+    <a rel="full-article" href="/2016/06/jekyll-auto-deploy-and-tests.html">Read on &rarr;</a>
+  </footer>
+
+
+    
+      
+      
+<header>
+  <h1 class="entry-title"><a href="/2016/06/elasticsearch-cluster-for-old-indice.html">Миграция старых indices elasticsearch на другую ноду</a></h1>
+  
+    <p class="meta">
+      03 Jun 2016
+      
+       | <a href="/2016/06/elasticsearch-cluster-for-old-indice.html#disqus_thread">Comments</a>
+      
+    </p>
+  
+</header>
+<div class="content"><p>Я использую <code class="highlighter-rouge">elasticsearch</code> для централизованного хранения логов с серверов. Логов хранится много и каждый новый индекс ест ресурсы на сервере (статью об оптимизации используемых ресурсов для одной ноды можно посмотреть <a href="/2016/05/optimization-standalone-elasticsearch-in-elk-stack.html">здесь</a>). Однако это решение не спасает при хранении логов за очень большие периоды, в связи с чем я решил рассмотреть вариант хранения старых логов на отдельном сервере.</p>
+
+<p>Т.к. речь идет именно о логах, то шансы изменения данных из прошлого стремятся к нулю. Это позволяет нам не думать о необходимости записи в старые индексы и просто хранить их на сервере (например более дешевом с медленными дисками).
+Генеральная идея состоит в том, чтобы добавить дополнительную ноду данных в кластер и распределять индексы (indices) в зависимости от времени их создания.</p>
+
+</div>
+
+  <footer>
+    <a rel="full-article" href="/2016/06/elasticsearch-cluster-for-old-indice.html">Read on &rarr;</a>
+  </footer>
+
+
+    
+      
+      
+<header>
+  <h1 class="entry-title"><a href="/2016/05/optimization-standalone-elasticsearch-in-elk-stack.html">Оптимизация standalone сервера elasticsearch</a></h1>
+  
+    <p class="meta">
+      12 May 2016
+      
+       | <a href="/2016/05/optimization-standalone-elasticsearch-in-elk-stack.html#disqus_thread">Comments</a>
+      
+    </p>
+  
+</header>
+<div class="content"><p>При использовании <a href="https://www.elastic.co">elasticsearch</a> для сбора и анализа логов возникает вопрос оптимизации для одного сервера. Т.к. <code class="highlighter-rouge">elasticsearch</code> расчитан для использования в кластере, то большинство настроек “по умолчанию” выставлены так, что один сервер работает не эффективно. В этой заметке я разберу несколько примеров оптимизации <code class="highlighter-rouge">elasticsearch</code> для работы на одном сервере.</p>
+
+</div>
+
+  <footer>
+    <a rel="full-article" href="/2016/05/optimization-standalone-elasticsearch-in-elk-stack.html">Read on &rarr;</a>
+  </footer>
+
+
+    
+    </ol>
+
+    <!-- Pagination links -->
+    
+    <ul class="pagination">
+      
+        <li class="disabled"><span aria-hidden="true">&laquo;</span></li>
+      
+
+      <li><a href="/">First</a></li>
+
+      
+        
+          <li class="active">
+             <a>1<span class="sr-only">(current)</span></a>
+          </li>
+        
+      
+        
+          <li>
+            <a href="/en/page2/">2</a>
+          </li>
+        
+      
+        
+          <li>
+            <a href="/en/page3/">3</a>
+          </li>
+        
+      
+        
+          <li>
+            <a href="/en/page4/">4</a>
+          </li>
+        
+      
+        
+          <li>
+            <a href="/en/page5/">5</a>
+          </li>
+        
+      
+
+      <li><a href="/page5/">Last</a></li>
+
+      
+        <li>
+          <a href="/en/page2/">&raquo;</a>
+        </li>
+      
+    </ul>
+    
+</div><!-- end #home -->
+
+
+                <footer>
+                    &copy; Cyberflow
+                    
+                    - <a href="https://github.com/cyberflow">https://github.com/cyberflow</a> - Powered by Jekyll.
+                    
+                </footer>
+            </div><!-- end /.col-sm-8 -->
+        </div><!-- end /.container -->
+
+        <!-- Bootstrap core JavaScript
+        ================================================== -->
+        <!-- Placed at the end of the document so the pages load faster -->
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+        <script src="/static/js/bootstrap.min.js"></script>
+        <script src="/static/js/super-search.js"></script>
+    </body>
+</html>

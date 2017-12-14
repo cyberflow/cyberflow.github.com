@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html  lang="en" >
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link rel="shortcut icon" href="/static/img/favicon.ico" />
+        <title>Мониторинг dmesg - Cyberflow</title>
+        <meta name="author" content="Cyberflow" />
+        <meta name="description" content="Мониторинг dmesg" />
+        <meta name="keywords" content="Мониторинг dmesg, Cyberflow, monitoring, linux" />
+        <link rel="alternate" type="application/rss+xml" title="RSS" href="/feed.xml">
+
+        <!-- syntax highlighting CSS -->
+        <link rel="stylesheet" href="/static/css/syntax.css">
+
+        <!-- Bootstrap core CSS -->
+        <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+
+        <!-- Fonts -->
+        <link href="//fonts.googleapis.com/css?family=Roboto+Condensed:400,300italic,300,400italic,700&amp;subset=latin,latin-ext" rel="stylesheet" type="text/css">
+
+        <!-- Custom CSS -->
+        <link rel="stylesheet" href="/static/css/super-search.css">
+        <link rel="stylesheet" href="/static/css/main.css">
+
+        <!-- Google Analytics -->
+        
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-31213444-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+    </head>
+
+    <body>
+        <div class="container">
+            <div class="col-sm-3">
+                <a href="/"><img id="about" src="https://www.gravatar.com/avatar/7ca36522be02d33e7d2f4ea209012ac3?s=68" alt="cyberflow_gravatar" height="75px" width="75px" /></a>
+                <h1 class="author-name">Cyberflow</h1>
+                
+                <div id="about">
+                    I am linux system administrator.
+                </div>
+                
+
+                <hr />
+                <div class="search" id="js-search">
+                  <input type="text" placeholder="(sitemap)~$ type to search" class="search__input form-control" id="js-search__input">
+                  <ul class="search__results" id="js-search__results"></ul>
+                </div>
+                <hr />
+
+                <strong>Navigation</strong><br />
+                    &raquo; <a href="/">Home</a> <br />
+                
+                    &raquo; <a class="about" href="/category/">Categories</a><br />
+                
+                    &raquo; <a class="about" href="/code/">Code</a><br />
+                
+                    &raquo; <a class="about" href="/feed.xml">XML Feed</a><br />
+                
+            </div>
+
+            <div class="col-sm-8 col-offset-1">
+                <h1>Мониторинг dmesg</h1>
+<span class="time">02 Jul 2014</span>
+
+<span class="categories">
+    &raquo; <a href="/category/monitoring">monitoring</a>, <a href="/category/linux">linux</a>
+</span>
+
+
+<div class="content">
+    <div class="post"><h3 id="Задача">Задача</h3>
+<p>Необходимо организовать централизованный сбор логов, в частности сообщений ядра <code class="highlighter-rouge">dmesg</code> и реакции на них со стороны событийного мониторинга (например <em>nagios</em>).</p>
+
+<h3 id="Передача-сообщений-ядра-на-сервер-логов">Передача сообщений ядра на сервер логов</h3>
+<p>Для передачи сообщения ядра можно использовать модуль <code class="highlighter-rouge">netconsole</code>. Он позволяет передавать сообщения журнала ядра (dmesg) на удаленный компьютер по сети, без участия пространства пользователя (например, syslogd).
+Для сбора данных можно использовать, например <a href="http://logstash.net/">logstash</a>.</p>
+
+<p>Netconsole может быть встроен в ядро, так и загружен как модуль. Я использую загрузка модуля после загрузки системы, чтобы гарантировать, что сеть уже работает  настроена.</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code># dmesg -n 7
+# modprobe netconsole netconsole="6665@10.13.77.99/eth1,6666@10.13.77.1/d4:ae:52:cf:33:96"
+</code></pre></div></div>
+<p>Первая команда устанавливает уровень логирования для <code class="highlighter-rouge">dmesg</code>.
+Вторая загружает модуль <code class="highlighter-rouge">netconsole</code> с параметрами, где:
+<!--more--></p>
+
+<ul>
+  <li>6665 - порт отправки сообщений</li>
+  <li>10.13.77.99 - ip адрес хоста, с которого отправляются сообщения (текущий сервер)</li>
+  <li>eth1 - интерфейс с которого отправляются сообщения</li>
+  <li>6666 - порт, на который принимаются сообщения</li>
+  <li>10.13.77.1 - ip адрес хоста, на который принимаются сообщения</li>
+  <li>MAC - mac адрес интерфейса, на который принимаются сообщения</li>
+</ul>
+
+<p>Установка <code class="highlighter-rouge">logstash</code> не является темой этой статьи, поэтому я буду показывать лишь части конфига необходимые для реализации задачи. Для получения сообщений от <code class="highlighter-rouge">netconsole</code> надо указать следующий кусок конфига в блоке <code class="highlighter-rouge">input</code>:</p>
+
+<div class="language-properties highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">input</span> <span class="err">{</span>
+    <span class="err">udp</span> <span class="err">{</span>
+        <span class="py">type</span> <span class="p">=</span><span class="s">&gt; "netconsole"</span>
+        <span class="py">port</span> <span class="p">=</span><span class="s">&gt; "6666"</span>
+        <span class="py">host</span> <span class="p">=</span><span class="s">&gt; "10.13.77.1" }</span>
+    <span class="err">}</span>
+</code></pre></div></div>
+
+<p>где <code class="highlighter-rouge">host</code> - это ip адрес интерфейса на который будут присылаться сообщения ядра.</p>
+
+<p>Теперь все сообщения ядра отправляются в <code class="highlighter-rouge">logstash</code>.</p>
+
+<h3 id="Оповещения-при-критических-сообщениях-ядра">Оповещения при критических сообщениях ядра</h3>
+<p>В моём случае я хочу отслеживать наличие OOM сообщений и рассылать оповещения об этом. <code class="highlighter-rouge">Logstash</code> может отправлять письма с оповещениями сам, но мне интересно делать это событийным мониторингом.</p>
+
+<p>В качестве событийного мониторинга я использую <a href="http://www.shinken-monitoring.org">shinken</a>. Для реализации оповещения админов, по моему, лучше использовать сервисные чеки <code class="highlighter-rouge">is_volatile</code>. Эта опция позволяет отправлять оповещения на каждый статус non-OK даже если он не менялся. Подробнее об этой опции можно почитать на странице документации https://shinken.readthedocs.io.</p>
+
+<p>Чтобы не повторяться в описании каждого сервиса напишем template для volatile сервисов:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>define service {
+  name                          volatile-service
+  check_command                 dummy_ok
+  max_check_attempts            1
+  check_interval                5
+  retry_interval                2
+  active_checks_enabled         0
+  passive_checks_enabled        1
+  check_period                  24x7
+  check_freshness               1
+  freshness_threshold           300
+  flap_detection_enabled        0
+  notification_interval         60
+  notification_period           24x7
+  notification_options          u,c,w
+  notifications_enabled         1
+  contact_groups                sysadmin
+  register                      0
+}
+</code></pre></div></div>
+<p>В данном описании мы определяем пассивные сервисы, которые будут автоматически сбрасываться в статус ОК через 5 минут после изменения статуса. Так же важно в опции <code class="highlighter-rouge">max_check_attempts</code> указать 1, чтобы сервис сразу после первого сообщения переходил в <code class="highlighter-rouge">hard-state</code>.</p>
+
+<p>Теперь можно описать сам сервис используя вышеописанный template:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>define service {
+  hostgroup_name                linux
+  service_description           log_event
+  servicegroups                 logs
+  initial_state                 o
+  register                      1
+  use                           volatile-service
+}
+</code></pre></div></div>
+
+<p>С настройкой событийного мониторинга закончили. Переходим к настройке <code class="highlighter-rouge">logstash</code>.</p>
+
+<p>Т.к. все сообщения ядра приходят от IP адреса сервера, который его сгенерил, то первое что я рекомендую сделать это настроить для серверов обратную зону, что позволит упростить и дальнейшую работу с логами и передачу сообщений в <em>shinken</em>. Если обратная зона есть, то можно добавить в блок <em>filter</em> следующий кусок конфига:</p>
+
+<div class="language-properties highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">filter</span> <span class="err">{</span>
+    <span class="err">...</span>
+    <span class="err">dns</span> <span class="err">{</span>
+            <span class="err">'action'</span> <span class="err">=&gt;</span> <span class="err">"replace"</span>
+            <span class="err">'reverse'</span> <span class="err">=&gt;</span> <span class="err">["host"]</span>
+            <span class="err">'type'</span> <span class="err">=&gt;</span> <span class="err">"netconsole"</span>
+        <span class="err">}</span>
+    <span class="err">...</span>
+<span class="err">}</span>
+</code></pre></div></div>
+<p>Теперь в поле <code class="highlighter-rouge">host</code> вместо IP адреса сервера будет подставляться последний уровень домена хоста (т.е. если полный домен myserver.my.domain.example.com, то в поле попадёт только myserver). Это упростит жизнь в будущем.</p>
+
+<p>Далее добавим фильтрацию сообщений, на появления которых хотим получать оповещения. Для примера возьмём строку сообщающую о приходи <em>oom</em> киллера и будем тагать записи такого типа:</p>
+
+<div class="language-properties highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="err">filter</span> <span class="err">{</span>
+        <span class="err">...</span>
+        <span class="err">if</span> <span class="err">[message]</span> <span class="err">=~</span> <span class="err">/.+Out.of.memory.+Kill.process.+/</span> <span class="err">{</span>
+           <span class="err">noop</span> <span class="err">{</span>
+                  <span class="err">'add_tag'</span> <span class="err">=&gt;</span> <span class="err">["notify"]</span>
+              <span class="err">}</span>
+        <span class="err">}</span>
+        <span class="err">...</span>
+    <span class="err">}</span>
+</code></pre></div></div>
+<p>Осталось научить <em>logstash</em> отправлять сообщения с тэгом <code class="highlighter-rouge">notify</code>. Для отправки на сервер <em>Nagios</em> можно использовать уже готовые плагины logstash <code class="highlighter-rouge">nagios</code> или <code class="highlighter-rouge">nagios_nsca</code>. Я использую <em>shinken</em> и хоть он и совместим с <em>Nagios</em> в большинстве случаев, в этом я предпочёл использовать API <em>shinken</em>. Для отправки сообщений я написал простенький скрипт на <code class="highlighter-rouge">bash</code>:</p>
+
+<blockquote class="filename">
+  <p>log_event_sender.sh</p>
+</blockquote>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">#!/bin/bash</span>
+<span class="c"># WS_Arbiter config</span>
+<span class="nv">USER</span><span class="o">=</span>username<span class="p">;</span>
+<span class="nv">PASS</span><span class="o">=</span>password<span class="p">;</span>
+<span class="nv">WS_IP</span><span class="o">=</span>192.168.0.55<span class="p">;</span>
+<span class="nv">WS_PORT</span><span class="o">=</span>7760<span class="p">;</span>
+
+<span class="nv">HOST_NAME</span><span class="o">=</span><span class="nv">$1</span><span class="p">;</span>
+<span class="nv">SERVICE</span><span class="o">=</span><span class="sb">`</span><span class="nb">echo</span> <span class="nv">$2</span> | sed <span class="nt">-r</span> <span class="nt">-e</span> <span class="s1">'s/[[:space:]]/%20/g'</span><span class="sb">`</span><span class="p">;</span>
+<span class="nv">RCODE</span><span class="o">=</span>2<span class="p">;</span>
+<span class="nv">MESSAGE</span><span class="o">=</span><span class="sb">`</span><span class="nb">echo</span> <span class="nv">$3</span> | sed <span class="nt">-r</span> <span class="nt">-e</span> <span class="s1">'s/[[:space:]]/%20/g'</span><span class="sb">`</span><span class="p">;</span>
+
+<span class="nv">DATA</span><span class="o">=</span><span class="s2">"time_stamp=</span><span class="k">$(</span>date +%s<span class="k">)</span><span class="s2">&amp;host_name=</span><span class="nv">$HOST_NAME</span><span class="s2">&amp;service_description=</span><span class="nv">$SERVICE</span><span class="s2">&amp;return_code=</span><span class="nv">$RCODE</span><span class="s2">&amp;output=</span><span class="nv">$MESSAGE</span><span class="s2">"</span><span class="p">;</span>
+<span class="nv">SEND</span><span class="o">=</span><span class="k">$(</span>curl <span class="nt">-s</span> <span class="nt">-u</span> <span class="k">${</span><span class="nv">USER</span><span class="k">}</span>:<span class="k">${</span><span class="nv">PASS</span><span class="k">}</span> <span class="nt">-d</span> <span class="nv">$DATA</span> http://<span class="k">${</span><span class="nv">WS_IP</span><span class="k">}</span>:<span class="k">${</span><span class="nv">WS_PORT</span><span class="k">}</span>/push_check_result<span class="k">)</span>
+</code></pre></div></div>
+<p>Добавляем отправку сообщений с тэгом <code class="highlighter-rouge">notify</code> в конфиг <em>logstash</em>:</p>
+
+<div class="language-properties highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">output</span> <span class="err">{</span>
+    <span class="err">exec</span> <span class="err">{</span>
+       <span class="err">'tags'</span> <span class="err">=&gt;</span> <span class="err">["notify"]</span>
+       <span class="err">'command'</span> <span class="err">=&gt;</span> <span class="err">"/usr/local/log_event_sender.sh</span> <span class="err">%{host}</span> <span class="err">log_event</span> <span class="err">'%{message}'"</span>
+  <span class="err">}</span>
+<span class="err">}</span>
+</code></pre></div></div>
+<p>Дальнейшее расширение очевидно. Если нужно добавить оповещение о сообщениях другого типа, то нужно просто отлавливать их в <em>logstash</em> и навешивать тэг <code class="highlighter-rouge">notify</code>.</p>
+</div>
+</div>
+
+
+
+    
+    
+        
+            
+        
+            
+        
+    
+
+    
+    
+        
+            
+                
+                <div class="panel-body">
+                <h4>Related Posts</h4>
+                <ul>
+                
+                <li class="relatedPost">
+                    <a href="https://cyberflow.net/2017/12/kapacitor-alert-to-icinga2.html" data-proofer-ignore>send kapacitor alert to Icinga 2</a>
+                    
+                        (Categories: <a href="/category/monitoring">monitoring</a>)
+                    
+                </li>
+                
+                
+            
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+        
+    
+        
+            
+                
+                <li class="relatedPost">
+                    <a href="https://cyberflow.net/2016/05/optimization-standalone-elasticsearch-in-elk-stack.html" data-proofer-ignore>Оптимизация standalone сервера elasticsearch</a>
+                    
+                        (Categories: <a href="/category/elasticsearch">elasticsearch</a>, <a href="/category/monitoring">monitoring</a>, <a href="/category/linux">linux</a>)
+                    
+                </li>
+                
+                
+            
+        
+            
+        
+    
+        
+            
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+                
+                <li class="relatedPost">
+                    <a href="https://cyberflow.net/2016/03/grafana-slash-nginx-auth-proxy-httpaswd.html" data-proofer-ignore>Grafana/nginx auth proxy httpaswd</a>
+                    
+                        (Categories: <a href="/category/linux">linux</a>, <a href="/category/monitoring">monitoring</a>)
+                    
+                </li>
+                
+                
+            
+        
+    
+        
+            
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+        
+    
+        
+            
+        
+            
+                
+                <li class="relatedPost">
+                    <a href="https://cyberflow.net/2015/09/use-ssh-x-session-from-user-to-root.html" data-proofer-ignore>Пробрасывание X сессии от пользователя к root</a>
+                    
+                        (Categories: <a href="/category/notice">notice</a>, <a href="/category/linux">linux</a>)
+                    
+                </li>
+                
+                
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+        
+    
+        
+            
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+                
+                <li class="relatedPost">
+                    <a href="https://cyberflow.net/2014/05/ssh-config-tricks.html" data-proofer-ignore>Трюки с ssh config</a>
+                    
+                        (Categories: <a href="/category/linux">linux</a>)
+                    
+                </li>
+                
+                
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+        
+    
+        
+            
+        
+            
+                
+                <li class="relatedPost">
+                    <a href="https://cyberflow.net/2014/05/install-slave-percona-server.html" data-proofer-ignore>Установка slave mysql-percona сервера</a>
+                    
+                        (Categories: <a href="/category/ha">ha</a>, <a href="/category/linux">linux</a>, <a href="/category/databases">databases</a>)
+                    
+                </li>
+                
+                
+            
+        
+    
+        
+            
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+        
+    
+        
+            
+        
+            
+        
+    
+        
+            
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+        
+    
+        
+            
+        
+            
+        
+    
+        
+            
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+        
+    
+        
+            
+        
+            
+        
+    
+        
+            
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+        
+    
+        
+            
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+        
+    
+        
+            
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+        
+    
+        
+            
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+        
+    
+        
+            
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+        
+    
+
+
+    </ul>
+    </div>
+
+
+<div class="PageNavigation">
+  
+    <a class="prev" href="/2014/05/erchef-no-connect-error.html">&laquo; Erchef no_connect Error</a>
+  
+  
+    <a class="next" href="/2015/09/use-ssh-x-session-from-user-to-root.html">Пробрасывание X сессии от пользователя к root &raquo;</a>
+  
+</div>
+
+
+
+
+<div class="disqus-comments">
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* <![CDATA[ */
+
+        var disqus_shortname = "cyberflowblog";
+        var disqus_identifier = "https://cyberflow.net_Мониторинг dmesg";
+        var disqus_title = "Мониторинг dmesg";
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    /* ]]> */
+    </script>
+</div>
+
+
+
+                <footer>
+                    &copy; Cyberflow
+                    
+                    - <a href="https://github.com/cyberflow">https://github.com/cyberflow</a> - Powered by Jekyll.
+                    
+                </footer>
+            </div><!-- end /.col-sm-8 -->
+        </div><!-- end /.container -->
+
+        <!-- Bootstrap core JavaScript
+        ================================================== -->
+        <!-- Placed at the end of the document so the pages load faster -->
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+        <script src="/static/js/bootstrap.min.js"></script>
+        <script src="/static/js/super-search.js"></script>
+    </body>
+</html>

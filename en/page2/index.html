@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html  lang="en" >
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link rel="shortcut icon" href="/static/img/favicon.ico" />
+        <title>Cyberflow</title>
+        <meta name="author" content="Cyberflow" />
+        <meta name="description" content="My Personal Blog" />
+        <meta name="keywords" content="Cyberflow, monitoring, perl, ruby, debian, linux, chef, notice, jekyll, clusters, ha, elasticsearch, databases" />
+        <link rel="alternate" type="application/rss+xml" title="RSS" href="/feed.xml">
+
+        <!-- syntax highlighting CSS -->
+        <link rel="stylesheet" href="/static/css/syntax.css">
+
+        <!-- Bootstrap core CSS -->
+        <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+
+        <!-- Fonts -->
+        <link href="//fonts.googleapis.com/css?family=Roboto+Condensed:400,300italic,300,400italic,700&amp;subset=latin,latin-ext" rel="stylesheet" type="text/css">
+
+        <!-- Custom CSS -->
+        <link rel="stylesheet" href="/static/css/super-search.css">
+        <link rel="stylesheet" href="/static/css/main.css">
+
+        <!-- Google Analytics -->
+        
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-31213444-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+    </head>
+
+    <body>
+        <div class="container">
+            <div class="col-sm-3">
+                <a href="/"><img id="about" src="https://www.gravatar.com/avatar/7ca36522be02d33e7d2f4ea209012ac3?s=68" alt="cyberflow_gravatar" height="75px" width="75px" /></a>
+                <h1 class="author-name">Cyberflow</h1>
+                
+                <div id="about">
+                    I am linux system administrator.
+                </div>
+                
+
+                <hr />
+                <div class="search" id="js-search">
+                  <input type="text" placeholder="(sitemap)~$ type to search" class="search__input form-control" id="js-search__input">
+                  <ul class="search__results" id="js-search__results"></ul>
+                </div>
+                <hr />
+
+                <strong>Navigation</strong><br />
+                    &raquo; <a href="/">Home</a> <br />
+                
+                    &raquo; <a class="about" href="/category/">Categories</a><br />
+                
+                    &raquo; <a class="about" href="/code/">Code</a><br />
+                
+                    &raquo; <a class="about" href="/feed.xml">XML Feed</a><br />
+                
+            </div>
+
+            <div class="col-sm-8 col-offset-1">
+                <div id="home">
+    <h1>Cyberflow</h1>
+    <hr />
+    <ol class="posts">
+    
+      
+      
+<header>
+  <h1 class="entry-title"><a href="/2016/03/grafana-slash-nginx-auth-proxy-httpaswd.html">Grafana/nginx auth proxy httpaswd</a></h1>
+  
+    <p class="meta">
+      17 Mar 2016
+      
+       | <a href="/2016/03/grafana-slash-nginx-auth-proxy-httpaswd.html#disqus_thread">Comments</a>
+      
+    </p>
+  
+</header>
+<div class="content"><p>Краткое описание настройки <a href="http://grafana.org">Grafana</a> (&gt; 2.0) и nginx с использованием auth basic авторизации через файлы htpasswd.</p>
+
+<p>Необходимые настройки конфига Grafana:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[server]
+protocol = http
+http_port = 3000
+domain = localhost
+http_addr = 127.0.0.1
+...
+[auth.basic]
+enabled=false
+[users]
+allow_sign_up = false
+auto_assign_org = true
+auto_assign_org_role = Editor
+[auth.proxy]
+enabled = true
+header_name = X-WEBAUTH-USER
+auto_sign_up = true
+</code></pre></div></div>
+
+</div>
+
+  <footer>
+    <a rel="full-article" href="/2016/03/grafana-slash-nginx-auth-proxy-httpaswd.html">Read on &rarr;</a>
+  </footer>
+
+
+    
+      
+      
+<header>
+  <h1 class="entry-title"><a href="/2015/09/use-ssh-x-session-from-user-to-root.html">Пробрасывание X сессии от пользователя к root</a></h1>
+  
+    <p class="meta">
+      09 Sep 2015
+      
+       | <a href="/2015/09/use-ssh-x-session-from-user-to-root.html#disqus_thread">Comments</a>
+      
+    </p>
+  
+</header>
+<div class="content"><p>Сталкнулся с необходимостью запуска графической утилиты на удаленном сервере под пользователем root, но доступ для root по ssh закрыт.</p>
+
+<p>В итоге нашел такой workaround:</p>
+
+<p>Заходим на сервер под пользователем прокинув X сессию через ssh:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>~<span class="nv">$ </span>ssh <span class="nt">-X</span> user@hostname
+</code></pre></div></div>
+
+<p>Находим X сессию, потом свитчемся в root:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>~<span class="nv">$ </span>xauth list
+hostname/unix:10  MIT-MAGIC-COOKIE-1  f714ef310193878cae851635b871d840
+~<span class="nv">$ </span><span class="nb">sudo</span> <span class="nt">-s</span>
+</code></pre></div></div>
+
+<p>Добавляем имеющуюся сессию пользователю root</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>~# xauth add hostname/unix:10  MIT-MAGIC-COOKIE-1 f714ef310193878cae851635b871d840
+</code></pre></div></div>
+<p>Все! Можно запускать X приложение под root-ом.</p>
+</div>
+
+
+    
+      
+      
+<header>
+  <h1 class="entry-title"><a href="/2014/07/monitoring-dmesg.html">Мониторинг dmesg</a></h1>
+  
+    <p class="meta">
+      02 Jul 2014
+      
+       | <a href="/2014/07/monitoring-dmesg.html#disqus_thread">Comments</a>
+      
+    </p>
+  
+</header>
+<div class="content"><h3 id="Задача">Задача</h3>
+<p>Необходимо организовать централизованный сбор логов, в частности сообщений ядра <code class="highlighter-rouge">dmesg</code> и реакции на них со стороны событийного мониторинга (например <em>nagios</em>).</p>
+
+<h3 id="Передача-сообщений-ядра-на-сервер-логов">Передача сообщений ядра на сервер логов</h3>
+<p>Для передачи сообщения ядра можно использовать модуль <code class="highlighter-rouge">netconsole</code>. Он позволяет передавать сообщения журнала ядра (dmesg) на удаленный компьютер по сети, без участия пространства пользователя (например, syslogd).
+Для сбора данных можно использовать, например <a href="http://logstash.net/">logstash</a>.</p>
+
+<p>Netconsole может быть встроен в ядро, так и загружен как модуль. Я использую загрузка модуля после загрузки системы, чтобы гарантировать, что сеть уже работает  настроена.</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code># dmesg -n 7
+# modprobe netconsole netconsole="6665@10.13.77.99/eth1,6666@10.13.77.1/d4:ae:52:cf:33:96"
+</code></pre></div></div>
+<p>Первая команда устанавливает уровень логирования для <code class="highlighter-rouge">dmesg</code>.
+Вторая загружает модуль <code class="highlighter-rouge">netconsole</code> с параметрами, где:</p>
+
+</div>
+
+  <footer>
+    <a rel="full-article" href="/2014/07/monitoring-dmesg.html">Read on &rarr;</a>
+  </footer>
+
+
+    
+      
+      
+<header>
+  <h1 class="entry-title"><a href="/2014/05/erchef-no-connect-error.html">Erchef no_connect Error</a></h1>
+  
+    <p class="meta">
+      28 May 2014
+      
+       | <a href="/2014/05/erchef-no-connect-error.html#disqus_thread">Comments</a>
+      
+    </p>
+  
+</header>
+<div class="content"><h3 id="Предпосылки">Предпосылки</h3>
+<p>Столкнулся с тем, что при большом количестве нод в <a href="http://opscode.com">chef-server</a> версий <em>11.0.4</em> и <em>11.0.8</em> поставленных из omnibus пакетов для Ubuntu, он с большой периодичностью стал отдавать <code class="highlighter-rouge">500 Internal server error</code> нодам при выполнении куска рецепта, который делает поиск по data_bag’ам. При изучении логов выяснилось следующее:
+В логах nginx’a видно, что запросы на поиск отправляются на бэкэнд erchef’а (ядро chef-server написанное на эрланге) и в ответ получаем <code class="highlighter-rouge">500</code>:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>192.168.1.111 - - [27/May/2014:11:45:28 +0000] "GET /search/databag1?q=id:node1&amp;sort=X_CHEF_id_CHEF_X%20asc&amp;start=0&amp;rows=1000 HTTP/1.1" 500 "0.051" 36 "-" "Chef Client/11.6.0 (ruby-1.9.3-p429; ohai-6.18.0; x86_64-linux; +http://opscode.com)" "127.0.0.1:8000" "500" "0.046" "11.6.0" "algorithm=sha1;version=1.0;" "auth1" "2014-05-27T11:45:28Z" "2jmj7l5rSw0yVb/vlWAYkK/YBwk=" 1011
+</code></pre></div></div>
+
+<p>Смотрим далее в логи <code class="highlighter-rouge">erchef</code>:</p>
+
+<div class="language-erlang highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">=</span><span class="nv">ERROR</span> <span class="nv">REPORT</span><span class="o">====</span> <span class="mi">27</span><span class="o">-</span><span class="nv">May</span><span class="o">-</span><span class="mi">2014</span><span class="p">::</span><span class="mi">11</span><span class="p">:</span><span class="mi">45</span><span class="p">:</span><span class="mi">28</span> <span class="o">===</span>
+<span class="n">webmachine</span> <span class="nn">error</span><span class="p">:</span> <span class="n">path</span><span class="o">=</span><span class="s">"/search/databag1"</span>
+<span class="p">{</span><span class="n">error</span><span class="p">,</span>
+    <span class="p">{</span><span class="n">error</span><span class="p">,</span><span class="n">function_clause</span><span class="p">,</span>
+        <span class="p">[{</span><span class="n">chef_wm_search</span><span class="p">,</span><span class="n">'-make_bulk_get_fun/5-lc$^1/1-2-'</span><span class="p">,</span>
+             <span class="p">[{</span><span class="n">error</span><span class="p">,</span><span class="n">no_connections</span><span class="p">},</span>
+             <span class="o">&lt;&lt;</span><span class="s">"databag1"</span><span class="o">&gt;&gt;</span><span class="p">],</span>
+             <span class="p">[{</span><span class="n">file</span><span class="p">,</span><span class="s">"src/chef_wm_search.erl"</span><span class="p">},{</span><span class="n">line</span><span class="p">,</span><span class="mi">233</span><span class="p">}]},</span>
+         <span class="p">{</span><span class="n">chef_wm_search</span><span class="p">,</span><span class="n">fetch_result_rows</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span>
+             <span class="p">[{</span><span class="n">file</span><span class="p">,</span><span class="s">"src/chef_wm_search.erl"</span><span class="p">},{</span><span class="n">line</span><span class="p">,</span><span class="mi">351</span><span class="p">}]},</span>
+         <span class="p">{</span><span class="n">chef_wm_search</span><span class="p">,</span><span class="n">make_search_results</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span>
+             <span class="p">[{</span><span class="n">file</span><span class="p">,</span><span class="s">"src/chef_wm_search.erl"</span><span class="p">},{</span><span class="n">line</span><span class="p">,</span><span class="mi">324</span><span class="p">}]},</span>
+         <span class="p">{</span><span class="n">chef_wm_search</span><span class="p">,</span><span class="n">to_json</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span>
+             <span class="p">[{</span><span class="n">file</span><span class="p">,</span><span class="s">"src/chef_wm_search.erl"</span><span class="p">},{</span><span class="n">line</span><span class="p">,</span><span class="mi">130</span><span class="p">}]},</span>
+         <span class="p">{</span><span class="n">webmachine_resource</span><span class="p">,</span><span class="n">resource_call</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span>
+             <span class="p">[{</span><span class="n">file</span><span class="p">,</span><span class="s">"src/webmachine_resource.erl"</span><span class="p">},{</span><span class="n">line</span><span class="p">,</span><span class="mi">166</span><span class="p">}]},</span>
+         <span class="p">{</span><span class="n">webmachine_resource</span><span class="p">,</span><span class="n">do</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span>
+             <span class="p">[{</span><span class="n">file</span><span class="p">,</span><span class="s">"src/webmachine_resource.erl"</span><span class="p">},{</span><span class="n">line</span><span class="p">,</span><span class="mi">125</span><span class="p">}]},</span>
+         <span class="p">{</span><span class="n">webmachine_decision_core</span><span class="p">,</span><span class="n">resource_call</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span>
+             <span class="p">[{</span><span class="n">file</span><span class="p">,</span><span class="s">"src/webmachine_decision_core.erl"</span><span class="p">},{</span><span class="n">line</span><span class="p">,</span><span class="mi">48</span><span class="p">}]},</span>
+         <span class="p">{</span><span class="n">webmachine_decision_core</span><span class="p">,</span><span class="n">decision</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span>
+             <span class="p">[{</span><span class="n">file</span><span class="p">,</span><span class="s">"src/webmachine_decision_core.erl"</span><span class="p">},{</span><span class="n">line</span><span class="p">,</span><span class="mi">532</span><span class="p">}]}]}}</span>
+</code></pre></div></div>
+<p>К сожалению то, что erchef пишет в свой лог не информативно. Однако путём длительного перебора удалось понять, что проблема в соединении к базе.</p>
+
+</div>
+
+  <footer>
+    <a rel="full-article" href="/2014/05/erchef-no-connect-error.html">Read on &rarr;</a>
+  </footer>
+
+
+    
+      
+      
+<header>
+  <h1 class="entry-title"><a href="/2014/05/ssh-config-tricks.html">Трюки с ssh config</a></h1>
+  
+    <p class="meta">
+      22 May 2014
+      
+       | <a href="/2014/05/ssh-config-tricks.html#disqus_thread">Comments</a>
+      
+    </p>
+  
+</header>
+<div class="content"><p>Конфиг ssh очень полезная и удобная штука. Пользуюсь им давно, но недавно открыл ещё несколько замечательных возможностей. Решил поделиться парой полезных фич и рассказать об одном маленьком лайфхаке.</p>
+
+<h3 id="Шаринг-соединений">Шаринг соединений</h3>
+<p>Часто бывает необходимо по работе держать много консолей с ssh на один сервер. Для упрощения такой работы (с точки зрения компьютера) в OpenSSH есть возможность шарить соединения. Т.е. если вы зашли на сервер, то в системе создается <em>ControlSocket</em> и все последующие соединения на этот сервер будут использовать уже созданный сокет, а не создавать новое подключение. И если при первом соединении сервер спрашивает у вас пароль, то при повторном использовании уже сокета авторизация не потребуется.</p>
+
+<p>Для настройки <em>Connection sharing</em> необходимо добавить следующие строчки в начало конфига ssh:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ControlMaster auto
+ControlPath /tmp/ssh_%h_%p_%r
+</code></pre></div></div>
+
+<h3 id="Проброс-соединений-через-сервер">Проброс соединений через сервер</h3>
+<p>Другая не менее полезная штука - это возможность настроить соединение через сервер. Т.е. вместо двух команд: <code class="highlighter-rouge">ssh server1</code> и потом уже оттуда <code class="highlighter-rouge">ssh server2</code>, можно сразу в конфиге всё прописать и ходить одной командой.</p>
+
+</div>
+
+  <footer>
+    <a rel="full-article" href="/2014/05/ssh-config-tricks.html">Read on &rarr;</a>
+  </footer>
+
+
+    
+    </ol>
+
+    <!-- Pagination links -->
+    
+    <ul class="pagination">
+      
+        <li>
+          <a href="/en/">&laquo;</a>
+        </li>
+      
+
+      <li><a href="/">First</a></li>
+
+      
+        
+          <li><a href="/">1</a></li>
+        
+      
+        
+          <li class="active">
+             <a>2<span class="sr-only">(current)</span></a>
+          </li>
+        
+      
+        
+          <li>
+            <a href="/en/page3/">3</a>
+          </li>
+        
+      
+        
+          <li>
+            <a href="/en/page4/">4</a>
+          </li>
+        
+      
+        
+          <li>
+            <a href="/en/page5/">5</a>
+          </li>
+        
+      
+
+      <li><a href="/page5/">Last</a></li>
+
+      
+        <li>
+          <a href="/en/page3/">&raquo;</a>
+        </li>
+      
+    </ul>
+    
+</div><!-- end #home -->
+
+
+                <footer>
+                    &copy; Cyberflow
+                    
+                    - <a href="https://github.com/cyberflow">https://github.com/cyberflow</a> - Powered by Jekyll.
+                    
+                </footer>
+            </div><!-- end /.col-sm-8 -->
+        </div><!-- end /.container -->
+
+        <!-- Bootstrap core JavaScript
+        ================================================== -->
+        <!-- Placed at the end of the document so the pages load faster -->
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+        <script src="/static/js/bootstrap.min.js"></script>
+        <script src="/static/js/super-search.js"></script>
+    </body>
+</html>

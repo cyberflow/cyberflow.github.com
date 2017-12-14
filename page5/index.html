@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html  lang="ru" >
     <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
@@ -65,7 +65,7 @@
                 
                     &raquo; <a class="about" href="/category/">Categories</a><br />
                 
-                    &raquo; <a class="about" href="https://github.com/cyberflow">Github</a><br />
+                    &raquo; <a class="about" href="/code/">Code</a><br />
                 
                     &raquo; <a class="about" href="/feed.xml">XML Feed</a><br />
                 
@@ -76,6 +76,34 @@
     <h1>Cyberflow</h1>
     <hr />
     <ol class="posts">
+    
+      
+      
+<header>
+  <h1 class="entry-title"><a href="/2012/10/identify-fs-on-lvs-volume.html">Определение ФС на LVS томе</a></h1>
+  
+    <p class="meta">
+      12 Oct 2012
+      
+       | <a href="/2012/10/identify-fs-on-lvs-volume.html#disqus_thread">Comments</a>
+      
+    </p>
+  
+</header>
+<div class="content"><p>Для определения FS на LVS томе нам необходимо получить метаданные данные с тома, определяющие тип FS.</p>
+
+<p>Для начала нужно посотреть смещение на томе, чтобы определить откуда начинаются необходимые нам данные. Для этого можно выполнить команду:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">$ </span>mdadm <span class="nt">-E</span> /dev/sas00/51501_24<br data-jekyll-commonmark-ghpages="" />/dev/sas00/51501_24:<br data-jekyll-commonmark-ghpages="" />          Magic : a92b4efc<br data-jekyll-commonmark-ghpages="" />        Version : 1.2<br data-jekyll-commonmark-ghpages="" />    Feature Map : 0x1<br data-jekyll-commonmark-ghpages="" />     Array UUID : a11a9dae:fa6f187e:fdce9334:ec1fe46b<br data-jekyll-commonmark-ghpages="" />           Name : xen10:md51501_24<br data-jekyll-commonmark-ghpages="" />  Creation Time : Wed Sep 26 12:01:52 2012<br data-jekyll-commonmark-ghpages="" />     Raid Level : raid1<br data-jekyll-commonmark-ghpages="" />   Raid Devices : 2<br data-jekyll-commonmark-ghpages="" /><br data-jekyll-commonmark-ghpages="" /> Avail Dev Size : 10491904 <span class="o">(</span>5.00 GiB 5.37 GB<span class="o">)</span><br data-jekyll-commonmark-ghpages="" />     Array Size : 10491880 <span class="o">(</span>5.00 GiB 5.37 GB<span class="o">)</span><br data-jekyll-commonmark-ghpages="" />  Used Dev Size : 10491880 <span class="o">(</span>5.00 GiB 5.37 GB<span class="o">)</span><br data-jekyll-commonmark-ghpages="" />    <span class="k">**</span>Data Offset : 2048 sectors<span class="k">**</span><br data-jekyll-commonmark-ghpages="" />   Super Offset : 8 sectors<br data-jekyll-commonmark-ghpages="" />          State : clean<br data-jekyll-commonmark-ghpages="" />    Device UUID : 58297892:37844649:cb27316e:2e2f8c0e<br data-jekyll-commonmark-ghpages="" /><br data-jekyll-commonmark-ghpages="" />Internal Bitmap : 8 sectors from superblock<br data-jekyll-commonmark-ghpages="" />    Update Time : Fri Oct 12 10:30:43 2012<br data-jekyll-commonmark-ghpages="" />       Checksum : 6b31c0a0 - correct<br data-jekyll-commonmark-ghpages="" />         Events : 6786<br data-jekyll-commonmark-ghpages="" /><br data-jekyll-commonmark-ghpages="" /><br data-jekyll-commonmark-ghpages="" />   Device Role : Active device 0<br data-jekyll-commonmark-ghpages="" />   Array State : AA <span class="o">(</span><span class="s1">'A'</span> <span class="o">==</span> active, <span class="s1">'.'</span> <span class="o">==</span> missing<span class="o">)</span></code></pre></figure>
+
+<p>Далее мы можем получить суберблок и определить тип файловой системы:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">dd <span class="k">if</span><span class="o">=</span>/dev/sas00/51501_24 <span class="nv">skip</span><span class="o">=</span>2048 <span class="nv">bs</span><span class="o">=</span>1k <span class="nv">count</span><span class="o">=</span>1024 | file -<br data-jekyll-commonmark-ghpages="" />/dev/stdin: Linux rev 1.0 ext4 filesystem data, <span class="nv">UUID</span><span class="o">=</span>afb28ffa-9663-4f2e-94cb-9d05abfd1b76 <span class="o">(</span>needs journal recovery<span class="o">)</span> <span class="o">(</span>extents<span class="o">)</span> <span class="o">(</span>large files<span class="o">)</span> <span class="o">(</span>huge files<span class="o">)</span></code></pre></figure>
+
+<p>Том, который использовался для примера содержит FS ext4</p>
+</div>
+
+
     
       
       

@@ -5,9 +5,43 @@
     <description>My Personal Blog</description>
     <link>https://cyberflow.net/</link>
     <atom:link href="https://cyberflow.net/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Sat, 09 Dec 2017 10:08:17 +0000</pubDate>
-    <lastBuildDate>Sat, 09 Dec 2017 10:08:17 +0000</lastBuildDate>
+    <pubDate>Thu, 14 Dec 2017 10:01:45 +0000</pubDate>
+    <lastBuildDate>Thu, 14 Dec 2017 10:01:45 +0000</lastBuildDate>
     <generator>Jekyll v3.6.2</generator>
+    
+      <item>
+        <title>testing jekyll language plugins</title>
+        <description>&lt;p&gt;Решил потестировать мультиязычный плагин для [jekyll][].
+На просторах сети нашел приличное количество оных, но для первой пробы решил выбрать &lt;a href=&quot;https://github.com/vwochnik/jekyll-language-plugin&quot;&gt;jekyll-language-plugin&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Установка плагина подробно описана на &lt;a href=&quot;https://github.com/vwochnik/jekyll-language-plugin/wiki/Getting-Started&quot;&gt;wiki&lt;/a&gt; проекта.&lt;/p&gt;
+
+&lt;p&gt;Однако беглый обзор показал, что реализация данного плагина требует файл с переводами для всего. Если я правильно понял, то пост надо забивать в такой файл, а потом вызывать весь пост как переменную. Возможно я что-то понял не так, но в итоге этот плагин мне не понравился.&lt;/p&gt;
+
+&lt;p&gt;Дальнейшее исследование привело меня к &lt;a href=&quot;https://github.com/Anthony-Gaudino/jekyll-multiple-languages-plugin&quot;&gt;jekyll-multiple-languages-plugin&lt;/a&gt;. Тут уже в документации описано, что статьи или страницы можно хранить в &lt;code class=&quot;highlighter-rouge&quot;&gt;.md&lt;/code&gt; файлах в специпльных “языковых” директориях и импортировать их при помощи &lt;code class=&quot;highlighter-rouge&quot;&gt;% include file %&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Этот вариант понравился мне больше.&lt;/p&gt;
+
+&lt;p&gt;Правда радость была не долгой. Плагин отказался работать “из коробки”. Ошибка в коде, отвечающем за определение статики сайта. В итоге при попытке сбилдить сайт получал &lt;code class=&quot;highlighter-rouge&quot;&gt;jekyll 3.6.2 | Error:  can't dup NilClass&lt;/code&gt;. Добрае люди уже поправили ошибку и сделали &lt;a href=&quot;https://github.com/Anthony-Gaudino/jekyll-multiple-languages-plugin/pull/102/files&quot;&gt;PR&lt;/a&gt; в github, но разработчики не торопяться его принимать. Печалька, но можно поправить руками.&lt;/p&gt;
+
+&lt;p&gt;После патчинга модуля сборка заработала. Создать переводимую страницу (page в терминах jekyll) получилось без особых проблем. Однако для моего блога перевод статей, а точнее его текущее отсутсвие, привело к тому, что после сборки все статьи не сгенерились. После исключения из обработки директории с постами, при помощью директивы &lt;code class=&quot;highlighter-rouge&quot;&gt;exclude_from_localizations&lt;/code&gt; в &lt;code class=&quot;highlighter-rouge&quot;&gt;_config.yml&lt;/code&gt; удалось собрать сайт с переведенной страницей и не переведенными постами.&lt;/p&gt;
+
+&lt;p&gt;Пример двухязычной страницы можно посмотреть &lt;a href=&quot;/code/&quot;&gt;тут&lt;/a&gt;.&lt;/p&gt;
+</description>
+        <pubDate>Wed, 13 Dec 2017 16:14:00 +0000</pubDate>
+        <link>https://cyberflow.net/2017/12/testing-jekyll-language-plugin.html</link>
+        <guid isPermaLink="true">https://cyberflow.net/2017/12/testing-jekyll-language-plugin.html</guid>
+        
+        <category>jekyll</category>
+        
+        <category>plugins</category>
+        
+        <category>bloging</category>
+        
+        
+        <category>jekyll</category>
+        
+      </item>
     
       <item>
         <title>send kapacitor alert to Icinga 2</title>
@@ -838,54 +872,6 @@ Host db*.dc2
         
         
         <category>linux</category>
-        
-      </item>
-    
-      <item>
-        <title>Установка slave mysql-percona сервера</title>
-        <description>&lt;p&gt;Хочу сразу заметить, что способов развернуть slave сервер существует масса. Я хочу рассказать лишь об одном из них. Во-первых для себя, т.к. я часто применяю его в работе. Во-вторых для тех, у кого стоит задача по развертыванию независимого (поясню: это значит что перенос файлов базы с одного сервера на другой не подходит, как в моём случае. Т.е. репликация не полная) slave и при этом репликация производиться только над некоторыми БД, а не над всем, что есть.&lt;/p&gt;
-
-&lt;p&gt;Подразумевается, что уже есть мастер сервер, на котором крутятся БД и настроен для репликации.&lt;/p&gt;
-
-&lt;p&gt;Теперь надо сделать dump баз данных, при этом будем использовать атрибуты &lt;code class=&quot;highlighter-rouge&quot;&gt;add-drop-database&lt;/code&gt; для добавление в dump строчки удаляющей базу перед её созданием и &lt;code class=&quot;highlighter-rouge&quot;&gt;master-data&lt;/code&gt; для добавления информации о бин-логах и их позиции на момент создания dump’a. Так же, чтобы избежать переноса служебных баз, формируем список баз для переноса исключив из них все служебные базы mysql (в список можно добавить и другие базы по аналогии). После создания dump’a переносим его на slave сервер.&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;# DATABASE_LIST=$(mysql -NBe 'show schemas' | grep -wv 'mysql\|performance_schema\|information_schema')
-# mysqldump  --databases $DATABASE_LIST --add-drop-database --master-data -u root -p &amp;gt; dbdump.db
-# scp dbdump.db mysql-slave-host:~/
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;На slave сервере добавляем необходиму информацию для репликации. Это можно сделать и после развертывания dump’a. Так же я пропущу описание настройки репликации в конфигурации mysql.&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;# mysql
-mysql&amp;gt; CHANGE MASTER TO MASTER_HOST='mysql-master-host', MASTER_USER='$replica_user', MASTER_PASSWORD='$slavepass';
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;Теперь можно залить сделанный dump и после этого включить репликацию.&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;# mysql -p &amp;lt; ~/dbdump.db
-# mysql
-mysql&amp;gt; slave start;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-</description>
-        <pubDate>Wed, 14 May 2014 18:03:00 +0000</pubDate>
-        <link>https://cyberflow.net/2014/05/install-slave-percona-server.html</link>
-        <guid isPermaLink="true">https://cyberflow.net/2014/05/install-slave-percona-server.html</guid>
-        
-        <category>linux</category>
-        
-        <category>mysql</category>
-        
-        <category>replication</category>
-        
-        <category>ha</category>
-        
-        
-        <category>ha</category>
-        
-        <category>linux</category>
-        
-        <category>databases</category>
         
       </item>
     

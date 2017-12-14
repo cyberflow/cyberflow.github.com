@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html  lang="en" >
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link rel="shortcut icon" href="/static/img/favicon.ico" />
+        <title>Установка chef solo на debian 6 squeeze - Cyberflow</title>
+        <meta name="author" content="Cyberflow" />
+        <meta name="description" content="Установка chef solo на debian 6 squeeze" />
+        <meta name="keywords" content="Установка chef solo на debian 6 squeeze, Cyberflow, debian, chef" />
+        <link rel="alternate" type="application/rss+xml" title="RSS" href="/feed.xml">
+
+        <!-- syntax highlighting CSS -->
+        <link rel="stylesheet" href="/static/css/syntax.css">
+
+        <!-- Bootstrap core CSS -->
+        <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+
+        <!-- Fonts -->
+        <link href="//fonts.googleapis.com/css?family=Roboto+Condensed:400,300italic,300,400italic,700&amp;subset=latin,latin-ext" rel="stylesheet" type="text/css">
+
+        <!-- Custom CSS -->
+        <link rel="stylesheet" href="/static/css/super-search.css">
+        <link rel="stylesheet" href="/static/css/main.css">
+
+        <!-- Google Analytics -->
+        
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-31213444-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+    </head>
+
+    <body>
+        <div class="container">
+            <div class="col-sm-3">
+                <a href="/"><img id="about" src="https://www.gravatar.com/avatar/7ca36522be02d33e7d2f4ea209012ac3?s=68" alt="cyberflow_gravatar" height="75px" width="75px" /></a>
+                <h1 class="author-name">Cyberflow</h1>
+                
+                <div id="about">
+                    I am linux system administrator.
+                </div>
+                
+
+                <hr />
+                <div class="search" id="js-search">
+                  <input type="text" placeholder="(sitemap)~$ type to search" class="search__input form-control" id="js-search__input">
+                  <ul class="search__results" id="js-search__results"></ul>
+                </div>
+                <hr />
+
+                <strong>Navigation</strong><br />
+                    &raquo; <a href="/">Home</a> <br />
+                
+                    &raquo; <a class="about" href="/category/">Categories</a><br />
+                
+                    &raquo; <a class="about" href="/code/">Code</a><br />
+                
+                    &raquo; <a class="about" href="/feed.xml">XML Feed</a><br />
+                
+            </div>
+
+            <div class="col-sm-8 col-offset-1">
+                <h1>Установка chef solo на debian 6 squeeze</h1>
+<span class="time">18 Oct 2012</span>
+
+<span class="categories">
+    &raquo; <a href="/category/debian">debian</a>, <a href="/category/chef">chef</a>
+</span>
+
+
+<div class="content">
+    <div class="post"><p>Для начала установим необходимые пакеты для установки и работы cfeh-solo.</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">apt-get install <span class="nb">sudo </span>wget lsb-release</code></pre></figure>
+
+<p>Далее добавляем репозиторий opscode в списки репозиториев командой:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nb">echo</span> <span class="s2">"deb http://apt.opscode.com/ </span><span class="sb">`</span>lsb_release <span class="nt">-cs</span><span class="sb">`</span><span class="s2">-0.10 main"</span> | <span class="nb">sudo </span>tee /etc/apt/sources.list.d/opscode.list</code></pre></figure>
+
+<p>Теперь необходимо добавить ключи к репозиторию:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nb">sudo </span>mkdir <span class="nt">-p</span> /etc/apt/trusted.gpg.d<br data-jekyll-commonmark-ghpages="" />gpg <span class="nt">--keyserver</span> keys.gnupg.net <span class="nt">--recv-keys</span> 83EF826A<br data-jekyll-commonmark-ghpages="" />gpg <span class="nt">--export</span> packages@opscode.com | <span class="nb">sudo </span>tee /etc/apt/trusted.gpg.d/opscode-keyring.gpg <span class="o">&gt;</span> /dev/null</code></pre></figure>
+
+<p>Обновим информацию о пакетах с учётом добавленного репозитория и установим opscode-keyring:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nb">sudo </span>apt-get update <span class="o">&amp;&amp;</span> <span class="nb">sudo </span>apt-get install opscode-keyring</code></pre></figure>
+
+<p>Устанавливаем chef:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nb">sudo </span>apt-get install chef</code></pre></figure>
+
+<p>При установке будет задан вопрос о пути к серверу chef, т.к. мы делаем установку для chef-solo, то указываем там “none”.</p>
+</div>
+</div>
+
+
+
+    
+    
+        
+            
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+        
+    
+        
+            
+        
+            
+        
+    
+        
+            
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+        
+    
+        
+            
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+        
+    
+        
+            
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+        
+    
+        
+            
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+                
+                <div class="panel-body">
+                <h4>Related Posts</h4>
+                <ul>
+                
+                <li class="relatedPost">
+                    <a href="https://cyberflow.net/2014/05/erchef-no-connect-error.html" data-proofer-ignore>Erchef no_connect Error</a>
+                    
+                        (Categories: <a href="/category/chef">chef</a>)
+                    
+                </li>
+                
+                
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+        
+    
+        
+            
+        
+            
+        
+    
+        
+            
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+                
+                <li class="relatedPost">
+                    <a href="https://cyberflow.net/2013/08/replication-chef-database.html" data-proofer-ignore>Репликация таблиц базы chef-server </a>
+                    
+                        (Categories: <a href="/category/chef">chef</a>, <a href="/category/ha">ha</a>, <a href="/category/linux">linux</a>)
+                    
+                </li>
+                
+                
+            
+        
+    
+        
+            
+        
+            
+        
+    
+        
+            
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+        
+    
+        
+            
+        
+            
+        
+    
+        
+            
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+        
+    
+        
+            
+        
+            
+        
+    
+        
+            
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+                
+                <li class="relatedPost">
+                    <a href="https://cyberflow.net/2013/02/use-opscode-chef-and-clodo-servers.html" data-proofer-ignore>Настраиваем сервера на Clodo через Opscode Chef</a>
+                    
+                        (Categories: <a href="/category/chef">chef</a>)
+                    
+                </li>
+                
+                
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+        
+    
+
+    
+    
+        
+            
+                
+                <li class="relatedPost">
+                    <a href="https://cyberflow.net/2013/02/how-to-install-nodejs-on-linux-deb-base.html" data-proofer-ignore>Установка node.js на Linux (deb base)</a>
+                    
+                        (Categories: <a href="/category/debian">debian</a>, <a href="/category/linux">linux</a>)
+                    
+                </li>
+                
+                
+            
+        
+            
+        
+    
+        
+            
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+        
+    
+        
+            
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+        
+    
+
+    
+    
+        
+            
+                
+                <li class="relatedPost">
+                    <a href="https://cyberflow.net/2012/08/install-debian-to-hp-proliant-with-bnx2.html" data-proofer-ignore>Install debian to HP ProLiant with bnx2</a>
+                    
+                        (Categories: <a href="/category/debian">debian</a>, <a href="/category/linux">linux</a>)
+                    
+                </li>
+                
+                
+            
+        
+            
+        
+    
+        
+            
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+        
+    
+        
+            
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+        
+    
+
+
+    </ul>
+    </div>
+
+
+<div class="PageNavigation">
+  
+    <a class="prev" href="/2012/10/identify-fs-on-lvs-volume.html">&laquo; Определение ФС на LVS томе</a>
+  
+  
+    <a class="next" href="/2012/12/redmine-2-admin-password-reset.html">Redmine 2.x обнуление пароля admin-a &raquo;</a>
+  
+</div>
+
+
+
+
+<div class="disqus-comments">
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* <![CDATA[ */
+
+        var disqus_shortname = "cyberflowblog";
+        var disqus_identifier = "https://cyberflow.net_Установка chef solo на debian 6 squeeze";
+        var disqus_title = "Установка chef solo на debian 6 squeeze";
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    /* ]]> */
+    </script>
+</div>
+
+
+
+                <footer>
+                    &copy; Cyberflow
+                    
+                    - <a href="https://github.com/cyberflow">https://github.com/cyberflow</a> - Powered by Jekyll.
+                    
+                </footer>
+            </div><!-- end /.col-sm-8 -->
+        </div><!-- end /.container -->
+
+        <!-- Bootstrap core JavaScript
+        ================================================== -->
+        <!-- Placed at the end of the document so the pages load faster -->
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+        <script src="/static/js/bootstrap.min.js"></script>
+        <script src="/static/js/super-search.js"></script>
+    </body>
+</html>

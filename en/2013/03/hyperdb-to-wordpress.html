@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html  lang="en" >
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link rel="shortcut icon" href="/static/img/favicon.ico" />
+        <title>Hyperdb to Wordpress - Cyberflow</title>
+        <meta name="author" content="Cyberflow" />
+        <meta name="description" content="Hyperdb to Wordpress" />
+        <meta name="keywords" content="Hyperdb to Wordpress, Cyberflow, clusters, linux, ha" />
+        <link rel="alternate" type="application/rss+xml" title="RSS" href="/feed.xml">
+
+        <!-- syntax highlighting CSS -->
+        <link rel="stylesheet" href="/static/css/syntax.css">
+
+        <!-- Bootstrap core CSS -->
+        <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+
+        <!-- Fonts -->
+        <link href="//fonts.googleapis.com/css?family=Roboto+Condensed:400,300italic,300,400italic,700&amp;subset=latin,latin-ext" rel="stylesheet" type="text/css">
+
+        <!-- Custom CSS -->
+        <link rel="stylesheet" href="/static/css/super-search.css">
+        <link rel="stylesheet" href="/static/css/main.css">
+
+        <!-- Google Analytics -->
+        
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-31213444-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+    </head>
+
+    <body>
+        <div class="container">
+            <div class="col-sm-3">
+                <a href="/"><img id="about" src="https://www.gravatar.com/avatar/7ca36522be02d33e7d2f4ea209012ac3?s=68" alt="cyberflow_gravatar" height="75px" width="75px" /></a>
+                <h1 class="author-name">Cyberflow</h1>
+                
+                <div id="about">
+                    I am linux system administrator.
+                </div>
+                
+
+                <hr />
+                <div class="search" id="js-search">
+                  <input type="text" placeholder="(sitemap)~$ type to search" class="search__input form-control" id="js-search__input">
+                  <ul class="search__results" id="js-search__results"></ul>
+                </div>
+                <hr />
+
+                <strong>Navigation</strong><br />
+                    &raquo; <a href="/">Home</a> <br />
+                
+                    &raquo; <a class="about" href="/category/">Categories</a><br />
+                
+                    &raquo; <a class="about" href="/code/">Code</a><br />
+                
+                    &raquo; <a class="about" href="/feed.xml">XML Feed</a><br />
+                
+            </div>
+
+            <div class="col-sm-8 col-offset-1">
+                <h1>Hyperdb to Wordpress</h1>
+<span class="time">22 Mar 2013</span>
+
+<span class="categories">
+    &raquo; <a href="/category/clusters">clusters</a>, <a href="/category/linux">linux</a>, <a href="/category/ha">ha</a>
+</span>
+
+
+<div class="content">
+    <div class="post"><p><a href="http://wordpress.org/extend/plugins/hyperdb/">Hyperdb</a> - это замена стандартоного класса <code class="highlighter-rouge">wpdb</code>, позволяющая использовать несколько баз данных.
+В данной статье я опишу настройку hyperdb для распределенной инфраструктуры, состоящей из двух frontend серверов и двух серверов баз данных на базе дистрибутивов Debian 6, в качестве основной задачи ставилось не только распределение запросов на чтение между серверами БД, но и отслеживания отставаний слэйв сервера и, в случае отставания, чтение актуальных данных с мастера.</p>
+
+<p>Настройка самих фронтендов оставим за кадром, т.к. это выходит за рамки данной статьи. Что касается серверов БД, то мы будем использовать мастер-слэйв репликацию и mk-heartbeat для отслеживания lag-ов на слэйве. Сервера геораспределены и каждый сервер БД располагается в отдельном ДЦ в паре с фронтендом. На настройке баз я остановлючь подробнее:</p>
+
+<h2 id="Настройка-репликации-db">Настройка репликации DB:</h2>
+
+<p>Здесь не описано ничего принципиально нового. Используется стандартная <a href="http://dev.mysql.com/doc/refman/5.1/en/replication.html">репликация Мастер-Слэйв</a> средствами MySql.</p>
+
+<!--more-->
+
+<p>Все, описанные ниже команды выполнялись под пользователем <code class="highlighter-rouge">root</code>, что является не безопасным. Будьте осторожны, при работе под суперпользователем.</p>
+
+<p>Устанавливаем сервер баз данных и пакет с <code class="highlighter-rouge">mk-hertbeat</code>:</p>
+
+<figure class="highlight"><pre><code class="language-console" data-lang="console"><span class="gp">#</span> aptitude install mysql-server maatkit</code></pre></figure>
+
+<p>Далее, используя документацию создаём базу wordpress на db1.
+Этот сервер будет мастером. В файл <code class="highlighter-rouge">/etc/mysql/my.cnf</code> в секции [mysqld] необходимо добавить:</p>
+
+<figure class="highlight"><pre><code class="language-cfg" data-lang="cfg">init-connect='SET NAMES utf8;'<br data-jekyll-commonmark-ghpages="" />server-id                = 1<br data-jekyll-commonmark-ghpages="" />log_bin                  = /var/log/mysql/mysql-bin<br data-jekyll-commonmark-ghpages="" />expire_logs_days         = 5<br data-jekyll-commonmark-ghpages="" />max_binlog_size          = 100M<br data-jekyll-commonmark-ghpages="" />binlog_do_db             = wordpress</code></pre></figure>
+
+<p>Далее надо перезапустить mysql:</p>
+
+<figure class="highlight"><pre><code class="language-console" data-lang="console"><span class="gp">#</span> service mysql restart</code></pre></figure>
+
+<p>Теперь блокируем базу на запись, чтобы избежать рассинхронизации до окончания настройки репликации:</p>
+
+<figure class="highlight"><pre><code class="language-console" data-lang="console"><span class="gp">mysql&gt;</span> FLUSH TABLES WITH READ LOCK<span class="p">;</span><br data-jekyll-commonmark-ghpages="" /><span class="gp">mysql&gt;</span> SET GLOBAL read_only <span class="o">=</span> ON<span class="p">;</span></code></pre></figure>
+
+<p>После этого делаем дамп базы wordpress и копируем на слэйв сервер БД (db2).</p>
+
+<p>На db1 создаём пользователя для репликации:</p>
+
+<figure class="highlight"><pre><code class="language-console" data-lang="console"><span class="gp">mysql&gt;</span> GRANT REPLICATION SLAVE, REPLICATION CLIENT ON wordpress.<span class="k">*</span> TO repl@<span class="s1">'%'</span> IDENTIFIED BY <span class="s1">'replicationsuperpassword'</span> with grant option<span class="p">;</span><br data-jekyll-commonmark-ghpages="" /><span class="gp">mysql&gt;</span> SHOW MASTER STATUS<span class="p">;</span></code></pre></figure>
+
+<p>Из вывода последней команды нам понадобится <code class="highlighter-rouge">Position</code> и <code class="highlighter-rouge">File</code> для конфигурации репликации на втором сервере БД.
+На втором сервере(db2) в <code class="highlighter-rouge">/etc/mysql/my.cnf</code> в секции [mysqld] необходимо добавить:</p>
+
+<figure class="highlight"><pre><code class="language-cfg" data-lang="cfg">server-id                = 2</code></pre></figure>
+
+<p>На db2 выполняем следующие команды подставляя значения из вывода <code class="highlighter-rouge">SHOW MASTER STATUS</code> c db1:</p>
+
+<figure class="highlight"><pre><code class="language-console" data-lang="console"><span class="gp">mysql&gt;</span> STOP SLAVE<span class="p">;</span><br data-jekyll-commonmark-ghpages="" /><span class="gp">mysql&gt;</span> RESET SLAVE<span class="p">;</span><br data-jekyll-commonmark-ghpages="" /><span class="gp">mysql&gt;</span> CHANGE MASTER TO <span class="nv">MASTER_HOST</span><span class="o">=</span><span class="s1">'db1.host.ru'</span>,<br data-jekyll-commonmark-ghpages="" /><span class="go">MASTER_PORT=3306,<br data-jekyll-commonmark-ghpages="" />MASTER_USER='repl',<br data-jekyll-commonmark-ghpages="" />MASTER_PASSWORD='replicationsuperpassword',<br data-jekyll-commonmark-ghpages="" />MASTER_LOG_FILE='mysql-bin.000001',<br data-jekyll-commonmark-ghpages="" />MASTER_LOG_POS=106,<br data-jekyll-commonmark-ghpages="" /></span><span class="gp">MASTER_CONNECT_RETRY=10;</span><br data-jekyll-commonmark-ghpages="" /><span class="gp">mysql&gt;</span> START SLAVE<span class="p">;</span></code></pre></figure>
+
+<p>Проверяем, что репликация работает:</p>
+
+<figure class="highlight"><pre><code class="language-console" data-lang="console"><span class="gp">mysql&gt;</span> SHOW SLAVE STATUS<span class="se">\G</span></code></pre></figure>
+
+<p>В выводе должно присутствовать:</p>
+
+<figure class="highlight"><pre><code class="language-cfg" data-lang="cfg">Slave_IO_Running: Yes<br data-jekyll-commonmark-ghpages="" />Slave_SQL_Running: Yes</code></pre></figure>
+
+<p>Если видим эти строки, то можно включать мастер БД(db1) на чтение:</p>
+
+<figure class="highlight"><pre><code class="language-console" data-lang="console"><span class="gp">mysql&gt;</span> SET GLOBAL read_only <span class="o">=</span> OFF<span class="p">;</span><br data-jekyll-commonmark-ghpages="" /><span class="gp">mysql&gt;</span> UNLOCK TABLES<span class="p">;</span></code></pre></figure>
+
+<p>Переходим к настройке Hyperdb.</p>
+
+<h2 id="Установка-и-настройка-hyperdb">Установка и настройка Hyperdb:</h2>
+<p>Сама установка класса проста и не затейлива.
+Скачиваем архивчик с классами с официального сайта <a href="http://wordpress.org/extend/plugins/hyperdb/">Wordpress</a>. Распаковываем на всех web-серверах. В архиве всего 3 файла: <code class="highlighter-rouge">db-config.php</code>, <code class="highlighter-rouge">db.php</code>, <code class="highlighter-rouge">readme.txt</code>.</p>
+
+<p>Правим конфигурационный файл для web1 (он находится в том же сегменте, что и db1, т.е. рядом с мастером):</p>
+
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="sr">//</span><span class="err">описываем</span> <span class="err">параметры</span> <span class="err">подключения</span> <span class="err">к</span> <span class="err">мастеру</span><span class="p">.</span><br data-jekyll-commonmark-ghpages="" /><span class="nf">/</span><span class="o">/</span><span class="err">Т</span><span class="o">.</span><span class="err">к</span><span class="o">.</span> <span class="err">он</span> <span class="err">ближе</span> <span class="err">всех</span><span class="p">,</span> <span class="err">то</span> <span class="err">и</span> <span class="err">читать</span> <span class="err">будем</span> <span class="err">с</span> <span class="err">него</span><span class="p">,</span> <span class="err">ставим</span> <span class="err">приоритет</span> <span class="err">чтения</span> <span class="mi">1</span><span class="o">.</span><br data-jekyll-commonmark-ghpages="" /><span class="vg">$wpdb</span><span class="o">-&gt;</span><span class="n">add_database</span><span class="p">(</span><span class="n">array</span><span class="p">(</span><br data-jekyll-commonmark-ghpages="" /> <span class="s1">'host'</span>     <span class="o">=&gt;</span> <span class="s1">'db1.hostname.ru'</span><span class="p">,</span><br data-jekyll-commonmark-ghpages="" /> <span class="s1">'user'</span>     <span class="o">=&gt;</span> <span class="s1">'wordpress'</span><span class="p">,</span><br data-jekyll-commonmark-ghpages="" /> <span class="s1">'password'</span> <span class="o">=&gt;</span> <span class="s1">'wordpressdbpass'</span><span class="p">,</span><br data-jekyll-commonmark-ghpages="" /> <span class="s1">'name'</span>     <span class="o">=&gt;</span> <span class="s1">'wordpress'</span><span class="p">,</span><br data-jekyll-commonmark-ghpages="" /> <span class="s1">'write'</span>    <span class="o">=&gt;</span> <span class="mi">1</span><span class="p">,</span><br data-jekyll-commonmark-ghpages="" /> <span class="s1">'read'</span>     <span class="o">=&gt;</span> <span class="mi">1</span><span class="p">,</span><br data-jekyll-commonmark-ghpages="" /><span class="p">));</span><br data-jekyll-commonmark-ghpages="" /><br data-jekyll-commonmark-ghpages="" /><span class="sr">//</span> <span class="err">добавляем</span> <span class="err">слэйв</span> <span class="err">сервер</span><span class="o">.</span> <span class="err">Т</span><span class="o">.</span><span class="err">к</span><span class="o">.</span> <span class="err">он</span> <span class="err">в</span> <span class="err">другом</span> <span class="err">сегменте</span><span class="p">,</span> <span class="err">то</span> <span class="err">приоритет</span> <span class="err">на</span> <span class="err">чтение</span> <span class="err">ниже</span><span class="o">.</span><br data-jekyll-commonmark-ghpages="" /><span class="vg">$wpdb</span><span class="o">-&gt;</span><span class="n">add_database</span><span class="p">(</span><span class="n">array</span><span class="p">(</span><br data-jekyll-commonmark-ghpages="" /> <span class="s1">'host'</span>     <span class="o">=&gt;</span> <span class="s1">'db2.hostname.ru'</span><span class="p">,</span><br data-jekyll-commonmark-ghpages="" /> <span class="s1">'user'</span>     <span class="o">=&gt;</span> <span class="s1">'wordpress'</span><span class="p">,</span><br data-jekyll-commonmark-ghpages="" /> <span class="s1">'password'</span> <span class="o">=&gt;</span> <span class="s1">'wordpressdbpass'</span><span class="p">,</span><br data-jekyll-commonmark-ghpages="" /> <span class="s1">'name'</span>     <span class="o">=&gt;</span> <span class="s1">'wordpress'</span><span class="p">,</span><br data-jekyll-commonmark-ghpages="" /> <span class="s1">'write'</span>    <span class="o">=&gt;</span> <span class="mi">0</span><span class="p">,</span><br data-jekyll-commonmark-ghpages="" /> <span class="s1">'read'</span>     <span class="o">=&gt;</span> <span class="mi">2</span><span class="p">,</span><br data-jekyll-commonmark-ghpages="" /><span class="p">));</span></code></pre></figure>
+
+<p>Такая конфигурация позволит читать с ближайшего сервера или со слейва, если мастер будет не доступен.
+Конфиг для web2:</p>
+
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="sr">//</span><span class="err">описываем</span> <span class="err">параметры</span> <span class="err">подключения</span> <span class="err">к</span> <span class="err">мастеру</span><span class="p">.</span><br data-jekyll-commonmark-ghpages="" /><span class="nf">/</span><span class="o">/</span><span class="err">Пишем</span> <span class="err">мы</span> <span class="err">всегда</span> <span class="err">и</span> <span class="err">только</span> <span class="err">на</span> <span class="err">мастер</span><span class="p">,</span> <span class="err">читать</span> <span class="err">с</span> <span class="err">него</span> <span class="err">будем</span> <span class="err">только</span> <span class="err">в</span> <span class="err">случае</span> <span class="err">отказа</span> <span class="err">слэйва</span><br data-jekyll-commonmark-ghpages="" /><span class="sr">//</span><span class="err">ставим</span> <span class="err">приоритет</span> <span class="err">чтения</span> <span class="mi">2</span><span class="o">.</span><br data-jekyll-commonmark-ghpages="" /><span class="vg">$wpdb</span><span class="o">-&gt;</span><span class="n">add_database</span><span class="p">(</span><span class="n">array</span><span class="p">(</span><br data-jekyll-commonmark-ghpages="" /> <span class="s1">'host'</span>     <span class="o">=&gt;</span> <span class="s1">'db1.hostname.ru'</span><span class="p">,</span><br data-jekyll-commonmark-ghpages="" /> <span class="s1">'user'</span>     <span class="o">=&gt;</span> <span class="s1">'wordpress'</span><span class="p">,</span><br data-jekyll-commonmark-ghpages="" /> <span class="s1">'password'</span> <span class="o">=&gt;</span> <span class="s1">'wordpressdbpass'</span><span class="p">,</span><br data-jekyll-commonmark-ghpages="" /> <span class="s1">'name'</span>     <span class="o">=&gt;</span> <span class="s1">'wordpress'</span><span class="p">,</span><br data-jekyll-commonmark-ghpages="" /> <span class="s1">'write'</span>    <span class="o">=&gt;</span> <span class="mi">1</span><span class="p">,</span><br data-jekyll-commonmark-ghpages="" /> <span class="s1">'read'</span>    <span class="o">=&gt;</span> <span class="mi">2</span><span class="p">,</span><br data-jekyll-commonmark-ghpages="" /><span class="p">));</span><br data-jekyll-commonmark-ghpages="" /><br data-jekyll-commonmark-ghpages="" /><span class="sr">//</span> <span class="err">добавляем</span> <span class="err">слэйв</span> <span class="err">сервер</span><span class="o">.</span> <span class="err">Т</span><span class="o">.</span><span class="err">к</span><span class="o">.</span> <span class="err">он</span> <span class="err">рядом</span><span class="p">,</span> <span class="err">то</span> <span class="err">приоритет</span> <span class="err">на</span> <span class="err">чтение</span> <span class="mi">1</span><span class="o">.</span><br data-jekyll-commonmark-ghpages="" /><span class="vg">$wpdb</span><span class="o">-&gt;</span><span class="n">add_database</span><span class="p">(</span><span class="n">array</span><span class="p">(</span><br data-jekyll-commonmark-ghpages="" /> <span class="s1">'host'</span>     <span class="o">=&gt;</span> <span class="s1">'db2.hostname.ru'</span><span class="p">,</span><br data-jekyll-commonmark-ghpages="" /> <span class="s1">'user'</span>     <span class="o">=&gt;</span> <span class="s1">'wordpress'</span><span class="p">,</span><br data-jekyll-commonmark-ghpages="" /> <span class="s1">'password'</span> <span class="o">=&gt;</span> <span class="s1">'wordpressdbpass'</span><span class="p">,</span><br data-jekyll-commonmark-ghpages="" /> <span class="s1">'name'</span>     <span class="o">=&gt;</span> <span class="s1">'wordpress'</span><span class="p">,</span><br data-jekyll-commonmark-ghpages="" /> <span class="s1">'write'</span>    <span class="o">=&gt;</span> <span class="mi">0</span><span class="p">,</span><br data-jekyll-commonmark-ghpages="" /> <span class="s1">'read'</span>     <span class="o">=&gt;</span> <span class="mi">1</span><span class="p">,</span><br data-jekyll-commonmark-ghpages="" /> <span class="s1">'lag_threshold'</span> <span class="o">=&gt;</span> <span class="mi">60</span><span class="p">,</span> <span class="sr">//</span><span class="err">определяем</span> <span class="err">допустимое</span> <span class="err">время</span> <span class="err">отставания</span> <span class="err">слэйва</span> <span class="err">в</span> <span class="err">секундах</span><br data-jekyll-commonmark-ghpages="" /><span class="p">));</span></code></pre></figure>
+
+<p>Теперь, если скопировать конфиги в корень wordpress, а <code class="highlighter-rouge">db.php</code> в директорию <code class="highlighter-rouge">/wp-content/</code>, то мы уже начнём работать с БД по распределенной схеме.</p>
+
+<p>Но цель данной статьи не просто распределять запросы на чтение по разным БД, но и реагировать на отставание слэйв-сервера, чтобы отдавать посетителям максимально актуальные данные.</p>
+
+<h2 id="Настройка-обнаружения-отсутствия-слейва-для-hyperdb">Настройка обнаружения отсутствия слейва для hyperdb:</h2>
+
+<p>Первое что хочу отметить, что настраивать обнаружение лагов мы будем только для web2, т.к. web1 ходит читать в мастер, а в слэйв только по крайней необходимости и в таком случае лучше читать хоть что-то, чем вообще не вернуть никаких данных, хоть бы и не актуальных.</p>
+
+<p>В конфиге <code class="highlighter-rouge">db-config.php</code> уже есть пример функций, позволяющих отслеживать лаги слэйва. Я лишь немного опишу процесс и как настроить сервера БД, чтобы эти функции работали и работали правильно. Для наглядности сразу приведу эти функции, которые нам надо будет добавить в конец файла <code class="highlighter-rouge">db-config.php</code> на web2:</p>
+
+<blockquote class="filename">
+  <p>db-config.php</p>
+</blockquote>
+
+<figure class="highlight"><pre><code class="language-php" data-lang="php"><span class="nv">$wpdb</span><span class="o">-&gt;</span><span class="na">lag_cache_ttl</span> <span class="o">=</span> <span class="mi">30</span><span class="p">;</span><br data-jekyll-commonmark-ghpages="" /><span class="nv">$wpdb</span><span class="o">-&gt;</span><span class="na">shmem_key</span> <span class="o">=</span> <span class="nb">ftok</span><span class="p">(</span> <span class="k">__FILE__</span><span class="p">,</span> <span class="s2">"Y"</span> <span class="p">);</span><br data-jekyll-commonmark-ghpages="" /><span class="nv">$wpdb</span><span class="o">-&gt;</span><span class="na">shmem_size</span> <span class="o">=</span> <span class="mi">128</span> <span class="o">*</span> <span class="mi">1024</span><span class="p">;</span><br data-jekyll-commonmark-ghpages="" /><br data-jekyll-commonmark-ghpages="" /><span class="nv">$wpdb</span><span class="o">-&gt;</span><span class="na">add_callback</span><span class="p">(</span> <span class="s1">'get_lag_cache'</span><span class="p">,</span> <span class="s1">'get_lag_cache'</span> <span class="p">);</span><br data-jekyll-commonmark-ghpages="" /><span class="nv">$wpdb</span><span class="o">-&gt;</span><span class="na">add_callback</span><span class="p">(</span> <span class="s1">'get_lag'</span><span class="p">,</span>       <span class="s1">'get_lag'</span> <span class="p">);</span><br data-jekyll-commonmark-ghpages="" /><br data-jekyll-commonmark-ghpages="" /><span class="k">function</span> <span class="nf">get_lag_cache</span><span class="p">(</span> <span class="nv">$wpdb</span> <span class="p">)</span> <span class="p">{</span><br data-jekyll-commonmark-ghpages="" /> <span class="nv">$segment</span> <span class="o">=</span> <span class="nb">shm_attach</span><span class="p">(</span> <span class="nv">$wpdb</span><span class="o">-&gt;</span><span class="na">shmem_key</span><span class="p">,</span> <span class="nv">$wpdb</span><span class="o">-&gt;</span><span class="na">shmem_size</span><span class="p">,</span> <span class="mo">0600</span> <span class="p">);</span><br data-jekyll-commonmark-ghpages="" /> <span class="nv">$lag_data</span> <span class="o">=</span> <span class="o">@</span><span class="nb">shm_get_var</span><span class="p">(</span> <span class="nv">$segment</span><span class="p">,</span> <span class="mi">0</span> <span class="p">);</span><br data-jekyll-commonmark-ghpages="" /> <span class="nb">shm_detach</span><span class="p">(</span> <span class="nv">$segment</span> <span class="p">);</span><br data-jekyll-commonmark-ghpages="" /><br data-jekyll-commonmark-ghpages="" /> <span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="nb">is_array</span><span class="p">(</span> <span class="nv">$lag_data</span> <span class="p">)</span> <span class="o">||</span> <span class="o">!</span><span class="nb">is_array</span><span class="p">(</span> <span class="nv">$lag_data</span><span class="p">[</span> <span class="nv">$wpdb</span><span class="o">-&gt;</span><span class="na">lag_cache_key</span> <span class="p">]</span> <span class="p">)</span> <span class="p">)</span><br data-jekyll-commonmark-ghpages="" />  <span class="k">return</span> <span class="kc">false</span><span class="p">;</span><br data-jekyll-commonmark-ghpages="" /><br data-jekyll-commonmark-ghpages="" /> <span class="k">if</span> <span class="p">(</span> <span class="nv">$wpdb</span><span class="o">-&gt;</span><span class="na">lag_cache_ttl</span> <span class="o">&lt;</span> <span class="nb">time</span><span class="p">()</span> <span class="o">-</span> <span class="nv">$lag_data</span><span class="p">[</span> <span class="nv">$wpdb</span><span class="o">-&gt;</span><span class="na">lag_cache_key</span> <span class="p">][</span> <span class="s1">'timestamp'</span> <span class="p">]</span> <span class="p">)</span><br data-jekyll-commonmark-ghpages="" />  <span class="k">return</span> <span class="kc">false</span><span class="p">;</span><br data-jekyll-commonmark-ghpages="" /><br data-jekyll-commonmark-ghpages="" /> <span class="k">return</span> <span class="nv">$lag_data</span><span class="p">[</span> <span class="nv">$wpdb</span><span class="o">-&gt;</span><span class="na">lag_cache_key</span> <span class="p">][</span> <span class="s1">'lag'</span> <span class="p">];</span><br data-jekyll-commonmark-ghpages="" /><span class="p">}</span><br data-jekyll-commonmark-ghpages="" /><br data-jekyll-commonmark-ghpages="" /><span class="k">function</span> <span class="nf">get_lag</span><span class="p">(</span> <span class="nv">$wpdb</span> <span class="p">)</span> <span class="p">{</span><br data-jekyll-commonmark-ghpages="" /> <span class="nv">$dbh</span> <span class="o">=</span> <span class="nv">$wpdb</span><span class="o">-&gt;</span><span class="na">dbhs</span><span class="p">[</span> <span class="nv">$wpdb</span><span class="o">-&gt;</span><span class="na">dbhname</span> <span class="p">];</span><br data-jekyll-commonmark-ghpages="" /><br data-jekyll-commonmark-ghpages="" /> <span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="nb">mysql_select_db</span><span class="p">(</span> <span class="s1">'wordpress'</span><span class="p">,</span> <span class="nv">$dbh</span> <span class="p">)</span> <span class="p">)</span> <span class="c1">// вот здесь мы поменяем имя базы на wordpress. Остальное как в примере.<br data-jekyll-commonmark-ghpages="" /></span>  <span class="k">return</span> <span class="kc">false</span><span class="p">;</span><br data-jekyll-commonmark-ghpages="" /><br data-jekyll-commonmark-ghpages="" /> <span class="nv">$result</span> <span class="o">=</span> <span class="nb">mysql_query</span><span class="p">(</span> <span class="s2">"SELECT UNIX_TIMESTAMP() - UNIX_TIMESTAMP(ts) AS lag FROM heartbeat LIMIT 1"</span><span class="p">,</span> <span class="nv">$dbh</span> <span class="p">);</span><br data-jekyll-commonmark-ghpages="" /><br data-jekyll-commonmark-ghpages="" /> <span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="nv">$result</span> <span class="o">||</span> <span class="kc">false</span> <span class="o">===</span> <span class="nv">$row</span> <span class="o">=</span> <span class="nb">mysql_fetch_assoc</span><span class="p">(</span> <span class="nv">$result</span> <span class="p">)</span> <span class="p">)</span><br data-jekyll-commonmark-ghpages="" />  <span class="k">return</span> <span class="kc">false</span><span class="p">;</span><br data-jekyll-commonmark-ghpages="" /><br data-jekyll-commonmark-ghpages="" /> <span class="c1">// Cache the result in shared memory with timestamp<br data-jekyll-commonmark-ghpages="" /></span> <span class="nv">$sem_id</span> <span class="o">=</span> <span class="nb">sem_get</span><span class="p">(</span> <span class="nv">$wpdb</span><span class="o">-&gt;</span><span class="na">shmem_key</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mo">0600</span><span class="p">,</span> <span class="mi">1</span> <span class="p">)</span> <span class="p">;</span><br data-jekyll-commonmark-ghpages="" /> <span class="nb">sem_acquire</span><span class="p">(</span> <span class="nv">$sem_id</span> <span class="p">);</span><br data-jekyll-commonmark-ghpages="" /> <span class="nv">$segment</span> <span class="o">=</span> <span class="nb">shm_attach</span><span class="p">(</span> <span class="nv">$wpdb</span><span class="o">-&gt;</span><span class="na">shmem_key</span><span class="p">,</span> <span class="nv">$wpdb</span><span class="o">-&gt;</span><span class="na">shmem_size</span><span class="p">,</span> <span class="mo">0600</span> <span class="p">);</span><br data-jekyll-commonmark-ghpages="" /> <span class="nv">$lag_data</span> <span class="o">=</span> <span class="o">@</span><span class="nb">shm_get_var</span><span class="p">(</span> <span class="nv">$segment</span><span class="p">,</span> <span class="mi">0</span> <span class="p">);</span><br data-jekyll-commonmark-ghpages="" /><br data-jekyll-commonmark-ghpages="" /> <span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="nb">is_array</span><span class="p">(</span> <span class="nv">$lag_data</span> <span class="p">)</span> <span class="p">)</span><br data-jekyll-commonmark-ghpages="" />  <span class="nv">$lag_data</span> <span class="o">=</span> <span class="k">array</span><span class="p">();</span><br data-jekyll-commonmark-ghpages="" /><br data-jekyll-commonmark-ghpages="" /> <span class="nv">$lag_data</span><span class="p">[</span> <span class="nv">$wpdb</span><span class="o">-&gt;</span><span class="na">lag_cache_key</span> <span class="p">]</span> <span class="o">=</span> <span class="k">array</span><span class="p">(</span> <span class="s1">'timestamp'</span> <span class="o">=&gt;</span> <span class="nb">time</span><span class="p">(),</span> <span class="s1">'lag'</span> <span class="o">=&gt;</span> <span class="nv">$row</span><span class="p">[</span> <span class="s1">'lag'</span> <span class="p">]</span> <span class="p">);</span><br data-jekyll-commonmark-ghpages="" /> <span class="nb">shm_put_var</span><span class="p">(</span> <span class="nv">$segment</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="nv">$lag_data</span> <span class="p">);</span><br data-jekyll-commonmark-ghpages="" /> <span class="nb">shm_detach</span><span class="p">(</span> <span class="nv">$segment</span> <span class="p">);</span><br data-jekyll-commonmark-ghpages="" /> <span class="nb">sem_release</span><span class="p">(</span> <span class="nv">$sem_id</span> <span class="p">);</span><br data-jekyll-commonmark-ghpages="" /><br data-jekyll-commonmark-ghpages="" /> <span class="k">return</span> <span class="nv">$row</span><span class="p">[</span> <span class="s1">'lag'</span> <span class="p">];</span><br data-jekyll-commonmark-ghpages="" /><span class="p">}</span></code></pre></figure>
+
+<p>Итак, как работает отслеживание:</p>
+
+<ul>
+  <li>Перед тем, как устанавливать соединение с базой, мы смотрим нет ли у нас данных в кэшэ о статусе её отставания.
+Время жизни кэша задаётся через <code class="highlighter-rouge">$wpdb-&gt;lag_cache_ttl</code>. Использования кэша позволяет нам не генерировать дополнительных запросов в базу без необходимости.</li>
+  <li>Если данных нет или кэш протух, проверяем отставание с помощью запроса к табличке heartbeat. Получаем время отставания и записываем в кэш.</li>
+  <li>Первая или вторая функция вернёт нам время отставания слэйва. Оно сравнивается с <code class="highlighter-rouge">lag_threshold</code>, которое определяется при добавлении сервера в конфиге.</li>
+  <li>Если время отставания не превышает <code class="highlighter-rouge">lag_threshold</code>, то читаем со слэйва, в противном случае закрываем все соединения с этой базой и читаем с мастера.</li>
+</ul>
+
+<p>Конфиг поправили, как работает поняли. Осталось настроить <code class="highlighter-rouge">mk-heartbeat</code> для мониторинга отставания.</p>
+
+<h2 id="Настройка-mk-heartbeat">Настройка mk-heartbeat</h2>
+
+<p><a href="http://www.maatkit.org/doc/mk-heartbeat.html">mk-heartbeat</a> - утилита, входящая в пакет <code class="highlighter-rouge">maatkit</code>, для мониторинга лагов репликации баз данных. В начале статьи мы уже установили нужный пакет на мастер(db1).</p>
+
+<p>Два слова о том, как происходит мониторинг:</p>
+
+<ul>
+  <li>Демон, запущенный на мастере, раз в дельту времени пишет timestamp в табличку heartbeat в реплицируемой базе данных.</li>
+  <li>Средствами репликации эти данные попадают на слейв.</li>
+  <li>Функция get_lag, в hyperdb, сравнивает текущий timestamp с записью в табличке, получая время расхождения репликации.</li>
+</ul>
+
+<p>Запускаем демон. Он автоматически создаст нужную таблицу:</p>
+
+<figure class="highlight"><pre><code class="language-console" data-lang="console"><span class="gp">#</span> mk-heartbeat <span class="nt">--daemonize</span> <span class="nt">--create-table</span> <span class="nt">--table</span> heartbeat <span class="nt">-D</span> wordpress <span class="nt">--interval</span> 27 <span class="nt">--update</span></code></pre></figure>
+
+<p>Эта команда запустит демон, который создаст таблицу heartbeat в базе wordpress и будет записывать timestamp раз в 27 секунд (этого достаточно для проверки отставания не более минуты).</p>
+
+<p>При желании можно обернуть запуск демона в инит-скрипт и запускать при старте сервера.</p>
+
+<p>Собственно теперь мы отслеживаем лаги репликации и отдаём пользователям наисвежайшие данные из баз.</p>
+</div>
+</div>
+
+
+
+    
+    
+        
+            
+        
+            
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+        
+            
+        
+    
+        
+            
+        
+            
+        
+            
+        
+    
+        
+            
+        
+            
+                
+                <div class="panel-body">
+                <h4>Related Posts</h4>
+                <ul>
+                
+                <li class="relatedPost">
+                    <a href="https://cyberflow.net/2016/05/optimization-standalone-elasticsearch-in-elk-stack.html" data-proofer-ignore>Оптимизация standalone сервера elasticsearch</a>
+                    
+                        (Categories: <a href="/category/elasticsearch">elasticsearch</a>, <a href="/category/monitoring">monitoring</a>, <a href="/category/linux">linux</a>)
+                    
+                </li>
+                
+                
+            
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+                
+                <li class="relatedPost">
+                    <a href="https://cyberflow.net/2016/03/grafana-slash-nginx-auth-proxy-httpaswd.html" data-proofer-ignore>Grafana/nginx auth proxy httpaswd</a>
+                    
+                        (Categories: <a href="/category/linux">linux</a>, <a href="/category/monitoring">monitoring</a>)
+                    
+                </li>
+                
+                
+            
+        
+            
+        
+    
+        
+            
+        
+            
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+        
+            
+        
+    
+        
+            
+        
+            
+                
+                <li class="relatedPost">
+                    <a href="https://cyberflow.net/2015/09/use-ssh-x-session-from-user-to-root.html" data-proofer-ignore>Пробрасывание X сессии от пользователя к root</a>
+                    
+                        (Categories: <a href="/category/notice">notice</a>, <a href="/category/linux">linux</a>)
+                    
+                </li>
+                
+                
+            
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+        
+            
+        
+    
+        
+            
+        
+            
+                
+                <li class="relatedPost">
+                    <a href="https://cyberflow.net/2014/07/monitoring-dmesg.html" data-proofer-ignore>Мониторинг dmesg</a>
+                    
+                        (Categories: <a href="/category/monitoring">monitoring</a>, <a href="/category/linux">linux</a>)
+                    
+                </li>
+                
+                
+            
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+                
+                <li class="relatedPost">
+                    <a href="https://cyberflow.net/2014/05/ssh-config-tricks.html" data-proofer-ignore>Трюки с ssh config</a>
+                    
+                        (Categories: <a href="/category/linux">linux</a>)
+                    
+                </li>
+                
+                
+            
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+        
+            
+                
+                <li class="relatedPost">
+                    <a href="https://cyberflow.net/2014/05/install-slave-percona-server.html" data-proofer-ignore>Установка slave mysql-percona сервера</a>
+                    
+                        (Categories: <a href="/category/ha">ha</a>, <a href="/category/linux">linux</a>, <a href="/category/databases">databases</a>)
+                    
+                </li>
+                
+                
+            
+        
+    
+        
+            
+        
+            
+        
+            
+        
+    
+        
+            
+        
+            
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+        
+            
+        
+    
+        
+            
+        
+            
+        
+            
+        
+    
+        
+            
+        
+            
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+        
+            
+        
+    
+        
+            
+        
+            
+        
+            
+        
+    
+        
+            
+        
+            
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+        
+            
+        
+    
+        
+            
+        
+            
+        
+            
+        
+    
+        
+            
+        
+            
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+        
+            
+        
+    
+        
+            
+        
+            
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+        
+            
+        
+    
+        
+            
+        
+            
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+        
+            
+        
+    
+        
+            
+        
+            
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+        
+            
+        
+    
+        
+            
+        
+            
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+            
+        
+            
+        
+    
+
+
+    </ul>
+    </div>
+
+
+<div class="PageNavigation">
+  
+    <a class="prev" href="/2013/03/adding-facebook-comment-to-octopress.html">&laquo; Добавление Facebook комментариев к Octopress</a>
+  
+  
+    <a class="next" href="/2013/05/logstash-rotate-logs-in-elasticsearch.html">logstash, ротация логов в elasticsearch &raquo;</a>
+  
+</div>
+
+
+
+
+<div class="disqus-comments">
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* <![CDATA[ */
+
+        var disqus_shortname = "cyberflowblog";
+        var disqus_identifier = "https://cyberflow.net_Hyperdb to Wordpress";
+        var disqus_title = "Hyperdb to Wordpress";
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    /* ]]> */
+    </script>
+</div>
+
+
+
+                <footer>
+                    &copy; Cyberflow
+                    
+                    - <a href="https://github.com/cyberflow">https://github.com/cyberflow</a> - Powered by Jekyll.
+                    
+                </footer>
+            </div><!-- end /.col-sm-8 -->
+        </div><!-- end /.container -->
+
+        <!-- Bootstrap core JavaScript
+        ================================================== -->
+        <!-- Placed at the end of the document so the pages load faster -->
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+        <script src="/static/js/bootstrap.min.js"></script>
+        <script src="/static/js/super-search.js"></script>
+    </body>
+</html>

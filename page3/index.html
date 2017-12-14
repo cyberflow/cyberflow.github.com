@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html  lang="ru" >
     <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
@@ -65,7 +65,7 @@
                 
                     &raquo; <a class="about" href="/category/">Categories</a><br />
                 
-                    &raquo; <a class="about" href="https://github.com/cyberflow">Github</a><br />
+                    &raquo; <a class="about" href="/code/">Code</a><br />
                 
                     &raquo; <a class="about" href="/feed.xml">XML Feed</a><br />
                 
@@ -76,6 +76,47 @@
     <h1>Cyberflow</h1>
     <hr />
     <ol class="posts">
+    
+      
+      
+<header>
+  <h1 class="entry-title"><a href="/2014/05/install-slave-percona-server.html">Установка slave mysql-percona сервера</a></h1>
+  
+    <p class="meta">
+      14 May 2014
+      
+       | <a href="/2014/05/install-slave-percona-server.html#disqus_thread">Comments</a>
+      
+    </p>
+  
+</header>
+<div class="content"><p>Хочу сразу заметить, что способов развернуть slave сервер существует масса. Я хочу рассказать лишь об одном из них. Во-первых для себя, т.к. я часто применяю его в работе. Во-вторых для тех, у кого стоит задача по развертыванию независимого (поясню: это значит что перенос файлов базы с одного сервера на другой не подходит, как в моём случае. Т.е. репликация не полная) slave и при этом репликация производиться только над некоторыми БД, а не над всем, что есть.</p>
+
+<p>Подразумевается, что уже есть мастер сервер, на котором крутятся БД и настроен для репликации.</p>
+
+<p>Теперь надо сделать dump баз данных, при этом будем использовать атрибуты <code class="highlighter-rouge">add-drop-database</code> для добавление в dump строчки удаляющей базу перед её созданием и <code class="highlighter-rouge">master-data</code> для добавления информации о бин-логах и их позиции на момент создания dump’a. Так же, чтобы избежать переноса служебных баз, формируем список баз для переноса исключив из них все служебные базы mysql (в список можно добавить и другие базы по аналогии). После создания dump’a переносим его на slave сервер.</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code># DATABASE_LIST=$(mysql -NBe 'show schemas' | grep -wv 'mysql\|performance_schema\|information_schema')
+# mysqldump  --databases $DATABASE_LIST --add-drop-database --master-data -u root -p &gt; dbdump.db
+# scp dbdump.db mysql-slave-host:~/
+</code></pre></div></div>
+
+<p>На slave сервере добавляем необходиму информацию для репликации. Это можно сделать и после развертывания dump’a. Так же я пропущу описание настройки репликации в конфигурации mysql.</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code># mysql
+mysql&gt; CHANGE MASTER TO MASTER_HOST='mysql-master-host', MASTER_USER='$replica_user', MASTER_PASSWORD='$slavepass';
+</code></pre></div></div>
+
+<p>Теперь можно залить сделанный dump и после этого включить репликацию.</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code># mysql -p &lt; ~/dbdump.db
+# mysql
+mysql&gt; slave start;
+</code></pre></div></div>
+
+</div>
+
+
     
       
       
@@ -186,39 +227,6 @@
 
   <footer>
     <a rel="full-article" href="/2013/03/adding-facebook-comment-to-octopress.html">Read on &rarr;</a>
-  </footer>
-
-
-    
-      
-      
-<header>
-  <h1 class="entry-title"><a href="/2013/02/use-opscode-chef-and-clodo-servers.html">Настраиваем сервера на Clodo через Opscode Chef</a></h1>
-  
-    <p class="meta">
-      28 Feb 2013
-      
-       | <a href="/2013/02/use-opscode-chef-and-clodo-servers.html#disqus_thread">Comments</a>
-      
-    </p>
-  
-</header>
-<div class="content"><p>Данная статья описывает возможность автоматической настройки виртуальных серверов (на примере хостинга clodo.ru) с помощью <a href="http://www.opscode.com">chef</a>.</p>
-
-<p>Заводим аккаунт в <a href="http://www.opscode.com/" title="Opscode">opscode</a></p>
-
-<p>Добавляем free хостинг на 5 серверов.</p>
-
-<p>При создании необходимо скачать ключик валидотора и конфиг для <a href="https://docs.chef.io/knife.html" title="Knife">knife</a> и поместить в <code class="highlighter-rouge">~/.chef/knife.rb</code>.</p>
-
-<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="n">current_dir</span> <span class="o">=</span> <span class="no">File</span><span class="p">.</span><span class="nf">dirname</span><span class="p">(</span><span class="kp">__FILE__</span><span class="p">)</span><br data-jekyll-commonmark-ghpages="" /><span class="n">log_level</span>                <span class="ss">:info</span><br data-jekyll-commonmark-ghpages="" /><span class="n">log_location</span>             <span class="no">STDOUT</span><br data-jekyll-commonmark-ghpages="" /><span class="n">node_name</span>                <span class="s2">"cyberflow"</span><br data-jekyll-commonmark-ghpages="" /><span class="n">client_key</span>               <span class="s2">"</span><span class="si">#{</span><span class="n">current_dir</span><span class="si">}</span><span class="s2">/cyberflow.pem"</span><br data-jekyll-commonmark-ghpages="" /><span class="n">validation_client_name</span>   <span class="s2">"clodo-test-validator"</span><br data-jekyll-commonmark-ghpages="" /><span class="n">validation_key</span>           <span class="s2">"</span><span class="si">#{</span><span class="n">current_dir</span><span class="si">}</span><span class="s2">/clodo-test-validator.pem"</span><br data-jekyll-commonmark-ghpages="" /><span class="n">chef_server_url</span>          <span class="s2">"https://api.opscode.com/organizations/clodo-test"</span><br data-jekyll-commonmark-ghpages="" /><span class="n">cache_type</span>               <span class="s1">'BasicFile'</span><br data-jekyll-commonmark-ghpages="" /><span class="n">cache_options</span><span class="p">(</span> <span class="ss">:path</span> <span class="o">=&gt;</span> <span class="s2">"</span><span class="si">#{</span><span class="no">ENV</span><span class="p">[</span><span class="s1">'HOME'</span><span class="p">]</span><span class="si">}</span><span class="s2">/.chef/checksums"</span> <span class="p">)</span><br data-jekyll-commonmark-ghpages="" /><span class="n">cookbook_path</span>            <span class="p">[</span><span class="s2">"</span><span class="si">#{</span><span class="n">current_dir</span><span class="si">}</span><span class="s2">/../cookbooks"</span><span class="p">]</span></code></pre></figure>
-
-<p>Далее идём в <a href="http://www.opscode.com/" title="Opscode">opscode</a>, заводим клиента, и ключик для клиента кладём так же в <code class="highlighter-rouge">~/.chef/</code>.</p>
-
-</div>
-
-  <footer>
-    <a rel="full-article" href="/2013/02/use-opscode-chef-and-clodo-servers.html">Read on &rarr;</a>
   </footer>
 
 

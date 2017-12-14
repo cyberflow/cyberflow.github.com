@@ -5,9 +5,43 @@
     <description>My Personal Blog</description>
     <link>https://cyberflow.net/</link>
     <atom:link href="https://cyberflow.net/sitemap.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Sat, 09 Dec 2017 10:08:17 +0000</pubDate>
-    <lastBuildDate>Sat, 09 Dec 2017 10:08:17 +0000</lastBuildDate>
+    <pubDate>Thu, 14 Dec 2017 10:01:45 +0000</pubDate>
+    <lastBuildDate>Thu, 14 Dec 2017 10:01:45 +0000</lastBuildDate>
     <generator>Jekyll v3.6.2</generator>
+    
+      <item>
+        <title>testing jekyll language plugins</title>
+        <description>&lt;p&gt;Решил потестировать мультиязычный плагин для [jekyll][].
+На просторах сети нашел приличное количество оных, но для первой пробы решил выбрать &lt;a href=&quot;https://github.com/vwochnik/jekyll-language-plugin&quot;&gt;jekyll-language-plugin&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Установка плагина подробно описана на &lt;a href=&quot;https://github.com/vwochnik/jekyll-language-plugin/wiki/Getting-Started&quot;&gt;wiki&lt;/a&gt; проекта.&lt;/p&gt;
+
+&lt;p&gt;Однако беглый обзор показал, что реализация данного плагина требует файл с переводами для всего. Если я правильно понял, то пост надо забивать в такой файл, а потом вызывать весь пост как переменную. Возможно я что-то понял не так, но в итоге этот плагин мне не понравился.&lt;/p&gt;
+
+&lt;p&gt;Дальнейшее исследование привело меня к &lt;a href=&quot;https://github.com/Anthony-Gaudino/jekyll-multiple-languages-plugin&quot;&gt;jekyll-multiple-languages-plugin&lt;/a&gt;. Тут уже в документации описано, что статьи или страницы можно хранить в &lt;code class=&quot;highlighter-rouge&quot;&gt;.md&lt;/code&gt; файлах в специпльных “языковых” директориях и импортировать их при помощи &lt;code class=&quot;highlighter-rouge&quot;&gt;% include file %&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Этот вариант понравился мне больше.&lt;/p&gt;
+
+&lt;p&gt;Правда радость была не долгой. Плагин отказался работать “из коробки”. Ошибка в коде, отвечающем за определение статики сайта. В итоге при попытке сбилдить сайт получал &lt;code class=&quot;highlighter-rouge&quot;&gt;jekyll 3.6.2 | Error:  can't dup NilClass&lt;/code&gt;. Добрае люди уже поправили ошибку и сделали &lt;a href=&quot;https://github.com/Anthony-Gaudino/jekyll-multiple-languages-plugin/pull/102/files&quot;&gt;PR&lt;/a&gt; в github, но разработчики не торопяться его принимать. Печалька, но можно поправить руками.&lt;/p&gt;
+
+&lt;p&gt;После патчинга модуля сборка заработала. Создать переводимую страницу (page в терминах jekyll) получилось без особых проблем. Однако для моего блога перевод статей, а точнее его текущее отсутсвие, привело к тому, что после сборки все статьи не сгенерились. После исключения из обработки директории с постами, при помощью директивы &lt;code class=&quot;highlighter-rouge&quot;&gt;exclude_from_localizations&lt;/code&gt; в &lt;code class=&quot;highlighter-rouge&quot;&gt;_config.yml&lt;/code&gt; удалось собрать сайт с переведенной страницей и не переведенными постами.&lt;/p&gt;
+
+&lt;p&gt;Пример двухязычной страницы можно посмотреть &lt;a href=&quot;/code/&quot;&gt;тут&lt;/a&gt;.&lt;/p&gt;
+</description>
+        <pubDate>Wed, 13 Dec 2017 16:14:00 +0000</pubDate>
+        <link>https://cyberflow.net/2017/12/testing-jekyll-language-plugin.html</link>
+        <guid isPermaLink="true">https://cyberflow.net/2017/12/testing-jekyll-language-plugin.html</guid>
+        
+        <category>jekyll</category>
+        
+        <category>plugins</category>
+        
+        <category>bloging</category>
+        
+        
+        <category>jekyll</category>
+        
+      </item>
     
       <item>
         <title>send kapacitor alert to Icinga 2</title>
