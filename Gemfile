@@ -7,7 +7,7 @@ group :jekyll_plugins do
   gem 'jekyll-gravatar'
   gem 'jekyll-categories'
   gem 'jekyll-compose'
-  gem 'jekyll-multiple-languages-plugin'
+  gem 'jekyll-multiple-languages-plugin', :git => 'https://github.com/binarious/jekyll-multiple-languages-plugin.git', :branch => 'fix/nil-pointer'
 end
 
 group :tests do
