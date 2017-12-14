@@ -5,13 +5,13 @@
     <description>My Personal Blog</description>
     <link>https://cyberflow.net/en/</link>
     <atom:link href="https://cyberflow.net/en/sitemap.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Thu, 14 Dec 2017 10:01:48 +0000</pubDate>
-    <lastBuildDate>Thu, 14 Dec 2017 10:01:48 +0000</lastBuildDate>
+    <pubDate>Thu, 14 Dec 2017 10:11:27 +0000</pubDate>
+    <lastBuildDate>Thu, 14 Dec 2017 10:11:27 +0000</lastBuildDate>
     <generator>Jekyll v3.6.2</generator>
     
       <item>
         <title>testing jekyll language plugins</title>
-        <description>&lt;p&gt;Решил потестировать мультиязычный плагин для [jekyll][].
+        <description>&lt;p&gt;Решил потестировать мультиязычный плагин для &lt;a href=&quot;https://jekyllrb.com&quot;&gt;jekyll&lt;/a&gt;.
 На просторах сети нашел приличное количество оных, но для первой пробы решил выбрать &lt;a href=&quot;https://github.com/vwochnik/jekyll-language-plugin&quot;&gt;jekyll-language-plugin&lt;/a&gt;.&lt;/p&gt;
 
 &lt;p&gt;Установка плагина подробно описана на &lt;a href=&quot;https://github.com/vwochnik/jekyll-language-plugin/wiki/Getting-Started&quot;&gt;wiki&lt;/a&gt; проекта.&lt;/p&gt;
