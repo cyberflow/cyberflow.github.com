@@ -1,7 +1,7 @@
 GIT
   remote: https://github.com/binarious/jekyll-multiple-languages-plugin.git
-  revision: d02b4289882ebae7a65f3c8a1c409e9fd3a7cc9a
-  branch: fix/nil-pointer
+  revision: 9f37cb01c009aa141f32897dd8d582c1153e9d38
+  branch: master
   specs:
     jekyll-multiple-languages-plugin (1.5.1)
       jekyll (>= 2.0, < 4.0)
@@ -268,4 +268,4 @@ DEPENDENCIES
   rake
 
 BUNDLED WITH
-   1.16.0
+   1.16.4
