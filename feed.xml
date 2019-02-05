@@ -5,9 +5,90 @@
     <description>My Personal Blog</description>
     <link>https://cyberflow.net/</link>
     <atom:link href="https://cyberflow.net/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Thu, 14 Dec 2017 10:11:23 +0000</pubDate>
-    <lastBuildDate>Thu, 14 Dec 2017 10:11:23 +0000</lastBuildDate>
+    <pubDate>Tue, 05 Feb 2019 12:59:27 +0000</pubDate>
+    <lastBuildDate>Tue, 05 Feb 2019 12:59:27 +0000</lastBuildDate>
     <generator>Jekyll v3.6.2</generator>
+    
+      <item>
+        <title>Запуск logstash pipeline на привелигерованных портах</title>
+        <description>&lt;p&gt;Logstash является хорошим сборщиком логов, и хорошо, когда приложение, с которого собираются логи, можно настроить так, чтобы оно слало логи на выбранный порт. Но что делать, если такой возможности нет? Или это вообще не приложение, а некая железка в сети? И умее она слать только на 514 порт?&lt;/p&gt;
+
+&lt;p&gt;Конечно можно сделать перенаправление пакетов на уровне iptables. Но, с моей точки зрения, решение не очень элегантное и тяжело контролируемое.&lt;/p&gt;
+
+&lt;p&gt;Можно воспользоваться &lt;code class=&quot;highlighter-rouge&quot;&gt;CAP_NET_BIND_SERVICE&lt;/code&gt;, однако и это решение имеет минус, связанный с тем, что в нем отсутствует возможность контролировать какие конкретно привелигерованные порты может использовать приложение.&lt;/p&gt;
+
+&lt;p&gt;В этой статье я кратко опишу решение, которое понравилось лично мне.&lt;/p&gt;
+
+&lt;!--more--&gt;
+
+&lt;h2 id=&quot;Настройка-authbind&quot;&gt;Настройка authbind&lt;/h2&gt;
+&lt;p&gt;Opensource утилита, позволяющая разрешать приложениям использовать привелигированные порты без прав суперпользователя (root).&lt;/p&gt;
+
+&lt;p&gt;Утилита доступна в репозиториях debian/ubuntu и устанавливается через &lt;code class=&quot;highlighter-rouge&quot;&gt;sudo apt-get install authbind&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Настраивается утилита достаточно просто:
+Например, чтобы разрешить приложению, запускаемому под пользователем &lt;code class=&quot;highlighter-rouge&quot;&gt;logstash&lt;/code&gt; использовать порт 514, необходимо сделать следующее:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Создать файл в &lt;code class=&quot;highlighter-rouge&quot;&gt;/etc/authbind/byport/&lt;/code&gt;
+    &lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;touch /etc/authbind/byport/!514
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+    &lt;p&gt;Использование “!” при создании файла указывает на протокол UDP.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;Дать прова на созданный файл, соответствующему пользователю:
+    &lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;chown logstash /etc/authbind/byport/!514
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+    &lt;p&gt;Очевидно, что этот шаг указывает какому конкретно пользователю разрешено использовать соответствующий привелигерованный порт.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;Дать прова на полное использование файла для пользователя
+    &lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;chmod 755 /etc/authbind/byport/!514
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;Настройка-logstash&quot;&gt;Настройка logstash&lt;/h2&gt;
+&lt;p&gt;Для того, чтоб logstash получил доступ до привелигерованных портов, необходимо добавить в строку запуска &lt;code class=&quot;highlighter-rouge&quot;&gt;usr/bin/authbind --deep&lt;/code&gt; до запуска самого logstash.&lt;/p&gt;
+
+&lt;p&gt;Это можно сделать путем редактирования юнита systemd. Должно получиться что-то вроде этого:&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;[Unit]
+Description=logstash
+
+[Service]
+Type=simple
+User=logstash
+Group=logstash
+EnvironmentFile=-/etc/default/logstash
+ExecStart=/usr/bin/authbind &quot;--deep&quot; &quot;/usr/bin/authbind&quot; &quot;--deep&quot; &quot;/usr/share/logstash/bin/logstash&quot; &quot;--path.settings&quot; &quot;/etc/logstash&quot;
+Restart=always
+WorkingDirectory=/
+Nice=19
+
+[Install]
+WantedBy=multi-user.target
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Однако хочется заметить, что logstash имеет свой скрипт настройки юнитов systemd. И, мне кажется, что правильнее использовать его, для настройки systemd юнитов.
+Но, к сожалению, их коробки он таких штук, как обертка для запуска не умеет. Но добавить руками эту функцию не сложно. В фале &lt;code class=&quot;highlighter-rouge&quot;&gt;/usr/share/logstash/bin/system-install&lt;/code&gt; надо поправить строчку:&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;program=&quot;$(cd `dirname $0`/..; pwd)/bin/logstash&quot;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;и поправить на:&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;program=&quot;/usr/bin/authbind --deep $(cd `dirname $0`/..; pwd)/bin/logstash&quot;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Теперь запустив этот скрипт мы получим новый systemd юнит с authbind.&lt;/p&gt;
+</description>
+        <pubDate>Tue, 05 Feb 2019 00:00:00 +0000</pubDate>
+        <link>https://cyberflow.net/2019/02/run-logstash-514-ports.html</link>
+        <guid isPermaLink="true">https://cyberflow.net/2019/02/run-logstash-514-ports.html</guid>
+        
+        <category>logstash</category>
+        
+        <category>authbind</category>
+        
+        
+        <category>elk</category>
+        
+      </item>
     
       <item>
         <title>testing jekyll language plugins</title>
@@ -802,76 +883,6 @@ hostname/unix:10  MIT-MAGIC-COOKIE-1  f714ef310193878cae851635b871d840
         
         
         <category>chef</category>
-        
-      </item>
-    
-      <item>
-        <title>Трюки с ssh config</title>
-        <description>&lt;p&gt;Конфиг ssh очень полезная и удобная штука. Пользуюсь им давно, но недавно открыл ещё несколько замечательных возможностей. Решил поделиться парой полезных фич и рассказать об одном маленьком лайфхаке.&lt;/p&gt;
-
-&lt;h3 id=&quot;Шаринг-соединений&quot;&gt;Шаринг соединений&lt;/h3&gt;
-&lt;p&gt;Часто бывает необходимо по работе держать много консолей с ssh на один сервер. Для упрощения такой работы (с точки зрения компьютера) в OpenSSH есть возможность шарить соединения. Т.е. если вы зашли на сервер, то в системе создается &lt;em&gt;ControlSocket&lt;/em&gt; и все последующие соединения на этот сервер будут использовать уже созданный сокет, а не создавать новое подключение. И если при первом соединении сервер спрашивает у вас пароль, то при повторном использовании уже сокета авторизация не потребуется.&lt;/p&gt;
-
-&lt;p&gt;Для настройки &lt;em&gt;Connection sharing&lt;/em&gt; необходимо добавить следующие строчки в начало конфига ssh:&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;ControlMaster auto
-ControlPath /tmp/ssh_%h_%p_%r
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;h3 id=&quot;Проброс-соединений-через-сервер&quot;&gt;Проброс соединений через сервер&lt;/h3&gt;
-&lt;p&gt;Другая не менее полезная штука - это возможность настроить соединение через сервер. Т.е. вместо двух команд: &lt;code class=&quot;highlighter-rouge&quot;&gt;ssh server1&lt;/code&gt; и потом уже оттуда &lt;code class=&quot;highlighter-rouge&quot;&gt;ssh server2&lt;/code&gt;, можно сразу в конфиге всё прописать и ходить одной командой.&lt;/p&gt;
-
-&lt;!--more--&gt;
-
-&lt;p&gt;Выглядеть такой конфиг будет примерно так:&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Host server2
-    HostName server2.domain.org
-    ProxyCommand ssh -W %h:%p -C server1
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-&lt;p&gt;Тут стоит пояснить, что ssh подставит вместо &lt;code class=&quot;highlighter-rouge&quot;&gt;%h&lt;/code&gt; хост, а вместо &lt;code class=&quot;highlighter-rouge&quot;&gt;%p&lt;/code&gt; порт.&lt;/p&gt;
-
-&lt;p&gt;Но и это ещё не всё. Помимо это ssh понимает паттерны внутри своего конфига.
-Приведу пример:&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Host db*
-   ProxyCommand ssh -W %h:%p -C gateway
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-&lt;p&gt;Теперь мы можем одной командой, скажем &lt;code class=&quot;highlighter-rouge&quot;&gt;ssh db2.domain.org&lt;/code&gt; попасть на сервер пробросив соединение через другой.&lt;/p&gt;
-
-&lt;p&gt;Этот метод в сочетании с шарингом соединений даёт мощный инструмент.&lt;/p&gt;
-
-&lt;h3 id=&quot;Проброс-соединений-для-серверов-с-похожими-именами&quot;&gt;Проброс соединений для серверов с похожими именами&lt;/h3&gt;
-&lt;p&gt;А теперь о проблеме с которой я столкнулся и “героически” решил.
-ПРоблема была в том, что есть два набора серверов с одинаковыми именами, пусть для примера это будут &lt;em&gt;db1&lt;/em&gt; &lt;em&gt;db2&lt;/em&gt; &lt;em&gt;dbN&lt;/em&gt;, находящихся за разными серверами, через которые на них надо ходить, пусть это будет &lt;em&gt;gate1&lt;/em&gt; и &lt;em&gt;gate2&lt;/em&gt;. Предыдущий пример с использованием паттернов покрывает задачу лишь частично. Можно, конечно, выкрутиться используя паттерны с доменным именем, но в таком случае надо набирать полное доменное имя сервера, хотя с гейта на него можно попасть по короткому имени без домена.
-Решить эту проблему удалось с помощью использования факта, что &lt;code class=&quot;highlighter-rouge&quot;&gt;ProxyCommand&lt;/code&gt; интерпретируется bash’ем =)
-В итоге конфиг выглядит приблизительно так:&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Host db*.dc1
-    ProxyCommand ssh -W $(echo %h| cut -d. -f1):%p -C gate1
-
-Host db*.dc2
-    ProxyCommand ssh -W $(echo %h| cut -d. -f1):%p -C gate2
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;Т.е. в консоле мы вводим &lt;code class=&quot;highlighter-rouge&quot;&gt;ssh db5.dc2&lt;/code&gt;, данный сервер матчится со вторым паттерном, но пре передачи имени хоста в прокси-команду ненужная часть домена отбрасывается.&lt;/p&gt;
-
-&lt;p&gt;Больше о конфиге ssh можно узнать из документации: &lt;a href=&quot;http://man.cx/ssh_config&quot;&gt;ssh_config&lt;/a&gt;&lt;/p&gt;
-</description>
-        <pubDate>Thu, 22 May 2014 20:57:00 +0000</pubDate>
-        <link>https://cyberflow.net/2014/05/ssh-config-tricks.html</link>
-        <guid isPermaLink="true">https://cyberflow.net/2014/05/ssh-config-tricks.html</guid>
-        
-        <category>linux</category>
-        
-        <category>ssh_config</category>
-        
-        <category>openssh</category>
-        
-        <category>ssh</category>
-        
-        
-        <category>linux</category>
         
       </item>
     

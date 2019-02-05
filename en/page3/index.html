@@ -9,7 +9,7 @@
         <title>Cyberflow</title>
         <meta name="author" content="Cyberflow" />
         <meta name="description" content="My Personal Blog" />
-        <meta name="keywords" content="Cyberflow, monitoring, perl, ruby, debian, linux, chef, notice, jekyll, clusters, ha, elasticsearch, databases" />
+        <meta name="keywords" content="Cyberflow, monitoring, perl, ruby, debian, linux, chef, notice, jekyll, clusters, ha, elasticsearch, databases, elk" />
         <link rel="alternate" type="application/rss+xml" title="RSS" href="/feed.xml">
 
         <!-- syntax highlighting CSS -->
@@ -76,6 +76,41 @@
     <h1>Cyberflow</h1>
     <hr />
     <ol class="posts">
+    
+      
+      
+<header>
+  <h1 class="entry-title"><a href="/2014/05/ssh-config-tricks.html">Трюки с ssh config</a></h1>
+  
+    <p class="meta">
+      22 May 2014
+      
+       | <a href="/2014/05/ssh-config-tricks.html#disqus_thread">Comments</a>
+      
+    </p>
+  
+</header>
+<div class="content"><p>Конфиг ssh очень полезная и удобная штука. Пользуюсь им давно, но недавно открыл ещё несколько замечательных возможностей. Решил поделиться парой полезных фич и рассказать об одном маленьком лайфхаке.</p>
+
+<h3 id="Шаринг-соединений">Шаринг соединений</h3>
+<p>Часто бывает необходимо по работе держать много консолей с ssh на один сервер. Для упрощения такой работы (с точки зрения компьютера) в OpenSSH есть возможность шарить соединения. Т.е. если вы зашли на сервер, то в системе создается <em>ControlSocket</em> и все последующие соединения на этот сервер будут использовать уже созданный сокет, а не создавать новое подключение. И если при первом соединении сервер спрашивает у вас пароль, то при повторном использовании уже сокета авторизация не потребуется.</p>
+
+<p>Для настройки <em>Connection sharing</em> необходимо добавить следующие строчки в начало конфига ssh:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ControlMaster auto
+ControlPath /tmp/ssh_%h_%p_%r
+</code></pre></div></div>
+
+<h3 id="Проброс-соединений-через-сервер">Проброс соединений через сервер</h3>
+<p>Другая не менее полезная штука - это возможность настроить соединение через сервер. Т.е. вместо двух команд: <code class="highlighter-rouge">ssh server1</code> и потом уже оттуда <code class="highlighter-rouge">ssh server2</code>, можно сразу в конфиге всё прописать и ходить одной командой.</p>
+
+</div>
+
+  <footer>
+    <a rel="full-article" href="/2014/05/ssh-config-tricks.html">Read on &rarr;</a>
+  </footer>
+
+
     
       
       
@@ -198,39 +233,6 @@ mysql&gt; slave start;
 
 
     
-      
-      
-<header>
-  <h1 class="entry-title"><a href="/2013/03/adding-facebook-comment-to-octopress.html">Добавление Facebook комментариев к Octopress</a></h1>
-  
-    <p class="meta">
-      20 Mar 2013
-      
-       | <a href="/2013/03/adding-facebook-comment-to-octopress.html#disqus_thread">Comments</a>
-      
-    </p>
-  
-</header>
-<div class="content"><p>В этой небольшой статья я опишу как добавить комментарии facebook к блогу на <a href="http://octopress.org">octopress</a>. В octopress есть поддержка комментариев с использованием <a href="http://disqus.com/">disqus</a>, но мне ближе facebook.</p>
-
-<p>Для начала необходимо <a href="https://developers.facebook.com/apps">зарегистрировать приложение на facebook</a> для своего блога. Когда регистрация пройдена facebook  должен выдать app id. Теперь можно приступить к настройке. Добавим facebook app id и параметры отображения комментариев в файл конфигурации <code class="highlighter-rouge">_config.yml</code></p>
-
-<blockquote class="filename">
-  <p>_config.yml</p>
-</blockquote>
-
-<figure class="highlight"><pre><code class="language-yml" data-lang="yml"><span class="c1"># Facebook comments</span><br data-jekyll-commonmark-ghpages="" /><span class="na">facebook</span><span class="pi">:</span><br data-jekyll-commonmark-ghpages="" />  <span class="na">appid</span><span class="pi">:</span> <span class="s">222612811167194</span><br data-jekyll-commonmark-ghpages="" />  <span class="na">num_post</span><span class="pi">:</span> <span class="s">5</span><br data-jekyll-commonmark-ghpages="" />  <span class="na">width</span><span class="pi">:</span> <span class="s">789</span><br data-jekyll-commonmark-ghpages="" />  <span class="na">colorscheme</span><span class="pi">:</span> <span class="s">light</span></code></pre></figure>
-
-<p>Следующим шагом добавим facebook javascript API на нашу страницу. Для этого можно воспользоваться уже имеющимся в octopress функционалом facebook like. И так, открываем <code class="highlighter-rouge">siurce/_includes/facebook_like.html</code> и меняем строчку содержащую <code class="highlighter-rouge">js.src=</code> заменив в ней цифры на app id полученный от facebook.</p>
-
-</div>
-
-  <footer>
-    <a rel="full-article" href="/2013/03/adding-facebook-comment-to-octopress.html">Read on &rarr;</a>
-  </footer>
-
-
-    
     </ol>
 
     <!-- Pagination links -->
@@ -273,8 +275,14 @@ mysql&gt; slave start;
           </li>
         
       
+        
+          <li>
+            <a href="/en/page6/">6</a>
+          </li>
+        
+      
 
-      <li><a href="/page5/">Last</a></li>
+      <li><a href="/page6/">Last</a></li>
 
       
         <li>

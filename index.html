@@ -9,7 +9,7 @@
         <title>Cyberflow</title>
         <meta name="author" content="Cyberflow" />
         <meta name="description" content="My Personal Blog" />
-        <meta name="keywords" content="Cyberflow, monitoring, perl, ruby, debian, linux, chef, notice, jekyll, clusters, ha, elasticsearch, databases" />
+        <meta name="keywords" content="Cyberflow, monitoring, perl, ruby, debian, linux, chef, notice, jekyll, clusters, ha, elasticsearch, databases, elk" />
         <link rel="alternate" type="application/rss+xml" title="RSS" href="/feed.xml">
 
         <!-- syntax highlighting CSS -->
@@ -76,6 +76,35 @@
     <h1>Cyberflow</h1>
     <hr />
     <ol class="posts">
+    
+      
+      
+<header>
+  <h1 class="entry-title"><a href="/2019/02/run-logstash-514-ports.html">Запуск logstash pipeline на привелигерованных портах</a></h1>
+  
+    <p class="meta">
+      05 Feb 2019
+      
+       | <a href="/2019/02/run-logstash-514-ports.html#disqus_thread">Comments</a>
+      
+    </p>
+  
+</header>
+<div class="content"><p>Logstash является хорошим сборщиком логов, и хорошо, когда приложение, с которого собираются логи, можно настроить так, чтобы оно слало логи на выбранный порт. Но что делать, если такой возможности нет? Или это вообще не приложение, а некая железка в сети? И умее она слать только на 514 порт?</p>
+
+<p>Конечно можно сделать перенаправление пакетов на уровне iptables. Но, с моей точки зрения, решение не очень элегантное и тяжело контролируемое.</p>
+
+<p>Можно воспользоваться <code class="highlighter-rouge">CAP_NET_BIND_SERVICE</code>, однако и это решение имеет минус, связанный с тем, что в нем отсутствует возможность контролировать какие конкретно привелигерованные порты может использовать приложение.</p>
+
+<p>В этой статье я кратко опишу решение, которое понравилось лично мне.</p>
+
+</div>
+
+  <footer>
+    <a rel="full-article" href="/2019/02/run-logstash-514-ports.html">Read on &rarr;</a>
+  </footer>
+
+
     
       
       
@@ -195,29 +224,6 @@
 
 
     
-      
-      
-<header>
-  <h1 class="entry-title"><a href="/2016/05/optimization-standalone-elasticsearch-in-elk-stack.html">Оптимизация standalone сервера elasticsearch</a></h1>
-  
-    <p class="meta">
-      12 May 2016
-      
-       | <a href="/2016/05/optimization-standalone-elasticsearch-in-elk-stack.html#disqus_thread">Comments</a>
-      
-    </p>
-  
-</header>
-<div class="content"><p>При использовании <a href="https://www.elastic.co">elasticsearch</a> для сбора и анализа логов возникает вопрос оптимизации для одного сервера. Т.к. <code class="highlighter-rouge">elasticsearch</code> расчитан для использования в кластере, то большинство настроек “по умолчанию” выставлены так, что один сервер работает не эффективно. В этой заметке я разберу несколько примеров оптимизации <code class="highlighter-rouge">elasticsearch</code> для работы на одном сервере.</p>
-
-</div>
-
-  <footer>
-    <a rel="full-article" href="/2016/05/optimization-standalone-elasticsearch-in-elk-stack.html">Read on &rarr;</a>
-  </footer>
-
-
-    
     </ol>
 
     <!-- Pagination links -->
@@ -260,8 +266,14 @@
           </li>
         
       
+        
+          <li>
+            <a href="/page6/">6</a>
+          </li>
+        
+      
 
-      <li><a href="/page5/">Last</a></li>
+      <li><a href="/page6/">Last</a></li>
 
       
         <li>

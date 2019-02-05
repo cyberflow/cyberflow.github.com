@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html  lang="en" >
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link rel="shortcut icon" href="/static/img/favicon.ico" />
+        <title>Запуск logstash pipeline на привелигерованных портах - Cyberflow</title>
+        <meta name="author" content="Cyberflow" />
+        <meta name="description" content="Запуск logstash pipeline на привелигерованных портах" />
+        <meta name="keywords" content="Запуск logstash pipeline на привелигерованных портах, Cyberflow, elk" />
+        <link rel="alternate" type="application/rss+xml" title="RSS" href="/feed.xml">
+
+        <!-- syntax highlighting CSS -->
+        <link rel="stylesheet" href="/static/css/syntax.css">
+
+        <!-- Bootstrap core CSS -->
+        <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+
+        <!-- Fonts -->
+        <link href="//fonts.googleapis.com/css?family=Roboto+Condensed:400,300italic,300,400italic,700&amp;subset=latin,latin-ext" rel="stylesheet" type="text/css">
+
+        <!-- Custom CSS -->
+        <link rel="stylesheet" href="/static/css/super-search.css">
+        <link rel="stylesheet" href="/static/css/main.css">
+
+        <!-- Google Analytics -->
+        
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-31213444-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+    </head>
+
+    <body>
+        <div class="container">
+            <div class="col-sm-3">
+                <a href="/"><img id="about" src="https://www.gravatar.com/avatar/7ca36522be02d33e7d2f4ea209012ac3?s=68" alt="cyberflow_gravatar" height="75px" width="75px" /></a>
+                <h1 class="author-name">Cyberflow</h1>
+                
+                <div id="about">
+                    I am linux system administrator.
+                </div>
+                
+
+                <hr />
+                <div class="search" id="js-search">
+                  <input type="text" placeholder="(sitemap)~$ type to search" class="search__input form-control" id="js-search__input">
+                  <ul class="search__results" id="js-search__results"></ul>
+                </div>
+                <hr />
+
+                <strong>Navigation</strong><br />
+                    &raquo; <a href="/">Home</a> <br />
+                
+                    &raquo; <a class="about" href="/category/">Categories</a><br />
+                
+                    &raquo; <a class="about" href="/code/">Code</a><br />
+                
+                    &raquo; <a class="about" href="/feed.xml">XML Feed</a><br />
+                
+            </div>
+
+            <div class="col-sm-8 col-offset-1">
+                <h1>Запуск logstash pipeline на привелигерованных портах</h1>
+<span class="time">05 Feb 2019</span>
+
+<span class="categories">
+    &raquo; <a href="/category/elk">elk</a>
+</span>
+
+
+<div class="content">
+    <div class="post"><p>Logstash является хорошим сборщиком логов, и хорошо, когда приложение, с которого собираются логи, можно настроить так, чтобы оно слало логи на выбранный порт. Но что делать, если такой возможности нет? Или это вообще не приложение, а некая железка в сети? И умее она слать только на 514 порт?</p>
+
+<p>Конечно можно сделать перенаправление пакетов на уровне iptables. Но, с моей точки зрения, решение не очень элегантное и тяжело контролируемое.</p>
+
+<p>Можно воспользоваться <code class="highlighter-rouge">CAP_NET_BIND_SERVICE</code>, однако и это решение имеет минус, связанный с тем, что в нем отсутствует возможность контролировать какие конкретно привелигерованные порты может использовать приложение.</p>
+
+<p>В этой статье я кратко опишу решение, которое понравилось лично мне.</p>
+
+<!--more-->
+
+<h2 id="Настройка-authbind">Настройка authbind</h2>
+<p>Opensource утилита, позволяющая разрешать приложениям использовать привелигированные порты без прав суперпользователя (root).</p>
+
+<p>Утилита доступна в репозиториях debian/ubuntu и устанавливается через <code class="highlighter-rouge">sudo apt-get install authbind</code>.</p>
+
+<p>Настраивается утилита достаточно просто:
+Например, чтобы разрешить приложению, запускаемому под пользователем <code class="highlighter-rouge">logstash</code> использовать порт 514, необходимо сделать следующее:</p>
+
+<ul>
+  <li>Создать файл в <code class="highlighter-rouge">/etc/authbind/byport/</code>
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>touch /etc/authbind/byport/!514
+</code></pre></div>    </div>
+    <p>Использование “!” при создании файла указывает на протокол UDP.</p>
+  </li>
+  <li>Дать прова на созданный файл, соответствующему пользователю:
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>chown logstash /etc/authbind/byport/!514
+</code></pre></div>    </div>
+    <p>Очевидно, что этот шаг указывает какому конкретно пользователю разрешено использовать соответствующий привелигерованный порт.</p>
+  </li>
+  <li>Дать прова на полное использование файла для пользователя
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>chmod 755 /etc/authbind/byport/!514
+</code></pre></div>    </div>
+  </li>
+</ul>
+
+<h2 id="Настройка-logstash">Настройка logstash</h2>
+<p>Для того, чтоб logstash получил доступ до привелигерованных портов, необходимо добавить в строку запуска <code class="highlighter-rouge">usr/bin/authbind --deep</code> до запуска самого logstash.</p>
+
+<p>Это можно сделать путем редактирования юнита systemd. Должно получиться что-то вроде этого:</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[Unit]
+Description=logstash
+
+[Service]
+Type=simple
+User=logstash
+Group=logstash
+EnvironmentFile=-/etc/default/logstash
+ExecStart=/usr/bin/authbind "--deep" "/usr/bin/authbind" "--deep" "/usr/share/logstash/bin/logstash" "--path.settings" "/etc/logstash"
+Restart=always
+WorkingDirectory=/
+Nice=19
+
+[Install]
+WantedBy=multi-user.target
+</code></pre></div></div>
+
+<p>Однако хочется заметить, что logstash имеет свой скрипт настройки юнитов systemd. И, мне кажется, что правильнее использовать его, для настройки systemd юнитов.
+Но, к сожалению, их коробки он таких штук, как обертка для запуска не умеет. Но добавить руками эту функцию не сложно. В фале <code class="highlighter-rouge">/usr/share/logstash/bin/system-install</code> надо поправить строчку:</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>program="$(cd `dirname $0`/..; pwd)/bin/logstash"
+</code></pre></div></div>
+<p>и поправить на:</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>program="/usr/bin/authbind --deep $(cd `dirname $0`/..; pwd)/bin/logstash"
+</code></pre></div></div>
+
+<p>Теперь запустив этот скрипт мы получим новый systemd юнит с authbind.</p>
+</div>
+</div>
+
+
+
+    
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+        
+            
+        
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+        
+            
+        
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+        
+            
+        
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+        
+            
+        
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+        
+            
+        
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+        
+            
+        
+    
+
+    
+    
+        
+            
+        
+    
+
+
+
+<div class="PageNavigation">
+  
+    <a class="prev" href="/2017/12/testing-jekyll-language-plugin.html">&laquo; testing jekyll language plugins</a>
+  
+  
+</div>
+
+
+
+
+<div class="disqus-comments">
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* <![CDATA[ */
+
+        var disqus_shortname = "cyberflowblog";
+        var disqus_identifier = "https://cyberflow.net_Запуск logstash pipeline на привелигерованных портах";
+        var disqus_title = "Запуск logstash pipeline на привелигерованных портах";
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    /* ]]> */
+    </script>
+</div>
+
+
+
+                <footer>
+                    &copy; Cyberflow
+                    
+                    - <a href="https://github.com/cyberflow">https://github.com/cyberflow</a> - Powered by Jekyll.
+                    
+                </footer>
+            </div><!-- end /.col-sm-8 -->
+        </div><!-- end /.container -->
+
+        <!-- Bootstrap core JavaScript
+        ================================================== -->
+        <!-- Placed at the end of the document so the pages load faster -->
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+        <script src="/static/js/bootstrap.min.js"></script>
+        <script src="/static/js/super-search.js"></script>
+    </body>
+</html>

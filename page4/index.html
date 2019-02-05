@@ -9,7 +9,7 @@
         <title>Cyberflow</title>
         <meta name="author" content="Cyberflow" />
         <meta name="description" content="My Personal Blog" />
-        <meta name="keywords" content="Cyberflow, monitoring, perl, ruby, debian, linux, chef, notice, jekyll, clusters, ha, elasticsearch, databases" />
+        <meta name="keywords" content="Cyberflow, monitoring, perl, ruby, debian, linux, chef, notice, jekyll, clusters, ha, elasticsearch, databases, elk" />
         <link rel="alternate" type="application/rss+xml" title="RSS" href="/feed.xml">
 
         <!-- syntax highlighting CSS -->
@@ -76,6 +76,39 @@
     <h1>Cyberflow</h1>
     <hr />
     <ol class="posts">
+    
+      
+      
+<header>
+  <h1 class="entry-title"><a href="/2013/03/adding-facebook-comment-to-octopress.html">Добавление Facebook комментариев к Octopress</a></h1>
+  
+    <p class="meta">
+      20 Mar 2013
+      
+       | <a href="/2013/03/adding-facebook-comment-to-octopress.html#disqus_thread">Comments</a>
+      
+    </p>
+  
+</header>
+<div class="content"><p>В этой небольшой статья я опишу как добавить комментарии facebook к блогу на <a href="http://octopress.org">octopress</a>. В octopress есть поддержка комментариев с использованием <a href="http://disqus.com/">disqus</a>, но мне ближе facebook.</p>
+
+<p>Для начала необходимо <a href="https://developers.facebook.com/apps">зарегистрировать приложение на facebook</a> для своего блога. Когда регистрация пройдена facebook  должен выдать app id. Теперь можно приступить к настройке. Добавим facebook app id и параметры отображения комментариев в файл конфигурации <code class="highlighter-rouge">_config.yml</code></p>
+
+<blockquote class="filename">
+  <p>_config.yml</p>
+</blockquote>
+
+<figure class="highlight"><pre><code class="language-yml" data-lang="yml"><span class="c1"># Facebook comments</span><br data-jekyll-commonmark-ghpages="" /><span class="na">facebook</span><span class="pi">:</span><br data-jekyll-commonmark-ghpages="" />  <span class="na">appid</span><span class="pi">:</span> <span class="s">222612811167194</span><br data-jekyll-commonmark-ghpages="" />  <span class="na">num_post</span><span class="pi">:</span> <span class="s">5</span><br data-jekyll-commonmark-ghpages="" />  <span class="na">width</span><span class="pi">:</span> <span class="s">789</span><br data-jekyll-commonmark-ghpages="" />  <span class="na">colorscheme</span><span class="pi">:</span> <span class="s">light</span></code></pre></figure>
+
+<p>Следующим шагом добавим facebook javascript API на нашу страницу. Для этого можно воспользоваться уже имеющимся в octopress функционалом facebook like. И так, открываем <code class="highlighter-rouge">siurce/_includes/facebook_like.html</code> и меняем строчку содержащую <code class="highlighter-rouge">js.src=</code> заменив в ней цифры на app id полученный от facebook.</p>
+
+</div>
+
+  <footer>
+    <a rel="full-article" href="/2013/03/adding-facebook-comment-to-octopress.html">Read on &rarr;</a>
+  </footer>
+
+
     
       
       
@@ -217,44 +250,6 @@
 
 
     
-      
-      
-<header>
-  <h1 class="entry-title"><a href="/2012/10/install-chef-solo-to-debian-6-squeeze.html">Установка chef solo на debian 6 squeeze</a></h1>
-  
-    <p class="meta">
-      18 Oct 2012
-      
-       | <a href="/2012/10/install-chef-solo-to-debian-6-squeeze.html#disqus_thread">Comments</a>
-      
-    </p>
-  
-</header>
-<div class="content"><p>Для начала установим необходимые пакеты для установки и работы cfeh-solo.</p>
-
-<figure class="highlight"><pre><code class="language-bash" data-lang="bash">apt-get install <span class="nb">sudo </span>wget lsb-release</code></pre></figure>
-
-<p>Далее добавляем репозиторий opscode в списки репозиториев командой:</p>
-
-<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nb">echo</span> <span class="s2">"deb http://apt.opscode.com/ </span><span class="sb">`</span>lsb_release <span class="nt">-cs</span><span class="sb">`</span><span class="s2">-0.10 main"</span> | <span class="nb">sudo </span>tee /etc/apt/sources.list.d/opscode.list</code></pre></figure>
-
-<p>Теперь необходимо добавить ключи к репозиторию:</p>
-
-<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nb">sudo </span>mkdir <span class="nt">-p</span> /etc/apt/trusted.gpg.d<br data-jekyll-commonmark-ghpages="" />gpg <span class="nt">--keyserver</span> keys.gnupg.net <span class="nt">--recv-keys</span> 83EF826A<br data-jekyll-commonmark-ghpages="" />gpg <span class="nt">--export</span> packages@opscode.com | <span class="nb">sudo </span>tee /etc/apt/trusted.gpg.d/opscode-keyring.gpg <span class="o">&gt;</span> /dev/null</code></pre></figure>
-
-<p>Обновим информацию о пакетах с учётом добавленного репозитория и установим opscode-keyring:</p>
-
-<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nb">sudo </span>apt-get update <span class="o">&amp;&amp;</span> <span class="nb">sudo </span>apt-get install opscode-keyring</code></pre></figure>
-
-<p>Устанавливаем chef:</p>
-
-<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nb">sudo </span>apt-get install chef</code></pre></figure>
-
-<p>При установке будет задан вопрос о пути к серверу chef, т.к. мы делаем установку для chef-solo, то указываем там “none”.</p>
-</div>
-
-
-    
     </ol>
 
     <!-- Pagination links -->
@@ -297,8 +292,14 @@
           </li>
         
       
+        
+          <li>
+            <a href="/page6/">6</a>
+          </li>
+        
+      
 
-      <li><a href="/page5/">Last</a></li>
+      <li><a href="/page6/">Last</a></li>
 
       
         <li>

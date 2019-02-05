@@ -5,9 +5,90 @@
     <description>My Personal Blog</description>
     <link>https://cyberflow.net/</link>
     <atom:link href="https://cyberflow.net/sitemap.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Thu, 14 Dec 2017 10:11:23 +0000</pubDate>
-    <lastBuildDate>Thu, 14 Dec 2017 10:11:23 +0000</lastBuildDate>
+    <pubDate>Tue, 05 Feb 2019 12:59:27 +0000</pubDate>
+    <lastBuildDate>Tue, 05 Feb 2019 12:59:27 +0000</lastBuildDate>
     <generator>Jekyll v3.6.2</generator>
+    
+      <item>
+        <title>Запуск logstash pipeline на привелигерованных портах</title>
+        <description>&lt;p&gt;Logstash является хорошим сборщиком логов, и хорошо, когда приложение, с которого собираются логи, можно настроить так, чтобы оно слало логи на выбранный порт. Но что делать, если такой возможности нет? Или это вообще не приложение, а некая железка в сети? И умее она слать только на 514 порт?&lt;/p&gt;
+
+&lt;p&gt;Конечно можно сделать перенаправление пакетов на уровне iptables. Но, с моей точки зрения, решение не очень элегантное и тяжело контролируемое.&lt;/p&gt;
+
+&lt;p&gt;Можно воспользоваться &lt;code class=&quot;highlighter-rouge&quot;&gt;CAP_NET_BIND_SERVICE&lt;/code&gt;, однако и это решение имеет минус, связанный с тем, что в нем отсутствует возможность контролировать какие конкретно привелигерованные порты может использовать приложение.&lt;/p&gt;
+
+&lt;p&gt;В этой статье я кратко опишу решение, которое понравилось лично мне.&lt;/p&gt;
+
+&lt;!--more--&gt;
+
+&lt;h2 id=&quot;Настройка-authbind&quot;&gt;Настройка authbind&lt;/h2&gt;
+&lt;p&gt;Opensource утилита, позволяющая разрешать приложениям использовать привелигированные порты без прав суперпользователя (root).&lt;/p&gt;
+
+&lt;p&gt;Утилита доступна в репозиториях debian/ubuntu и устанавливается через &lt;code class=&quot;highlighter-rouge&quot;&gt;sudo apt-get install authbind&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Настраивается утилита достаточно просто:
+Например, чтобы разрешить приложению, запускаемому под пользователем &lt;code class=&quot;highlighter-rouge&quot;&gt;logstash&lt;/code&gt; использовать порт 514, необходимо сделать следующее:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Создать файл в &lt;code class=&quot;highlighter-rouge&quot;&gt;/etc/authbind/byport/&lt;/code&gt;
+    &lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;touch /etc/authbind/byport/!514
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+    &lt;p&gt;Использование “!” при создании файла указывает на протокол UDP.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;Дать прова на созданный файл, соответствующему пользователю:
+    &lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;chown logstash /etc/authbind/byport/!514
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+    &lt;p&gt;Очевидно, что этот шаг указывает какому конкретно пользователю разрешено использовать соответствующий привелигерованный порт.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;Дать прова на полное использование файла для пользователя
+    &lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;chmod 755 /etc/authbind/byport/!514
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;Настройка-logstash&quot;&gt;Настройка logstash&lt;/h2&gt;
+&lt;p&gt;Для того, чтоб logstash получил доступ до привелигерованных портов, необходимо добавить в строку запуска &lt;code class=&quot;highlighter-rouge&quot;&gt;usr/bin/authbind --deep&lt;/code&gt; до запуска самого logstash.&lt;/p&gt;
+
+&lt;p&gt;Это можно сделать путем редактирования юнита systemd. Должно получиться что-то вроде этого:&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;[Unit]
+Description=logstash
+
+[Service]
+Type=simple
+User=logstash
+Group=logstash
+EnvironmentFile=-/etc/default/logstash
+ExecStart=/usr/bin/authbind &quot;--deep&quot; &quot;/usr/bin/authbind&quot; &quot;--deep&quot; &quot;/usr/share/logstash/bin/logstash&quot; &quot;--path.settings&quot; &quot;/etc/logstash&quot;
+Restart=always
+WorkingDirectory=/
+Nice=19
+
+[Install]
+WantedBy=multi-user.target
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Однако хочется заметить, что logstash имеет свой скрипт настройки юнитов systemd. И, мне кажется, что правильнее использовать его, для настройки systemd юнитов.
+Но, к сожалению, их коробки он таких штук, как обертка для запуска не умеет. Но добавить руками эту функцию не сложно. В фале &lt;code class=&quot;highlighter-rouge&quot;&gt;/usr/share/logstash/bin/system-install&lt;/code&gt; надо поправить строчку:&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;program=&quot;$(cd `dirname $0`/..; pwd)/bin/logstash&quot;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;и поправить на:&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;program=&quot;/usr/bin/authbind --deep $(cd `dirname $0`/..; pwd)/bin/logstash&quot;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Теперь запустив этот скрипт мы получим новый systemd юнит с authbind.&lt;/p&gt;
+</description>
+        <pubDate>Tue, 05 Feb 2019 00:00:00 +0000</pubDate>
+        <link>https://cyberflow.net/2019/02/run-logstash-514-ports.html</link>
+        <guid isPermaLink="true">https://cyberflow.net/2019/02/run-logstash-514-ports.html</guid>
+        
+        <category>logstash</category>
+        
+        <category>authbind</category>
+        
+        
+        <category>elk</category>
+        
+      </item>
     
       <item>
         <title>testing jekyll language plugins</title>

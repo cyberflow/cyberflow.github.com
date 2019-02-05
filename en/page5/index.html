@@ -9,7 +9,7 @@
         <title>Cyberflow</title>
         <meta name="author" content="Cyberflow" />
         <meta name="description" content="My Personal Blog" />
-        <meta name="keywords" content="Cyberflow, monitoring, perl, ruby, debian, linux, chef, notice, jekyll, clusters, ha, elasticsearch, databases" />
+        <meta name="keywords" content="Cyberflow, monitoring, perl, ruby, debian, linux, chef, notice, jekyll, clusters, ha, elasticsearch, databases, elk" />
         <link rel="alternate" type="application/rss+xml" title="RSS" href="/feed.xml">
 
         <!-- syntax highlighting CSS -->
@@ -76,6 +76,44 @@
     <h1>Cyberflow</h1>
     <hr />
     <ol class="posts">
+    
+      
+      
+<header>
+  <h1 class="entry-title"><a href="/2012/10/install-chef-solo-to-debian-6-squeeze.html">Установка chef solo на debian 6 squeeze</a></h1>
+  
+    <p class="meta">
+      18 Oct 2012
+      
+       | <a href="/2012/10/install-chef-solo-to-debian-6-squeeze.html#disqus_thread">Comments</a>
+      
+    </p>
+  
+</header>
+<div class="content"><p>Для начала установим необходимые пакеты для установки и работы cfeh-solo.</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">apt-get install <span class="nb">sudo </span>wget lsb-release</code></pre></figure>
+
+<p>Далее добавляем репозиторий opscode в списки репозиториев командой:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nb">echo</span> <span class="s2">"deb http://apt.opscode.com/ </span><span class="sb">`</span>lsb_release <span class="nt">-cs</span><span class="sb">`</span><span class="s2">-0.10 main"</span> | <span class="nb">sudo </span>tee /etc/apt/sources.list.d/opscode.list</code></pre></figure>
+
+<p>Теперь необходимо добавить ключи к репозиторию:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nb">sudo </span>mkdir <span class="nt">-p</span> /etc/apt/trusted.gpg.d<br data-jekyll-commonmark-ghpages="" />gpg <span class="nt">--keyserver</span> keys.gnupg.net <span class="nt">--recv-keys</span> 83EF826A<br data-jekyll-commonmark-ghpages="" />gpg <span class="nt">--export</span> packages@opscode.com | <span class="nb">sudo </span>tee /etc/apt/trusted.gpg.d/opscode-keyring.gpg <span class="o">&gt;</span> /dev/null</code></pre></figure>
+
+<p>Обновим информацию о пакетах с учётом добавленного репозитория и установим opscode-keyring:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nb">sudo </span>apt-get update <span class="o">&amp;&amp;</span> <span class="nb">sudo </span>apt-get install opscode-keyring</code></pre></figure>
+
+<p>Устанавливаем chef:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nb">sudo </span>apt-get install chef</code></pre></figure>
+
+<p>При установке будет задан вопрос о пути к серверу chef, т.к. мы делаем установку для chef-solo, то указываем там “none”.</p>
+</div>
+
+
     
       
       
@@ -223,37 +261,6 @@
 
 
     
-      
-      
-<header>
-  <h1 class="entry-title"><a href="/2011/11/idoutils-icinga-web-1-dot-5-2.html">Установка idoutils и icinga-web 1.5.2</a></h1>
-  
-    <p class="meta">
-      03 Nov 2011
-      
-       | <a href="/2011/11/idoutils-icinga-web-1-dot-5-2.html#disqus_thread">Comments</a>
-      
-    </p>
-  
-</header>
-<div class="content"><h3 id="Для-чего-это-нужно">Для чего это нужно?</h3>
-<p>В дефолтной инсталляции <a href="http://www.icinga.org">icinga</a> пишет все данные в файлики. Но есть возможность перенаправлять эти данные в базу при помощи idoutils. В целом в базе будут храниться все события, perf-data и другие данные.</p>
-
-<h3 id="Перед-тем-как-начать">Перед тем как начать</h3>
-<p>Подразумевается, что icinga 1.5.1 уже установлена и дальше будет только описание необходимых действия для установки idoutils и icinga-web 1.5.2. И то и другое требует базу данных. По этому убедитесь, что в вашем debian установлен соответствующий пакет. Если это не так, то установите его. Также необходимо наличии libdbi:</p>
-
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code># apt-get install mysql-server mysql-client libdbi0 libdbi0-dev libdbd-mysql
-</code></pre></div></div>
-<p>Для установки icinga-web 1.5.2 необходимы следующие пакеты:</p>
-
-</div>
-
-  <footer>
-    <a rel="full-article" href="/2011/11/idoutils-icinga-web-1-dot-5-2.html">Read on &rarr;</a>
-  </footer>
-
-
-    
     </ol>
 
     <!-- Pagination links -->
@@ -296,11 +303,19 @@
           </li>
         
       
+        
+          <li>
+            <a href="/en/page6/">6</a>
+          </li>
+        
+      
 
-      <li><a href="/page5/">Last</a></li>
+      <li><a href="/page6/">Last</a></li>
 
       
-        <li class="disabled"><span>&raquo;</span></li>
+        <li>
+          <a href="/en/page6/">&raquo;</a>
+        </li>
       
     </ul>
     
