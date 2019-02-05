@@ -4,3 +4,5 @@ _site*
 _deploy*
 .bundle
 .travis
+travis_rsa
+travis_rsa.pub

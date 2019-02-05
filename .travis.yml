@@ -12,7 +12,7 @@ gemfile:
 exclude: [vendor]
 before_install:
   - mkdir .travis
-  - openssl aes-256-cbc -K $encrypted_d1eeda8dc2f5_key -iv $encrypted_d1eeda8dc2f5_iv -in travis_rsa.enc -out .travis/travis_rsa -d
+  - openssl aes-256-cbc -K $encrypted_d1eeda8dc2f5_key -iv $encrypted_d1eeda8dc2f5_iv -in travis_rsa.enc -out travis_rsa -d
 script:
   - bundle exec rake site:test
 after_success:

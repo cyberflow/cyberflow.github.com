@@ -14,3 +14,7 @@ group :tests do
   gem 'html-proofer'
   gem 'rake'
 end
+
+group :operation do
+  gem 'travis'
+end
